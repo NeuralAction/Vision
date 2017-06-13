@@ -35,6 +35,8 @@ namespace Vision.Android
             InitStorage(new AndroidStorage());
 
             TensorFlowSharp.Android.NativeBinding.Init();
+            TensorFlowSharp.Android.NativeBinding.PrintFunc = new TensorFlow.NativeBinding.Print((s) => Log.Info("Vision.Android", s));
+            Logger.Log("TF Version: " + TensorFlow.TFCore.Version);
         }
 
         protected override void InternalSleep(int duration)
