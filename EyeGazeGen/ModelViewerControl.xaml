@@ -1,0 +1,44 @@
+﻿<UserControl x:Class="EyeGazeGen.ModelViewerControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:EyeGazeGen"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300" Background="Black" SizeChanged="UserControl_SizeChanged">
+    <Grid>
+        <Image x:Name="Img_Background" Stretch="Uniform"/>
+        <Grid Width="220" Height="220" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10">
+            <TextBlock Text="Eye Is Not Found" Foreground="White" UseLayoutRounding="True" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16">
+                <TextBlock.CacheMode>
+                    <BitmapCache SnapsToDevicePixels="True"/>
+                </TextBlock.CacheMode>
+                <TextBlock.Effect>
+                    <DropShadowEffect ShadowDepth="0"/>
+                </TextBlock.Effect>
+            </TextBlock>
+            <Image x:Name="Img_Eyes" Stretch="None"/>
+        </Grid>
+        <Canvas x:Name="canvas">
+            <Canvas.CacheMode>
+                <BitmapCache/>
+            </Canvas.CacheMode>
+        </Canvas>
+        <TextBlock Foreground="White" Text="model info" Margin="10" x:Name="Tb_Header" IsHitTestVisible="False" UseLayoutRounding="True" ClipToBounds="False">
+            <TextBlock.Effect>
+                <DropShadowEffect ShadowDepth="0"/>
+            </TextBlock.Effect>
+            <TextBlock.CacheMode>
+                <BitmapCache SnapsToDevicePixels="True"/>
+            </TextBlock.CacheMode>
+        </TextBlock>
+        <TextBlock UseLayoutRounding="True" x:Name="Tb_Info" Text="" Margin="10" Foreground="White" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+            <TextBlock.CacheMode>
+                <BitmapCache SnapsToDevicePixels="True"/>
+            </TextBlock.CacheMode>
+            <TextBlock.Effect>
+                <DropShadowEffect ShadowDepth="0"/>
+            </TextBlock.Effect>
+        </TextBlock>
+    </Grid>
+</UserControl>
