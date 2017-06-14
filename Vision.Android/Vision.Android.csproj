@@ -114,6 +114,10 @@
     <AndroidResource Include="Resources\Values\Strings.xml" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\OpenCV.Binding\OpenCV.Binding.csproj">
+      <Project>{3675b5a0-535b-4cfb-b523-ed60837278b9}</Project>
+      <Name>OpenCV.Binding</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TensorFlowSharp\TensorFlowSharp.Android\TensorFlowSharp.Android.csproj">
       <Project>{8d36690c-0079-4a33-915d-68d98b9a7117}</Project>
       <Name>TensorFlowSharp.Android</Name>
