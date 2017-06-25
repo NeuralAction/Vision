@@ -31,6 +31,7 @@ namespace Vision.Tests
         string FilePath;
         int index = -1;
         EyesDetector detector;
+        EyeGazeDetector gazeDetector;
         Capture capture;
 
         private FaceDetection(string faceXml, string eyeXml)
@@ -44,6 +45,8 @@ namespace Vision.Tests
                 MaxFaceSize = 85,
                 FaceMaxFactor = 0.9,
             };
+
+            gazeDetector = new EyeGazeDetector();
         }
 
         public FaceDetection(string filePath, string faceXml, string eyeXml) : this(faceXml, eyeXml)
@@ -89,6 +92,8 @@ namespace Vision.Tests
         double yoffset = 0;
         int frameMax = 0;
         int frameOk = 0;
+        Queue<double> qX = new Queue<double>();
+        Queue<double> qY = new Queue<double>();
         private void Capture_FrameReady(object sender, FrameArgs e)
         {
             VMat mat = e.VMat;
@@ -100,6 +105,29 @@ namespace Vision.Tests
                 Profiler.Start("DetectionALL");
                 FaceRect[] rect = detector.Detect(mat);
                 Profiler.End("DetectionALL");
+
+                if(rect.Length > 0)
+                {
+                    EyeRect lefteye = rect[0].LeftEye;
+                    if (lefteye == null && rect[0].Children.Count > 0)
+                        lefteye = rect[0].Children[0];
+                    if (lefteye != null)
+                    {
+                        Profiler.Start("GazeALL");
+                        Point info = gazeDetector.Detect(lefteye, mat);
+                        Profiler.End("GazeALL");
+                        qX.Enqueue(info.X);
+                        if (qX.Count > 6)
+                            qX.Dequeue();
+                        qY.Enqueue(info.Y);
+                        if (qY.Count > 6)
+                            qY.Dequeue();
+                        double pad = 0.15;
+                        double x = Math.Min(1, Math.Max(0, (qX.Average() - pad) / (1 - 2 * pad))) * mat.Width;
+                        double y = Math.Min(1, Math.Max(0, (qY.Average() - pad) / (1 - 2 * pad))) * mat.Height;
+                        Core.Cv.DrawCircle(mat, new Point(x, y), 5, Scalar.Yellow, 10);
+                    }
+                }
 
                 Detected?.Invoke(this, new FaceDetectedArgs(mat, rect));
 

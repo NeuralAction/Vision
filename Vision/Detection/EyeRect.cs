@@ -10,6 +10,14 @@ namespace Vision
     public class EyeRect : Rect
     {
         public FaceRect Parent { get; set; }
+        public Point AbsoluteCenter
+        {
+            get
+            {
+                Point pt = Center;
+                return new Point(Center.X + Parent.X, Center.Y + Parent.Y);
+            }
+        }
 
         public EyeRect(FaceRect parent, Rect rect) : base(rect)
         {

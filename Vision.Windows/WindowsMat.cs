@@ -84,5 +84,42 @@ namespace Vision.Windows
         {
             return new WindowsMat(InnerMat.Clone());
         }
+
+        public override float[] GetArray()
+        {
+            float[] f = new float[(int)Width * (int)Height * Channel];
+            using (MatOfByte3 matByte = new MatOfByte3())
+            {
+                InnerMat.CopyTo(matByte);
+
+                var indexer = matByte.GetIndexer();
+                int i = 0;
+                for (int y = 0; y < InnerMat.Height; y++)
+                {
+                    for (int x = 0; x < InnerMat.Width; x++)
+                    {
+                        Vec3b color = indexer[y, x];
+                        f[i] = (float)color.Item2;
+                        i++;
+                        f[i] = (float)color.Item1;
+                        i++;
+                        f[i] = (float)color.Item0;
+                        i++;
+                    }
+                }
+            }
+
+            return f;
+        }
+
+        protected override int GetChannel()
+        {
+            return InnerMat.Channels();
+        }
+
+        protected override long GetTotal()
+        {
+            return InnerMat.Total();
+        }
     }
 }

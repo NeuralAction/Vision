@@ -24,10 +24,13 @@ namespace Vision
             Stopwatch.Start();
         }
 
-        public static void Start(string name)
+        public static void Start(string name, bool showlog = false)
         {
             if (!IsDebug)
                 return;
+
+            if (showlog)
+                Logger.Log("Logger", $"\"{name}\" Flag is started");
 
             lock (DataLocker)
             {
@@ -37,10 +40,13 @@ namespace Vision
             }
         }
 
-        public static void End(string name)
+        public static void End(string name, bool showlog = false)
         {
             if (!IsDebug)
                 return;
+
+            if (showlog)
+                Logger.Log("Logger", $"\"{name}\" Flag is ended");
 
             lock (DataLocker)
             {

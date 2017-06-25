@@ -117,7 +117,7 @@ namespace Vision.Android
                 {
                     Logger.Log(this, string.Format("Camera Support Size: W{0},H{1}", size.Width, size.Height));
 
-                    if (size.Width == 1920 && size.Height == 1080)
+                    if (size.Width == 1280 && size.Height == 720)
                     {
                         parameter.SetPreviewSize(size.Width, size.Height);
                         Logger.Log(this, string.Format("SET Camera Size: W{0},H{1}", size.Width, size.Height));
@@ -179,8 +179,9 @@ namespace Vision.Android
                 return;
 
             frameCount++;
-            if (e.Buffer != null && LimitedTaskScheduler.QueuedTaskCount < LimitedTaskScheduler.MaxTaskCount)
-                LimitedTaskScheduler.Factory.StartNew(() => CaptureCvtProc(e.Buffer, frameCount, LimitedTaskScheduler.QueuedTaskCount));
+            //if (e.Buffer != null && LimitedTaskScheduler.QueuedTaskCount < LimitedTaskScheduler.MaxTaskCount)
+            //    LimitedTaskScheduler.Factory.StartNew(() => CaptureCvtProc(e.Buffer, frameCount, LimitedTaskScheduler.QueuedTaskCount));
+            CaptureCvtProc(e.Buffer, 0, 0);
 
             Profiler.Capture("TaskCount", LimitedTaskScheduler.QueuedTaskCount);
         }
@@ -196,21 +197,15 @@ namespace Vision.Android
                 case Graphics.ImageFormatType.Nv16:
                     mat = new Mat((int)Math.Round(height * 1.5), width, CvType.Cv8uc1);
                     mat.Put(0, 0, Buffer);
-                    OpenCV.ImgProc.Imgproc.CvtColor(mat, mat, (int)ColorConversion.YuvToRgba_NV12);
+                    OpenCV.ImgProc.Imgproc.CvtColor(mat, mat, (int)ColorConversion.YuvToBGR_NV12);
                     break;
                 case Graphics.ImageFormatType.Nv21:
                     mat = new Mat((int)Math.Round(height * 1.5), width, CvType.Cv8uc1);
                     mat.Put(0, 0, Buffer);
-                    OpenCV.ImgProc.Imgproc.CvtColor(mat, mat, (int)ColorConversion.YuvToRgba_NV21);
+                    OpenCV.ImgProc.Imgproc.CvtColor(mat, mat, (int)ColorConversion.YuvToBGR_NV21);
                     break;
                 case Graphics.ImageFormatType.Rgb565:
-                    OpenCV.ImgProc.Imgproc.CvtColor(mat, mat, (int)ColorConversion.Bgr565ToRgba);
-                    break;
                 case Graphics.ImageFormatType.Yuv420888:
-                    mat = new Mat((int)Math.Round(height * 1.5), width, CvType.Cv8uc1);
-                    mat.Put(0, 0, Buffer);
-                    OpenCV.ImgProc.Imgproc.CvtColor(mat, mat, (int)ColorConversion.YUV420pToRgba);
-                    break;
                 default:
                     throw new NotImplementedException("Unknown Camera Format");
             }
@@ -228,21 +223,22 @@ namespace Vision.Android
             Profiler.End("CaptureCvt.Flip" + threadindex);
 
             Profiler.End("CaptureCvt" + threadindex);
+            capturedBuffer = mat;
+            FrameReady?.Invoke(this, new FrameArgs(new AndroidMat(capturedBuffer)));
+            return;
+            if (lastFrame > frameIndex)
+            {
+                if (mat != null)
+                    mat.Dispose();
+                mat = null;
+
+                return;
+            }
 
             lock (capturedBufferLocker)
             {
-                if (lastFrame > frameIndex)
-                {
-                    if (mat != null)
-                        mat.Dispose();
-                    mat = null;
-
-                    return;
-                }
-
                 lastFrame = frameIndex;
-                capturedBuffer = mat;
-                FrameReady?.Invoke(this, new FrameArgs(new AndroidMat(capturedBuffer)));
+                
             }
         }
 

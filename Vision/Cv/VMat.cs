@@ -9,25 +9,17 @@ namespace Vision
 {
     public abstract class VMat : VirtualObject, IDisposable
     {
-        public virtual bool IsEmpty
-        {
-            get { return Object == null || Empty(); }
-        }
+        public virtual bool IsEmpty { get => Object == null || Empty(); }
 
-        public virtual Size Size
-        {
-            get { return (Object == null) ? null : GetSize(); }
-        }
+        public virtual Size Size { get => (Object == null) ? null : GetSize(); }
 
-        public virtual double Width
-        {
-            get { return Size.Width; }
-        }
+        public virtual double Width { get => Size.Width;  }
 
-        public virtual double Height
-        {
-            get { return Size.Height; }
-        }
+        public virtual double Height { get => Size.Height; }
+
+        public virtual int Channel { get => GetChannel(); }
+
+        public virtual long Total { get => GetTotal(); }
 
         public static VMat New()
         {
@@ -145,9 +137,12 @@ namespace Vision
 
         protected abstract Size GetSize();
         protected abstract bool Empty();
-
+        protected abstract int GetChannel();
+        protected abstract long GetTotal();
+        
         public abstract void CopyTo(VMat dist);
         public abstract void CopyTo(VMat dist, VMat mask);
+        public abstract float[] GetArray();
         public abstract VMat Clone();
         public abstract void Dispose();
     }

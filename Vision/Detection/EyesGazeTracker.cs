@@ -37,25 +37,46 @@ namespace Vision
     {
         public virtual EyesGazeTracker Parent { get; protected set; }
 
-        /// <summary>
-        /// in pixel
-        /// </summary>
         public virtual Size Size { get; protected set; }
-        /// <summary>
-        /// use x, y angles
-        /// </summary>
+
         public virtual Rotation Rotation { get; protected set; }
-        /// <summary>
-        /// point in screen. calc depends on Parent
-        /// </summary>
+
         public virtual Point ScreenPoint { get; protected set; }
+
+        public virtual EyeRect Eye { get; protected set; }
+
+        public EyeGazeInfo()
+        {
+            Size = new Size(-1);
+
+            Rotation = new Rotation();
+
+            ScreenPoint = new Point(-1,-1);
+        }
+
+        public EyeGazeInfo(Size size, Rotation rot, Point scr, EyeRect rect)
+        {
+            Size = size;
+
+            Rotation = rot;
+
+            ScreenPoint = scr;
+
+            Eye = rect;
+        }
 
         public EyeGazeInfo (EyesGazeTracker tracker)
         {
             Parent = tracker;
+
+            Size = new Size(-1);
+
+            Rotation = new Rotation();
+
+            ScreenPoint = new Point(-1, -1);
         }
 
-        public EyeGazeInfo(EyesGazeTracker tracker, Size size, Rotation rot, Point scr)
+        public EyeGazeInfo(EyesGazeTracker tracker, Size size, Rotation rot, Point scr, EyeRect rect)
         {
             Parent = tracker;
 
@@ -64,6 +85,8 @@ namespace Vision
             Rotation = rot;
 
             ScreenPoint = scr;
+
+            Eye = rect;
         }
     }
 

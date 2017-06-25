@@ -187,6 +187,8 @@ namespace Vision
 
                 using (Stream stream = assembly.GetManifestResourceStream(resource.Resource))
                 {
+                    if (stream == null)
+                        throw new FileNotFoundException("Resource is not founded: " + resource.Resource);
                     if (!node.IsExist)
                         node.Create();
                     Copy(stream, node);
@@ -257,6 +259,14 @@ namespace Vision
         public void Move(FileNode dist)
         {
             Storage.Move(this, dist);
+        }
+
+        public byte[] ReadBytes()
+        {
+            using(Stream stream = Open())
+            {
+                return stream.ReadAll();
+            }
         }
 
         public string[] ReadLines()

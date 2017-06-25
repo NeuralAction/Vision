@@ -58,6 +58,9 @@ namespace WindowsTests
                     case "video":
                         SimpleVideo();
                         break;
+                    case "tfimg":
+                        TfImg();
+                        break;
                     case "face":
                         FaceDetection();
                         break;
@@ -77,6 +80,14 @@ namespace WindowsTests
                         Console.WriteLine("Unknown Command : \"{0}\"", read_raw);
                         break;
                 }
+            }
+        }
+
+        public void TfImg()
+        {
+            using (Session sess = new Session())
+            {
+
             }
         }
 
@@ -103,15 +114,16 @@ namespace WindowsTests
             string cmd = Console.ReadLine();
             if (!string.IsNullOrEmpty(cmd))
             {
+                int ind = -1;
                 try
                 {
-                    int ind = Convert.ToInt32(cmd);
-                    detect = new FaceDetection(ind, new EyesDetectorXmlLoader());
+                    ind = Convert.ToInt32(cmd);
                 }
                 catch
                 {
-                    Logger.Log("Enter Correct Index");
+                    return;
                 }
+                detect = new FaceDetection(ind, new EyesDetectorXmlLoader());
             }
             else
             {

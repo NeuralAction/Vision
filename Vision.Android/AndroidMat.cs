@@ -10,6 +10,7 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using OpenCV.Core;
+using Vision;
 
 namespace Vision.Android
 {
@@ -87,6 +88,50 @@ namespace Vision.Android
         public override VMat Clone()
         {
             return new AndroidMat(InnerMat.Clone());
+        }
+
+        public override float[] GetArray()
+        {
+            Profiler.Start("MatGetArray");
+
+            int len = (int)Width * (int)Height * Channel;
+            double[] bytes = new double[len];
+            float[] f = new float[len];
+            int i = 0;
+            int b = 0;
+
+            using (Mat m = new Mat())
+            {
+                InnerMat.ConvertTo(m, CvType.Cv64fc3);
+                m.Get(0, 0, bytes);
+
+                for (int y = 0; y < Height; y++)
+                {
+                    for (int x = 0; x < Width; x++)
+                    {
+                        f[i] = (float)bytes[b + 2];
+                        i++;
+                        f[i] = (float)bytes[b + 1];
+                        i++;
+                        f[i] = (float)bytes[b + 0];
+                        i++;
+                        b += 3;
+                    }
+                }
+            }
+
+            Profiler.End("MatGetArray");
+            return f;
+        }
+
+        protected override int GetChannel()
+        {
+            return InnerMat.Channels();
+        }
+
+        protected override long GetTotal()
+        {
+            return InnerMat.Total();
         }
     }
 }

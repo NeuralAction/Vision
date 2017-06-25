@@ -99,7 +99,10 @@ namespace Vision.Android
             {
                 Bitmap bit = Bitmap.CreateBitmap((int)img.Width, (int)img.Height, Bitmap.Config.Argb8888);
 
-                Utils.MatToBitmap((Mat)img.Object, bit);
+                VMat mat = VMat.New();
+                img.ConvertColor(mat, ColorConversion.BgrToRgb);
+
+                Utils.MatToBitmap((Mat)mat.Object, bit);
 
                 activity.RunOnUiThread(() =>
                 {

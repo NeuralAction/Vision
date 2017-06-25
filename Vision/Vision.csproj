@@ -50,9 +50,11 @@
     <Compile Include="Common\Random.cs" />
     <Compile Include="Common\Rotation.cs" />
     <Compile Include="Common\Storage.cs" />
+    <Compile Include="Common\Util.cs" />
     <Compile Include="Cv\Capture.cs" />
     <Compile Include="Cv\CascadeClassifier.cs" />
     <Compile Include="Cv\MatType.cs" />
+    <Compile Include="Detection\EyeGazeDetector.cs" />
     <Compile Include="Detection\EyeGazeModel.cs" />
     <Compile Include="Detection\EyeGazeModelRecorder.cs" />
     <Compile Include="Detection\EyesDetectorXmlLoader.cs" />
@@ -79,6 +81,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Tensorflow\Session.cs" />
+    <Compile Include="Tensorflow\Tf.cs" />
+    <Compile Include="Tensorflow\Util.cs" />
     <Compile Include="Tests\FaceDetection.cs" />
     <Compile Include="Tests\SimpleCapture.cs" />
     <Compile Include="Tests\SimpleVideoPlayer.cs" />
@@ -121,6 +126,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Detection\frozen_cpu.pb" />
+    <EmbeddedResource Include="Detection\frozen_gpu.pb" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
