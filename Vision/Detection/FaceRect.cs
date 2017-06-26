@@ -35,6 +35,7 @@ namespace Vision
                 return null;
             }
         }
+        public EyeGazeInfo Info { get; set; }
 
         public FaceRect(Rect rect) : base(rect.Rectangle)
         {

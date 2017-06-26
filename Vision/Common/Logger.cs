@@ -28,6 +28,11 @@ namespace Vision
             WriteLine(string.Format("{0}[LOG] {1}", TimeStamp, message));
         }
 
+        public static void Log(string tag, string message)
+        {
+            Log(tag + " - " + message);
+        }
+
         public static void Log(object sender, string message)
         {
             Log(sender.ToString() + " - " + message);

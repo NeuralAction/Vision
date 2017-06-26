@@ -92,8 +92,8 @@ namespace Vision.Tests
         double yoffset = 0;
         int frameMax = 0;
         int frameOk = 0;
-        Queue<double> qX = new Queue<double>();
-        Queue<double> qY = new Queue<double>();
+        Queue<Point> trail = new Queue<Point>();
+        PointKalmanFilter filter = new PointKalmanFilter();
         private void Capture_FrameReady(object sender, FrameArgs e)
         {
             VMat mat = e.VMat;
@@ -104,7 +104,6 @@ namespace Vision.Tests
 
                 Profiler.Start("DetectionALL");
                 FaceRect[] rect = detector.Detect(mat);
-                Profiler.End("DetectionALL");
 
                 if(rect.Length > 0)
                 {
@@ -115,19 +114,26 @@ namespace Vision.Tests
                     {
                         Profiler.Start("GazeALL");
                         Point info = gazeDetector.Detect(lefteye, mat);
+                        Logger.Log("FaceDectection.GazeDetected", info.ToString());
                         Profiler.End("GazeALL");
-                        qX.Enqueue(info.X);
-                        if (qX.Count > 6)
-                            qX.Dequeue();
-                        qY.Enqueue(info.Y);
-                        if (qY.Count > 6)
-                            qY.Dequeue();
-                        double pad = 0.15;
-                        double x = Math.Min(1, Math.Max(0, (qX.Average() - pad) / (1 - 2 * pad))) * mat.Width;
-                        double y = Math.Min(1, Math.Max(0, (qY.Average() - pad) / (1 - 2 * pad))) * mat.Height;
-                        Core.Cv.DrawCircle(mat, new Point(x, y), 5, Scalar.Yellow, 10);
+                        info = filter.Calculate(info);
+                        trail.Enqueue(info);
+                        if (trail.Count > 20)
+                            trail.Dequeue();
+                        double size = 1;
+                        foreach (Point pt in trail)
+                        {
+                            if(size == trail.Count - 1)
+                            {
+                                Core.Cv.DrawCircle(mat, new Point(pt.X * mat.Width, pt.Y * mat.Height), 2, Scalar.Cyan, 4);
+                            }
+                            Core.Cv.DrawCircle(mat, new Point(pt.X * mat.Width, pt.Y * mat.Height), size, Scalar.Yellow, 2);
+                            size++;
+                        }
                     }
                 }
+
+                Profiler.End("DetectionALL");
 
                 Detected?.Invoke(this, new FaceDetectedArgs(mat, rect));
 

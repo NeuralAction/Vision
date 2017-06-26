@@ -43,6 +43,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Common\KalmanFilter.cs" />
     <Compile Include="Common\LayoutHelper.cs" />
     <Compile Include="Common\Logger.cs" />
     <Compile Include="Common\ManifestResource.cs" />
@@ -65,7 +66,7 @@
     <Compile Include="Cv\Interpolation.cs" />
     <Compile Include="Detection\EyeRect.cs" />
     <Compile Include="Detection\EyesDetector.cs" />
-    <Compile Include="Detection\EyesGazeTracker.cs" />
+    <Compile Include="Detection\EyeGazeInfo.cs" />
     <Compile Include="Detection\FaceRect.cs" />
     <Compile Include="Cv\HaarDetectionType.cs" />
     <Compile Include="Cv\LineType.cs" />
