@@ -71,6 +71,7 @@ namespace EyeGazeGen
                                 using(VMat eyeROI = faces[0].LeftEye.RoiCropByPercent(frame))
                                 {
                                     FileNode eyeFile = dir.GetFile($"{ele.Index},{ele.Point.X},{ele.Point.Y}.jpg");
+                                    eyeROI.NormalizeRGB();
                                     Core.Cv.ImgWrite(eyeFile, eyeROI, 92);
                                 }
                             }

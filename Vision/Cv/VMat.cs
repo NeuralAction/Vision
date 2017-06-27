@@ -80,7 +80,7 @@ namespace Vision
 
         public void NormalizeRGB(VMat output)
         {
-            NormalizeRGB(output, 4);
+            NormalizeRGB(output, 2);
         }
 
         public void NormalizeRGB()
