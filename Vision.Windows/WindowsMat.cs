@@ -16,6 +16,10 @@ namespace Vision.Windows
             {
                 return InnerMat;
             }
+            set
+            {
+                throw new NotSupportedException();
+            }
         }
 
         public WindowsMat()
@@ -112,6 +116,17 @@ namespace Vision.Windows
             return f;
         }
 
+        public override VMat[] Split()
+        {
+            Mat[] spl = InnerMat.Split();
+            List<VMat> ret = new List<VMat>();
+            foreach(Mat m in spl)
+            {
+                ret.Add(new WindowsMat(m));
+            }
+            return ret.ToArray();
+        }
+
         protected override int GetChannel()
         {
             return InnerMat.Channels();
@@ -120,6 +135,16 @@ namespace Vision.Windows
         protected override long GetTotal()
         {
             return InnerMat.Total();
+        }
+
+        public override void Merge(VMat[] channels)
+        {
+            List<Mat> m = new List<Mat>();
+            foreach(VMat v in channels)
+            {
+                m.Add((Mat)v.Object);
+            }
+            Cv2.Merge(m.ToArray(), (Mat)Object);
         }
     }
 }

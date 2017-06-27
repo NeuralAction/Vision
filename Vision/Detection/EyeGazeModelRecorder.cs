@@ -123,7 +123,7 @@ namespace Vision
                             if (!IsPaused)
                             {
                                 FileNode node = Parent.GetFile($"{captureCount},{Math.Round(pt.X)},{Math.Round(pt.Y)}.jpg");
-                                Core.Cv.ImgWrite(node, mat);
+                                Core.Cv.ImgWrite(node, mat, 90);
                                 captureCount++;
                                 if (captureCount > 1 && captureCount % 20 == 0)
                                 {

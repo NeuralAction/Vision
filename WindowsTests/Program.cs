@@ -20,12 +20,13 @@ namespace WindowsTests
             Core.ProjectInfromation,
             Core.VersionInfromation,
             "",
-            "FACE \t Face detection test",
-            "VIDEO \t Video playing test",
-            "CAM \t Camera streaming test",
-            "INFO \t Build Information of CV",
-            "CLR \t Clear console",
-            "EXIT \t Exit program"
+            "FACE    \t Face detection test",
+            "VIDEO   \t Video playing test",
+            "CAM     \t Camera streaming test",
+            "IMGPROC \t Image processing test",
+            "INFO    \t Build Information of CV",
+            "CLR     \t Clear console",
+            "EXIT    \t Exit program"
         };
 
         [STAThread]
@@ -58,8 +59,8 @@ namespace WindowsTests
                     case "video":
                         SimpleVideo();
                         break;
-                    case "tfimg":
-                        TfImg();
+                    case "imgproc":
+                        ImgProcTest();
                         break;
                     case "face":
                         FaceDetection();
@@ -83,12 +84,10 @@ namespace WindowsTests
             }
         }
 
-        public void TfImg()
+        public void ImgProcTest()
         {
-            using (Session sess = new Session())
-            {
-
-            }
+            ImageProcTests t = new ImageProcTests();
+            t.Run();
         }
 
         public void SimpleVideo()

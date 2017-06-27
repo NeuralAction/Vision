@@ -52,8 +52,8 @@ namespace Vision.Windows
             InnerCapture.Set(CaptureProperty.FourCC, (double)FourCC.MJPG);
             InnerCapture.Set(CaptureProperty.Fps, 30);
 
-            InnerCapture.Set(CaptureProperty.FrameWidth, 1280);
-            InnerCapture.Set(CaptureProperty.FrameHeight, 720);
+            InnerCapture.Set(CaptureProperty.FrameWidth, 1920);
+            InnerCapture.Set(CaptureProperty.FrameHeight, 1080);
 
             double w = InnerCapture.Get(CaptureProperty.FrameWidth);
             double h = InnerCapture.Get(CaptureProperty.FrameHeight);
@@ -79,9 +79,7 @@ namespace Vision.Windows
 
         public override void Dispose()
         {
-            Stop();
-
-            if(InnerCapture != null)
+            if (InnerCapture != null)
             {
                 InnerCapture.Dispose();
                 InnerCapture = null;
@@ -135,6 +133,7 @@ namespace Vision.Windows
         protected override void OnStart()
         {
             Stop();
+
             captureThread = new Thread(new ThreadStart(CaptureProc));
             captureThread.IsBackground = true;
             captureThread.Start();
@@ -151,7 +150,10 @@ namespace Vision.Windows
 
         public override void Join()
         {
-            captureThread.Join();
+            if (captureThread != null)
+            {
+                captureThread.Join();
+            }
         }
 
         private void CaptureProc()
@@ -161,20 +163,27 @@ namespace Vision.Windows
             char lastkey = (char)0;
             while (true)
             {
-                Mat frame = new Mat();
-                if (CaptureRead(frame))
+                using (Mat frame = new Mat())
                 {
-                    FrameReady?.Invoke(this, new FrameArgs(new WindowsMat(frame), lastkey));
+                    if (CaptureRead(frame))
+                    {
+                        FrameArgs arg = new FrameArgs(new WindowsMat(frame), lastkey);
+                        FrameReady?.Invoke(this, arg);
+                        if (arg.Break)
+                        {
+                            Dispose();
+                            Stop();
+                            return;
+                        }
 
-                    int sleep = (int)Math.Round(Math.Max(1, Math.Min(1000, (1000 / fps) - sw.ElapsedMilliseconds + lastMs)));
-                    lastMs = sw.ElapsedMilliseconds;
-                    lastkey = Core.Cv.WaitKey(sleep);
-                }
-                else
-                {
-                    frame.Dispose();
-
-                    lastkey = Core.Cv.WaitKey(1);
+                        int sleep = (int)Math.Round(Math.Max(1, Math.Min(1000, (1000 / fps) - sw.ElapsedMilliseconds + lastMs)));
+                        lastMs = sw.ElapsedMilliseconds;
+                        lastkey = Core.Cv.WaitKey(sleep);
+                    }
+                    else
+                    {
+                        lastkey = Core.Cv.WaitKey(1);
+                    }
                 }
             }
         }

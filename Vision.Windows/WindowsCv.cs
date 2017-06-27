@@ -68,6 +68,11 @@ namespace Vision.Windows
             return (char)Cv2.WaitKey(duration);
         }
 
+        protected override CLAHE CreateCLAHE(double clip, Size gridSize)
+        {
+            return new WindowsCLAHE(clip, gridSize);
+        }
+
         protected override Capture CreateCapture(int index)
         {
             return new WindowsCapture(index);

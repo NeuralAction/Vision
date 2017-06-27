@@ -27,7 +27,7 @@ namespace Vision.Tests
 
             if(e.LastKey == 'e')
             {
-                capture.Stop();
+                e.Break = true;
                 Core.Cv.CloseAllWindows();
                 return;
             }

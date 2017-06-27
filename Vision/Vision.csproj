@@ -54,6 +54,7 @@
     <Compile Include="Common\Util.cs" />
     <Compile Include="Cv\Capture.cs" />
     <Compile Include="Cv\CascadeClassifier.cs" />
+    <Compile Include="Cv\CLAHE.cs" />
     <Compile Include="Cv\MatType.cs" />
     <Compile Include="Detection\EyeGazeDetector.cs" />
     <Compile Include="Detection\EyeGazeModel.cs" />
@@ -86,6 +87,7 @@
     <Compile Include="Tensorflow\Tf.cs" />
     <Compile Include="Tensorflow\Util.cs" />
     <Compile Include="Tests\FaceDetection.cs" />
+    <Compile Include="Tests\ImageProcTests.cs" />
     <Compile Include="Tests\SimpleCapture.cs" />
     <Compile Include="Tests\SimpleVideoPlayer.cs" />
     <Compile Include="Core.cs" />

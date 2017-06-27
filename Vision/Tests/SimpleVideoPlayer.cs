@@ -22,34 +22,36 @@ namespace Vision.Tests
         {
             Logger.Log("Press E to Exit");
 
-            Capture capture = Capture.New(path);
-
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-            long lastMs = 0;
-
-            while (true)
+            using (Capture capture = Capture.New(path))
             {
-                lastMs = sw.ElapsedMilliseconds;
 
-                if (capture.IsOpened)
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
+                long lastMs = 0;
+
+                while (true)
                 {
-                    using (VMat mat = capture.QueryFrame())
+                    lastMs = sw.ElapsedMilliseconds;
+
+                    if (capture.IsOpened)
                     {
-                        if (mat != null && !mat.IsEmpty)
+                        using (VMat mat = capture.QueryFrame())
                         {
-                            Core.Cv.ImgShow(windowName, mat);
+                            if (mat != null && !mat.IsEmpty)
+                            {
+                                Core.Cv.ImgShow(windowName, mat);
+                            }
                         }
                     }
-                }
 
-                char c = Core.Cv.WaitKey((int)Math.Max(1, Math.Min((1000 / capture.FPS) - (sw.ElapsedMilliseconds - lastMs), 1000)));
+                    char c = Core.Cv.WaitKey((int)Math.Max(1, Math.Min((1000 / capture.FPS) - (sw.ElapsedMilliseconds - lastMs), 1000)));
 
-                if(c == 'e')
-                {
-                    Core.Cv.CloseAllWindows();
+                    if (c == 'e')
+                    {
+                        Core.Cv.CloseAllWindows();
 
-                    return;
+                        return;
+                    }
                 }
             }
         }

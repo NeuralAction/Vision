@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Vision
 {
-    public class VirtualObject
+    public abstract class VirtualObject
     {
-        public virtual object Object { get; set; }
+        public abstract object Object { get; set; }
     }
 }

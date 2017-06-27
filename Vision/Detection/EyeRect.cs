@@ -42,7 +42,7 @@ namespace Vision
             return VMat.New(frame, new Rect(Parent.X + X, Parent.Y + Y, Width, Height));
         }
 
-        public VMat RoiCropByPercent(VMat frame, double percentOfFace = 0.45)
+        public VMat RoiCropByPercent(VMat frame, double percentOfFace = 0.33)
         {
             double size = Math.Max(Parent.Width, Parent.Height) * percentOfFace;
             return VMat.New(frame, new Vision.Rect(Parent.X + Center.X - size * 0.5, Parent.Y + Center.Y - size * 0.5, size, size));

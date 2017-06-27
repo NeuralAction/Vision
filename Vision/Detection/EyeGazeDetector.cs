@@ -21,10 +21,23 @@ namespace Vision
             if(ModelGraph == null)
             {
                 ModelGraph = new Graph();
-                ModelGraph.ImportPb(Storage.LoadResource(ModelResourceGpu, true));
+                ModelGraph.ImportPb(Storage.LoadResource(ModelResourceCpu, true));
             }
             sess = new Session(ModelGraph);
             Logger.Log(this, "Finished model load");
+        }
+
+        public Point Detect(FaceRect face, VMat frame)
+        {
+            EyeRect lefteye = face.LeftEye;
+
+            if (lefteye == null && face.Children.Count > 0)
+                lefteye = face.Children[0];
+
+            if (lefteye == null)
+                return null;
+
+            return Detect(lefteye, frame);
         }
 
         public Point Detect(EyeRect eye, VMat frame)
@@ -38,14 +51,17 @@ namespace Vision
                 {
                     if (!mat.IsEmpty)
                     {
-                        Tensor imgTensor = Tools.VMatRGB2Tensor(mat, 160, 160, new long[] { 1, 160, 160, 3 });
+                        mat.Resize(new Size(160, 160));
+                        mat.NormalizeRGB();
+
+                        Tensor imgTensor = Tools.VMatRGB2Tensor(mat, -1, -1, new long[] { 1, 160, 160, 3 });
                         Tensor[] fetch = sess.Run(new string[] { "output" },
                                                     new Dictionary<string, Tensor>() { { "input_image", imgTensor }, { "phase_train", new Tensor(true) }, { "keep_prob", new Tensor(1.0f) } });
 
                         Tensor result = fetch[0];
                         float[,] output = (float[,])result.GetValue();
-                        pt.X = (output[0, 0] / 360);
-                        pt.Y = (output[0, 1] / 360);
+                        pt.X = Math.Max(0, Math.Min(1, (output[0, 0] / 360)));
+                        pt.Y = Math.Max(0, Math.Min(1, (output[0, 1] / 360)));
                         foreach(Tensor t in fetch)
                         {
                             t.Dispose();

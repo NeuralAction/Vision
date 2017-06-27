@@ -33,10 +33,13 @@ namespace Vision
             }
         }
 
+        //initializer
         internal protected abstract VMat CreateMat();
         internal protected abstract VMat CreateMat(Size size);
         internal protected abstract VMat CreateMat(Size size, MatType type);
         internal protected abstract VMat CreateMat(VMat mat, Rect rect);
+
+        internal protected abstract CLAHE CreateCLAHE(double clip, Size gridSize);
 
         internal protected abstract CascadeClassifier CreateCascadeClassifier(string filePath);
 
@@ -45,6 +48,7 @@ namespace Vision
 
         protected abstract string GetBuildInformation();
 
+        //TODO: Image Proc Funcs. this should moved to VMAT class file.
         public abstract void DrawCircle(VMat img, Point center, double radius, Scalar color, double thickness = 1, LineType lineType = LineType.Link8, int shift = 0);
         public abstract void DrawEllipse(VMat img, Point center, Size axes, double angle, double startAngle, double endAngle, Scalar color, double thickness = 1, LineType lineType = LineType.Link8, int shift = 0);
         public abstract void DrawText(VMat img, string text, Point org, FontFace fontFace, double fontScale, Scalar color, int thickness = 1, LineType lineType = LineType.Link8, bool bottomLeftOrigin = false);
@@ -54,7 +58,9 @@ namespace Vision
         public abstract void Transpose(VMat input, VMat output);
         public abstract void Resize(VMat input, VMat dist, Size size, double fx = 0, double fy = 0, Interpolation inter = Interpolation.Linear);
 
+        //global functions
         public abstract void ImgShow(string name, VMat img);
+        protected abstract VMat InternalImgRead(string path);
         public VMat ImgRead(FileNode node)
         {
             return ImgRead(node.AbosolutePath);
@@ -66,6 +72,7 @@ namespace Vision
             return InternalImgRead(path);
         }
 
+        protected abstract void InternalImgWrite(string name, VMat img, int quality);
         public void ImgWrite(FileNode node, VMat img, int quality = 80)
         {
             ImgWrite(node.AbosolutePath, img, quality);
@@ -76,8 +83,6 @@ namespace Vision
 
             InternalImgWrite(path, img, quality);
         }
-        protected abstract VMat InternalImgRead(string path);
-        protected abstract void InternalImgWrite(string name, VMat img, int quality);
 
         public abstract void CloseWindow(string name);
         public abstract void CloseAllWindows();

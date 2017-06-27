@@ -122,9 +122,10 @@ namespace EyeGazeGen
                         EyeRect eye = rect[0].LeftEye;
                         if (eye != null)
                         {
-                            using(VMat roi = eye.RoiCropByPercent(mat, 0.45))
+                            using(VMat roi = eye.RoiCropByPercent(mat))
                             {
-                                roi.Resize(new Vision.Size(220, 220));
+                                roi.Resize(new Vision.Size(160, 160));
+                                roi.NormalizeRGB();
                                 BitmapSource eyeImg = roi.ToBitmapSource();
                                 Img_Eyes.Source = eyeImg;
                             }

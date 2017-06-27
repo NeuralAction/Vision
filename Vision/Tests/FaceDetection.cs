@@ -107,15 +107,10 @@ namespace Vision.Tests
 
                 if(rect.Length > 0)
                 {
-                    EyeRect lefteye = rect[0].LeftEye;
-                    if (lefteye == null && rect[0].Children.Count > 0)
-                        lefteye = rect[0].Children[0];
-                    if (lefteye != null)
+                    Profiler.Start("GazeALL");
+                    Point info = gazeDetector.Detect(rect[0], mat);
+                    if (info != null)
                     {
-                        Profiler.Start("GazeALL");
-                        Point info = gazeDetector.Detect(lefteye, mat);
-                        Logger.Log("FaceDectection.GazeDetected", info.ToString());
-                        Profiler.End("GazeALL");
                         info = filter.Calculate(info);
                         trail.Enqueue(info);
                         if (trail.Count > 20)
@@ -123,14 +118,17 @@ namespace Vision.Tests
                         double size = 1;
                         foreach (Point pt in trail)
                         {
-                            if(size == trail.Count - 1)
+                            if (size == trail.Count - 1)
                             {
                                 Core.Cv.DrawCircle(mat, new Point(pt.X * mat.Width, pt.Y * mat.Height), 2, Scalar.Cyan, 4);
                             }
                             Core.Cv.DrawCircle(mat, new Point(pt.X * mat.Width, pt.Y * mat.Height), size, Scalar.Yellow, 2);
                             size++;
                         }
+
+                        Logger.Log("FaceDectection.GazeDetected", info.ToString());
                     }
+                    Profiler.End("GazeALL");
                 }
 
                 Profiler.End("DetectionALL");
@@ -155,7 +153,7 @@ namespace Vision.Tests
             {
                 case 'e':
                     Core.Cv.CloseAllWindows();
-                    capture.Stop();
+                    e.Break = true;
                     break;
                 default:
                     break;

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Vision
 {
+    //ref. https://stackoverflow.com/questions/39315817/filtering-streaming-data-to-reduce-noise-kalman-filter-c-sharp
     public class KalmanFilter
     {
         double A = double.Parse("1");

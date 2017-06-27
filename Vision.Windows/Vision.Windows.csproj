@@ -94,6 +94,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Converter.cs" />
+    <Compile Include="WindowsCLAHE.cs" />
     <Compile Include="WindowsStorage.cs" />
     <Compile Include="WindowsCapture.cs" />
     <Compile Include="WindowsCore.cs" />

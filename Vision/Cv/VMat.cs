@@ -36,7 +36,7 @@ namespace Vision
             Core.Cv.ConvertColor(this, output, convert);
         }
 
-        public void CvtColor(ColorConversion convert)
+        public void ConvertColor(ColorConversion convert)
         {
             ConvertColor(this, convert);
         }
@@ -60,6 +60,36 @@ namespace Vision
         {
             Core.Cv.Canny(this, output, thresold1, thresold2);
         }
+
+        public void NormalizeRGB(VMat output, double clip)
+        {
+            if (Channel != 3)
+                throw new NotSupportedException("Channel sould be RGB");
+
+            ConvertColor(ColorConversion.BgrToLab);
+
+            VMat[] spl = Split();
+
+            CLAHE c = CLAHE.New(clip, new Size(8, 8));
+            c.Apply(spl[0]);
+
+            Merge(spl);
+
+            ConvertColor(ColorConversion.LabToBgr);
+        }
+
+        public void NormalizeRGB(VMat output)
+        {
+            NormalizeRGB(output, 4);
+        }
+
+        public void NormalizeRGB()
+        {
+            NormalizeRGB(this);
+        }
+
+        public abstract VMat[] Split();
+        public abstract void Merge(VMat[] channels);
 
         public double CalcScaleFactor(double maxsize)
         {
