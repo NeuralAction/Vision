@@ -197,6 +197,12 @@ namespace Vision
 
             return node;
         }
+
+        public static void UnZip(FileNode zipfile, DirectoryNode outputdir)
+        {
+            Current.InternalUnZip(zipfile, outputdir);
+        }
+        protected abstract void InternalUnZip(FileNode zipfile, DirectoryNode outputdir);
     }
 
     public abstract class StorageNode
@@ -313,6 +319,14 @@ namespace Vision
                 {
                     write.Write(text);
                 }
+            }
+        }
+
+        public void WriteBytes(byte[] buffer)
+        {
+            using(Stream stream = Open())
+            {
+                stream.Write(buffer, 0, buffer.Length);
             }
         }
     }

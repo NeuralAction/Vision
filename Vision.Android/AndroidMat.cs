@@ -19,6 +19,7 @@ namespace Vision.Android
         public override object Object
         {
             get { return InnerMat; }
+            set { throw new NotImplementedException(); }
         }
         public Mat InnerMat;
 
@@ -132,6 +133,31 @@ namespace Vision.Android
         protected override long GetTotal()
         {
             return InnerMat.Total();
+        }
+
+        public override VMat[] Split()
+        {
+            List<Mat> spl = new List<Mat>();
+            OpenCV.Core.Core.Split(InnerMat, spl);
+
+            Mat[] mspl = spl.ToArray();
+
+            List<VMat> ret = new List<VMat>();
+            foreach(Mat m in mspl)
+            {
+                ret.Add(new AndroidMat(m));
+            }
+            return ret.ToArray();
+        }
+
+        public override void Merge(VMat[] channels)
+        {
+            List<Mat> c = new List<Mat>();
+            foreach(VMat m in channels)
+            {
+                c.Add((Mat)((AndroidMat)m).Object);
+            }
+            OpenCV.Core.Core.Merge(c, InnerMat);
         }
     }
 }

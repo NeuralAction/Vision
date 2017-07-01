@@ -195,5 +195,10 @@ namespace Vision.Android
         {
             Imgproc.Resize((Mat)input.Object, (Mat)dist.Object, new OpenCV.Core.Size(size.Width, size.Height), fx, fy, (int)inter);
         }
+
+        protected override CLAHE CreateCLAHE(double clip, Size gridSize)
+        {
+            return new AndroidCLAHE(clip, gridSize);
+        }
     }
 }

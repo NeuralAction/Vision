@@ -24,6 +24,7 @@ namespace WindowsTests
             "VIDEO   \t Video playing test",
             "CAM     \t Camera streaming test",
             "IMGPROC \t Image processing test",
+            "OBJCLS  \t Object classify test (Google Inception)",
             "INFO    \t Build Information of CV",
             "CLR     \t Clear console",
             "EXIT    \t Exit program"
@@ -62,6 +63,9 @@ namespace WindowsTests
                     case "imgproc":
                         ImgProcTest();
                         break;
+                    case "objcls":
+                        ObjectClassify();
+                        break;
                     case "face":
                         FaceDetection();
                         break;
@@ -82,6 +86,36 @@ namespace WindowsTests
                         break;
                 }
             }
+        }
+
+        public void ObjectClassify()
+        {
+            InceptionTests t = null;
+            try
+            {
+                Console.Write("Index [Press enter to detect from file] >>> ");
+                string inp = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(inp))
+                {
+                    OpenFileDialog ofd = new OpenFileDialog();
+                    if(DialogResult.OK == ofd.ShowDialog())
+                    {
+                        t = new InceptionTests(ofd.FileName);
+                    }
+                }
+                else
+                {
+                    int index = Convert.ToInt32(inp);
+                    t = new InceptionTests(index);
+                }
+            }
+            catch
+            {
+                return;
+            }
+
+            if(t!= null)
+                t.Run();
         }
 
         public void ImgProcTest()

@@ -95,6 +95,7 @@
   <ItemGroup>
     <Compile Include="AndroidCapture.cs" />
     <Compile Include="AndroidCascadeClassifier.cs" />
+    <Compile Include="AndroidCLAHE.cs" />
     <Compile Include="AndroidCore.cs" />
     <Compile Include="AndroidCv.cs" />
     <Compile Include="AndroidMat.cs" />
@@ -105,6 +106,7 @@
     <Compile Include="LoaderCallback.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ZipFile.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

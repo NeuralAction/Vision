@@ -18,6 +18,7 @@ namespace Vision.Android
         public override object Object
         {
             get { return InnerCascade; }
+            set { throw new NotImplementedException(); }
         }
         public OpenCV.ObjDetect.CascadeClassifier InnerCascade;
 

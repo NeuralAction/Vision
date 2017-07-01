@@ -21,6 +21,7 @@ namespace AndroidTests
         int index = 1;
 
         FaceDetection detection;
+        InceptionTests inception;
 
         protected override void OnCreate(Bundle bundle)
         {
@@ -39,18 +40,28 @@ namespace AndroidTests
                     detection = null;
                 }
 
+                if(inception != null)
+                {
+                    inception.Dispose();
+                    inception = null;
+                }
+
                 index++;
                 index %= 2;
-                detection = new FaceDetection(index, new EyesDetectorXmlLoader());
-                detection.Start();
+                //detection = new FaceDetection(index, new EyesDetectorXmlLoader());
+                //detection.Start();
+                inception = new InceptionTests(index);
+                inception.Start();
             };
 
             ImageView img = FindViewById<ImageView>(Resource.Id.imageView1);
 
             Core.Init(new AndroidCore(this, this, img));
 
-            detection = new FaceDetection(index, new EyesDetectorXmlLoader());
-            detection.Start();
+            //detection = new FaceDetection(index, new EyesDetectorXmlLoader());
+            //detection.Start();
+            inception = new InceptionTests(index);
+            inception.Start();
         }
     }
 }

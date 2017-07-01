@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -118,6 +119,11 @@ namespace Vision.Windows
                 return nodes.ToArray();
             }
             return null;
+        }
+
+        protected override void InternalUnZip(FileNode zipfile, DirectoryNode outputdir)
+        {
+            ZipFile.ExtractToDirectory(zipfile.AbosolutePath, outputdir.AbosolutePath);
         }
     }
 }

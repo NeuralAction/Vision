@@ -10,6 +10,7 @@ using OS = Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using Java.Util.Zip;
 
 namespace Vision.Android
 {
@@ -117,6 +118,12 @@ namespace Vision.Android
                 return nodes.ToArray();
             }
             return null;
+        }
+
+        protected override void InternalUnZip(FileNode zipfile, DirectoryNode outputdir)
+        {
+            ZipFile zip = new ZipFile(zipfile.AbosolutePath, outputdir.AbosolutePath);
+            zip.UnZip();
         }
     }
 }

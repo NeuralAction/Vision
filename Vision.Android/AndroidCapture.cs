@@ -26,6 +26,10 @@ namespace Vision.Android
             {
                 return Camera;
             }
+            set
+            {
+                throw new NotImplementedException();
+            }
         }
 
         private double fps;

@@ -26,7 +26,7 @@ namespace Vision
             Graph = graph;
             sess = new TFSession(graph.graph);
         }
-
+        
         public Tensor Run(Output output)
         {
             var runner = sess.GetRunner();
@@ -103,9 +103,9 @@ namespace Vision
             this.tensor = tensor;
         }
 
-        public object GetValue()
+        public object GetValue(bool arrayOfArray = false)
         {
-            return tensor.GetValue();
+            return tensor.GetValue(arrayOfArray);
         }
 
         public void Dispose()
