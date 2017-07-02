@@ -119,18 +119,14 @@ namespace Vision.Android
                 List<Hardware.Camera.Size> supportSize = parameter.SupportedPreviewSizes.ToList();
                 foreach (Hardware.Camera.Size size in supportSize)
                 {
-                    Logger.Log(this, string.Format("Camera Support Size: W{0},H{1}", size.Width, size.Height));
+                    Logger.Log(this, $"Camera Support Size: W{size.Width},H{size.Height}");
 
                     if (size.Width == 1280 && size.Height == 720)
                     {
                         parameter.SetPreviewSize(size.Width, size.Height);
-                        Logger.Log(this, string.Format("SET Camera Size: W{0},H{1}", size.Width, size.Height));
+                        Logger.Log(this, $"SET Camera Size: W{size.Width},H{size.Height}");
                     }
                 }
-                width = parameter.PreviewSize.Width;
-                height = parameter.PreviewSize.Height;
-                fps = parameter.PreviewFrameRate;
-                cameraType = parameter.PreviewFormat;
 
                 string[] supportedFocusMode = parameter.SupportedFocusModes.ToArray();
                 if (supportedFocusMode.Contains(Hardware.Camera.Parameters.FocusModeContinuousVideo))
@@ -141,7 +137,12 @@ namespace Vision.Android
                 {
                     parameter.FocusMode = Hardware.Camera.Parameters.FocusModeContinuousPicture;
                 }
-                //parameter.PreviewFormat = Graphics.ImageFormatType.
+                parameter.ColorEffect = Hardware.Camera.Parameters.EffectNone;
+
+                width = parameter.PreviewSize.Width;
+                height = parameter.PreviewSize.Height;
+                fps = parameter.PreviewFrameRate;
+                cameraType = parameter.PreviewFormat;
 
                 Logger.Log(this, string.Format("Camera is creating W{0} H{1} FPS{2}", width, height, fps));
                 Camera.SetParameters(parameter);
@@ -183,9 +184,9 @@ namespace Vision.Android
                 return;
 
             frameCount++;
-            //if (e.Buffer != null && LimitedTaskScheduler.QueuedTaskCount < LimitedTaskScheduler.MaxTaskCount)
-            //    LimitedTaskScheduler.Factory.StartNew(() => CaptureCvtProc(e.Buffer, frameCount, LimitedTaskScheduler.QueuedTaskCount));
-            CaptureCvtProc(e.Buffer, 0, 0);
+            if (e.Buffer != null && LimitedTaskScheduler.QueuedTaskCount < LimitedTaskScheduler.MaxTaskCount)
+                LimitedTaskScheduler.Factory.StartNew(() => CaptureCvtProc(e.Buffer, frameCount, LimitedTaskScheduler.QueuedTaskCount));
+            //CaptureCvtProc(e.Buffer, 0, 0);
 
             Profiler.Capture("TaskCount", LimitedTaskScheduler.QueuedTaskCount);
         }
@@ -209,6 +210,10 @@ namespace Vision.Android
                     OpenCV.ImgProc.Imgproc.CvtColor(mat, mat, (int)ColorConversion.YuvToBGR_NV21);
                     break;
                 case Graphics.ImageFormatType.Rgb565:
+                    mat = new Mat(width, height, CvType.Cv16uc1);
+                    mat.Put(0, 0, Buffer);
+                    OpenCV.ImgProc.Imgproc.CvtColor(mat, mat, (int)ColorConversion.Bgr565ToBgr);
+                    break;
                 case Graphics.ImageFormatType.Yuv420888:
                 default:
                     throw new NotImplementedException("Unknown Camera Format");
@@ -228,21 +233,20 @@ namespace Vision.Android
 
             Profiler.End("CaptureCvt" + threadindex);
             capturedBuffer = mat;
-            FrameReady?.Invoke(this, new FrameArgs(new AndroidMat(capturedBuffer)));
-            return;
-            if (lastFrame > frameIndex)
-            {
-                if (mat != null)
-                    mat.Dispose();
-                mat = null;
-
-                return;
-            }
 
             lock (capturedBufferLocker)
             {
+                if (lastFrame > frameIndex)
+                {
+                    if (mat != null)
+                        mat.Dispose();
+                    mat = null;
+                    Profiler.Count("CaptureSkipped");
+                    return;
+                }
+
                 lastFrame = frameIndex;
-                
+                FrameReady?.Invoke(this, new FrameArgs(new AndroidMat(capturedBuffer)));
             }
         }
 

@@ -95,8 +95,10 @@ namespace Vision.Android
         {
             Profiler.Start("MatGetArray");
 
-            int len = (int)Width * (int)Height * Channel;
-            double[] bytes = new double[len];
+            int width = (int)Width;
+            int height = (int)Height;
+            int len = (int)width * (int)height * Channel;
+            double[] buffer = new double[len];
             float[] f = new float[len];
             int i = 0;
             int b = 0;
@@ -104,17 +106,17 @@ namespace Vision.Android
             using (Mat m = new Mat())
             {
                 InnerMat.ConvertTo(m, CvType.Cv64fc3);
-                m.Get(0, 0, bytes);
+                m.Get(0, 0, buffer);
 
-                for (int y = 0; y < Height; y++)
+                for (int y = 0; y < height; y++)
                 {
-                    for (int x = 0; x < Width; x++)
+                    for (int x = 0; x < width; x++)
                     {
-                        f[i] = (float)bytes[b + 2];
+                        f[i] = (float)buffer[b + 2];
                         i++;
-                        f[i] = (float)bytes[b + 1];
+                        f[i] = (float)buffer[b + 1];
                         i++;
-                        f[i] = (float)bytes[b + 0];
+                        f[i] = (float)buffer[b + 0];
                         i++;
                         b += 3;
                     }

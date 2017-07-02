@@ -91,16 +91,18 @@ namespace Vision.Windows
 
         public override float[] GetArray()
         {
-            float[] f = new float[(int)Width * (int)Height * Channel];
+            int width = (int)Width;
+            int height = (int)Height;
+            float[] f = new float[(int)width * (int)height * Channel];
             using (MatOfByte3 matByte = new MatOfByte3())
             {
                 InnerMat.CopyTo(matByte);
 
                 var indexer = matByte.GetIndexer();
                 int i = 0;
-                for (int y = 0; y < InnerMat.Height; y++)
+                for (int y = 0; y < height; y++)
                 {
-                    for (int x = 0; x < InnerMat.Width; x++)
+                    for (int x = 0; x < width; x++)
                     {
                         Vec3b color = indexer[y, x];
                         f[i] = (float)color.Item2;

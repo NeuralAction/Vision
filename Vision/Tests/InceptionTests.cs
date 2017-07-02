@@ -17,6 +17,7 @@ namespace Vision.Tests
         int index = -1;
         string filepath;
         Capture cap;
+        Session sess;
 
         public InceptionTests(int index)
         {
@@ -94,6 +95,8 @@ namespace Vision.Tests
                 Logger.Log("Index file already loaded");
             }
 
+            sess = new Session(graph);
+
             cap.FrameReady += Cap_FrameReady;
             cap.Start();
         }
@@ -103,7 +106,7 @@ namespace Vision.Tests
             cap.Join();
         }
 
-        string inference = "";
+        InferenceResult[] inferences;
         private void Cap_FrameReady(object sender, FrameArgs e)
         {
             if(e.LastKey == 'e')
@@ -115,7 +118,19 @@ namespace Vision.Tests
 
             Update(e.VMat);
 
-            e.VMat.DrawText(0, 50, $"Result: {inference}", Scalar.Black);
+            if(inferences != null)
+            {
+                for(int i=0; i<3; i++)
+                {
+                    InferenceResult r = inferences[i];
+                    e.VMat.DrawText(0, 50 + 40 * i, $"Top {i + 1}: {resultTag[r.Id]} ({(r.Result*100).ToString("0.00")}%)", Scalar.Green);
+                }
+            }
+            else
+            {
+                e.VMat.DrawText(0, 50, $"Result: Wait for inference...", Scalar.Green);
+            }
+            e.VMat.DrawText(0, e.VMat.Height - 50, $"Inference FPS: {Profiler.Get("InferenceFPS")} ({Profiler.Get("InferenceALL").ToString("0")}ms)", Scalar.Green);
 
             Core.Cv.ImgShow("result", e.VMat);
         }
@@ -136,54 +151,43 @@ namespace Vision.Tests
 
         private void Inference(VMat mat)
         {
-            using (Session sess = new Session(graph))
+            Profiler.Start("InferenceALL");
+
+            Profiler.Start("InferenceDecodeImg");
+            Tensor img = Tools.VMatRGB2Tensor(mat, 224, 224, new long[] { 1, 224, 224, 3 });
+            Profiler.End("InferenceDecodeImg");
+
+            Profiler.Start("InferenceNormalizeImg");
+            Tensor normalized;
+            using (Session convert = new Session())
             {
-                Profiler.Start("InferenceALL");
-
-                Profiler.Start("InferenceDecodeImg");
-                Tensor img = Tools.VMatRGB2Tensor(mat, 224, 224, new long[] { 1, 224, 224, 3 });
-                Profiler.End("InferenceDecodeImg");
-
-                Profiler.Start("InferenceNormalizeImg");
-                Tensor normalized;
-                using (Session convert = new Session())
-                {
-                    TFGraph g = convert.Graph.NativeGraph;
-                    var input = g.Placeholder(TFDataType.Float);
-                    var output = g.Sub(input, g.Const(117.0f));
-                    var normfetch = convert.NativeSession.Run(new[] { input }, new[] { img.NativeTensor }, new[] { output });
-                    normalized = new Tensor(normfetch[0]);
-                }
-                Profiler.End("InferenceNormalizeImg");
-
-                Profiler.Start("InferenceRun");
-                Tensor[] fetches = sess.Run(new[] { "output" }, new Dictionary<string, Tensor>() { { "input", normalized } });
-                Profiler.End("InferenceRun");
-
-                Tensor result = fetches[0];
-                float[] list = ((float[][])result.GetValue(true))[0];
-                float max = -1;
-                int maxInd = -1;
-                for (int i = 0; i < list.Length; i++)
-                {
-                    if (max < list[i])
-                    {
-                        max = list[i];
-                        maxInd = i;
-                    }
-                }
-
-                if (maxInd > -1)
-                {
-                    inference = $"{resultTag[maxInd]}, {(max*100).ToString("0.00")}%";
-                }
-                else
-                {
-                    inference = "None";
-                }
-
-                Profiler.End("InferenceALL");
+                TFGraph g = convert.Graph.NativeGraph;
+                var input = g.Placeholder(TFDataType.Float);
+                var output = g.Sub(input, g.Const(117.0f));
+                var normfetch = convert.NativeSession.Run(new[] { input }, new[] { img.NativeTensor }, new[] { output });
+                normalized = new Tensor(normfetch[0]);
             }
+            Profiler.End("InferenceNormalizeImg");
+
+            Profiler.Start("InferenceRun");
+            Tensor[] fetches = sess.Run(new[] { "output" }, new Dictionary<string, Tensor>() { { "input", normalized } });
+            Profiler.End("InferenceRun");
+            normalized.Dispose();
+            img.Dispose();
+
+            Tensor result = fetches[0];
+            float[] list = ((float[][])result.GetValue(true))[0];
+            InferenceResult[] resultList = new InferenceResult[list.Length];
+            for (int i = 0; i < list.Length; i++)
+            {
+                resultList[i] = new InferenceResult(i, list[i]);
+            }
+            resultList = resultList.OrderByDescending(x => x.Result).ToArray();
+
+            inferences = resultList;
+
+            Profiler.End("InferenceALL");
+            Profiler.Count("InferenceFPS");
             mat.Dispose();
         }
 
@@ -201,6 +205,23 @@ namespace Vision.Tests
                 inferenceTask.Wait();
                 inferenceTask = null;
             }
+
+            if(sess != null)
+            {
+                sess.Dispose();
+                sess = null;
+            }
+        }
+    }
+
+    public class InferenceResult
+    {
+        public int Id;
+        public float Result;
+        public InferenceResult(int id, float result)
+        {
+            Id = id;
+            Result = result;
         }
     }
 }

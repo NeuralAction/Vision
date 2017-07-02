@@ -63,6 +63,7 @@ namespace Vision
         {
             if (sess != null)
             {
+                sess.CloseSession();
                 sess.Dispose();
                 sess = null;
             }
