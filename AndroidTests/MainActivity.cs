@@ -22,6 +22,7 @@ namespace AndroidTests
 
         FaceDetection detection;
         InceptionTests inception;
+        ImageProcTests imgtest;
 
         protected override void OnCreate(Bundle bundle)
         {
@@ -48,20 +49,22 @@ namespace AndroidTests
 
                 index++;
                 index %= 2;
-                //detection = new FaceDetection(index, new EyesDetectorXmlLoader());
-                //detection.Start();
-                inception = new InceptionTests(index);
-                inception.Start();
+                detection = new FaceDetection(index, new EyesDetectorXmlLoader());
+                detection.Start();
+
+                //inception = new InceptionTests(index);
+                //inception.Start();
             };
 
             ImageView img = FindViewById<ImageView>(Resource.Id.imageView1);
 
             Core.Init(new AndroidCore(this, this, img));
 
-            //detection = new FaceDetection(index, new EyesDetectorXmlLoader());
-            //detection.Start();
-            inception = new InceptionTests(index);
-            inception.Start();
+            detection = new FaceDetection(index, new EyesDetectorXmlLoader());
+            detection.Start();
+
+            //inception = new InceptionTests(index);
+            //inception.Start();
         }
     }
 }

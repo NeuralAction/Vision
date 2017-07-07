@@ -34,6 +34,7 @@ namespace Vision.Android
 
         private double fps;
         public override double FPS => fps;
+        public bool MultiThread { get; set; } = true;
 
         private Hardware.Camera Camera;
         private int cameraIndex;
@@ -184,9 +185,15 @@ namespace Vision.Android
                 return;
 
             frameCount++;
-            if (e.Buffer != null && LimitedTaskScheduler.QueuedTaskCount < LimitedTaskScheduler.MaxTaskCount)
-                LimitedTaskScheduler.Factory.StartNew(() => CaptureCvtProc(e.Buffer, frameCount, LimitedTaskScheduler.QueuedTaskCount));
-            //CaptureCvtProc(e.Buffer, 0, 0);
+            if (MultiThread)
+            {
+                if (e.Buffer != null && LimitedTaskScheduler.QueuedTaskCount < LimitedTaskScheduler.MaxTaskCount)
+                    LimitedTaskScheduler.Factory.StartNew(() => CaptureCvtProc(e.Buffer, frameCount, LimitedTaskScheduler.QueuedTaskCount));
+            }
+            else
+            {
+                CaptureCvtProc(e.Buffer, 0, 0);
+            }
 
             Profiler.Capture("TaskCount", LimitedTaskScheduler.QueuedTaskCount);
         }
@@ -234,18 +241,25 @@ namespace Vision.Android
             Profiler.End("CaptureCvt" + threadindex);
             capturedBuffer = mat;
 
-            lock (capturedBufferLocker)
+            if (MultiThread)
             {
-                if (lastFrame > frameIndex)
+                lock (capturedBufferLocker)
                 {
-                    if (mat != null)
-                        mat.Dispose();
-                    mat = null;
-                    Profiler.Count("CaptureSkipped");
-                    return;
-                }
+                    if (lastFrame > frameIndex)
+                    {
+                        if (mat != null)
+                            mat.Dispose();
+                        mat = null;
+                        Profiler.Count("CaptureSkipped");
+                        return;
+                    }
 
-                lastFrame = frameIndex;
+                    lastFrame = frameIndex;
+                }
+                FrameReady?.Invoke(this, new FrameArgs(new AndroidMat(capturedBuffer)));
+            }
+            else
+            {
                 FrameReady?.Invoke(this, new FrameArgs(new AndroidMat(capturedBuffer)));
             }
         }

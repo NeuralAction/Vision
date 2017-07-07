@@ -34,6 +34,15 @@ namespace Vision.Tests
         EyeGazeDetector gazeDetector;
         Capture capture;
 
+        double yoffset = 0;
+        int frameMax = 0;
+        int frameOk = 0;
+        object renderLock = new object();
+        Task DetectionTask;
+        FaceRect[] rect = null;
+        Queue<Point> trail = new Queue<Point>();
+        PointKalmanFilter filter = new PointKalmanFilter();
+
         private FaceDetection(string faceXml, string eyeXml)
         {
             Logger.Log(this, "Press E to Exit");
@@ -89,64 +98,32 @@ namespace Vision.Tests
             capture.Join();
         }
 
-        double yoffset = 0;
-        int frameMax = 0;
-        int frameOk = 0;
-        Queue<Point> trail = new Queue<Point>();
-        PointKalmanFilter filter = new PointKalmanFilter();
         private void Capture_FrameReady(object sender, FrameArgs e)
         {
             VMat mat = e.VMat;
 
             if (mat != null && !mat.IsEmpty)
             {
-                Profiler.Count("FaceFPS");
-
-                Profiler.Start("DetectionALL");
-                FaceRect[] rect = detector.Detect(mat);
-
-                if(rect.Length > 0)
+                if(DetectionTask == null || (DetectionTask!=null &&(DetectionTask.IsCompleted || DetectionTask.IsCanceled || DetectionTask.IsFaulted)))
                 {
-                    Profiler.Start("GazeALL");
-                    Point info = gazeDetector.Detect(rect[0], mat);
-                    if (info != null)
+                    VMat cloned = mat.Clone();
+                    DetectionTask = new Task(() =>
                     {
-                        info = filter.Calculate(info);
-                        trail.Enqueue(info);
-                        if (trail.Count > 20)
-                            trail.Dequeue();
-                        double size = 1;
-                        foreach (Point pt in trail)
-                        {
-                            if (size == trail.Count - 1)
-                            {
-                                Core.Cv.DrawCircle(mat, new Point(pt.X * mat.Width, pt.Y * mat.Height), 2, Scalar.Cyan, 4);
-                            }
-                            Core.Cv.DrawCircle(mat, new Point(pt.X * mat.Width, pt.Y * mat.Height), size, Scalar.Yellow, 2);
-                            size++;
-                        }
-
-                        Logger.Log("FaceDectection.GazeDetected", info.ToString());
-                    }
-                    Profiler.End("GazeALL");
+                        DetectProc(cloned);
+                    });
+                    DetectionTask.Start();
                 }
-
-                Profiler.End("DetectionALL");
-
-                Detected?.Invoke(this, new FaceDetectedArgs(mat, rect));
 
                 if (DrawOn)
                 {
                     Profiler.Start("Draw");
-                    Draw(mat, rect);
+                    Draw(mat);
                     Profiler.End("Draw");
 
                     Profiler.Start("imshow");
                     Core.Cv.ImgShow("camera", mat);
                     Profiler.End("imshow");
                 }
-
-                Profiler.End("CapMain");
             }
 
             switch (e.LastKey)
@@ -160,21 +137,75 @@ namespace Vision.Tests
             }
         }
 
-        public void Draw(VMat mat, FaceRect[] rect)
+        public void DetectProc(VMat mat)
         {
-            foreach (FaceRect f in rect)
-                f.Draw(mat, 3, true);
+            Profiler.Count("FaceFPS");
 
-            if (frameMax > 300)
-                frameMax = frameOk = 0;
-            if (rect.Length > 0 && rect[0].Children.Count > 0)
-                frameOk++;
-            frameMax++;
-            yoffset += 0.02;
-            yoffset %= 1;
-            mat.DrawText(50, 400 + 250 * Math.Pow(Math.Sin(2 * Math.PI * yoffset), 3), "HELLO WORLD");
-            mat.DrawText(50, 50, "FPS: " + Profiler.Get("FaceFPS") + " Detect: " + Profiler.Get("DetectionALL").ToString("0.00") + "ms", Scalar.Green);
-            mat.DrawText(50, 85, "Frame: " + frameOk + "/" + frameMax + " (" + ((double)frameOk / frameMax * 100).ToString("0.00") + "%)", Scalar.Green);
+            Profiler.Start("DetectionALL");
+            rect = detector.Detect(mat);
+
+            if (rect.Length > 0)
+            {
+                Profiler.Start("GazeALL");
+                Point info = gazeDetector.Detect(rect[0], mat);
+                if (info != null)
+                {
+                    info = filter.Calculate(info);
+                    lock (renderLock)
+                    {
+                        trail.Enqueue(info);
+                    }
+                    
+                    Logger.Log("FaceDectection.GazeDetected", info.ToString());
+                }
+                Profiler.End("GazeALL");
+            }
+
+            Profiler.End("DetectionALL");
+
+            Detected?.Invoke(this, new FaceDetectedArgs(mat, rect));
+
+            mat.Dispose();
+        }
+
+        public void Draw(VMat mat)
+        {
+            lock (renderLock)
+            {
+                Profiler.Count("DrawFPS");
+
+                if (rect != null)
+                {
+                    foreach (FaceRect f in rect)
+                        f.Draw(mat, 3, true);
+
+                    if (frameMax > 300)
+                        frameMax = frameOk = 0;
+                    if (rect.Length > 0 && rect[0].Children.Count > 0)
+                        frameOk++;
+                }
+
+                if (trail.Count > 20)
+                    trail.Dequeue();
+                double size = 1;
+                foreach (Point pt in trail)
+                {
+                    if (size == trail.Count - 1)
+                    {
+                        Core.Cv.DrawCircle(mat, new Point(pt.X * mat.Width, pt.Y * mat.Height), 2, Scalar.Cyan, 4);
+                    }
+                    Core.Cv.DrawCircle(mat, new Point(pt.X * mat.Width, pt.Y * mat.Height), size, Scalar.Yellow, 2);
+                    size++;
+                }
+
+                frameMax++;
+                yoffset += 0.02;
+                yoffset %= 1;
+                mat.DrawText(50, 400 + 250 * Math.Pow(Math.Sin(2 * Math.PI * yoffset), 3), "HELLO WORLD");
+                mat.DrawText(50, 50, $"DetectFPS: {Profiler.Get("FaceFPS")} ({Profiler.Get("DetectionALL").ToString("0.00")}ms)", Scalar.Green);
+                mat.DrawText(50, mat.Height - 50, $"DrawFPS: {Profiler.Get("DrawFPS")}", Scalar.Green);
+                mat.DrawText(50, 85, "Frame: " + frameOk + "/" + frameMax + " (" + ((double)frameOk / frameMax * 100).ToString("0.00") + "%)", Scalar.Green);
+            }
         }
 
         public void Dispose()

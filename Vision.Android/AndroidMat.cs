@@ -112,6 +112,7 @@ namespace Vision.Android
                 {
                     for (int x = 0; x < width; x++)
                     {
+                        //BGR to RGB
                         f[i] = (float)buffer[b + 2];
                         i++;
                         f[i] = (float)buffer[b + 1];
@@ -139,10 +140,15 @@ namespace Vision.Android
 
         public override VMat[] Split()
         {
-            List<Mat> spl = new List<Mat>();
+            int ch = Channel;
+            Mat[] spl = new Mat[ch];
+            for(int i=0; i<ch; i++)
+            {
+                spl[i] = new Mat();
+            }
             OpenCV.Core.Core.Split(InnerMat, spl);
 
-            Mat[] mspl = spl.ToArray();
+            Mat[] mspl = spl;
 
             List<VMat> ret = new List<VMat>();
             foreach(Mat m in mspl)

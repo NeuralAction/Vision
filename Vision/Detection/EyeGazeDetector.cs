@@ -52,7 +52,8 @@ namespace Vision
                     if (!mat.IsEmpty)
                     {
                         mat.Resize(new Size(160, 160));
-                        mat.NormalizeRGB();
+                        //TODO: Fix NormRGB droid
+                        //mat.NormalizeRGB();
 
                         Tensor imgTensor = Tools.VMatRGB2Tensor(mat, -1, -1, new long[] { 1, 160, 160, 3 });
                         Tensor[] fetch = sess.Run(new string[] { "output" },
