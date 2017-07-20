@@ -14,6 +14,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
 using Vision;
+using Vision.Cv;
+using Vision.Detection;
 
 namespace EyeGazeGen
 {
@@ -50,7 +52,7 @@ namespace EyeGazeGen
                 build.AppendLine($"sub:{model.Directory.Name}");
                 text.WriteText(build);
 
-                using (EyesDetector detector = new EyesDetector(new EyesDetectorXmlLoader()))
+                using (FaceDetector detector = new FaceDetector(new FaceDetectorXmlLoader()))
                 {
                     int count = 0;
                     detector.MaxSize = 480;

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
-namespace Vision
+namespace Vision.Cv
 {
     public abstract class VMat : VirtualObject, IDisposable
     {
@@ -26,9 +26,14 @@ namespace Vision
             return Core.Cv.CreateMat();
         }
 
-        public static VMat New(VMat Mat, Rect Rect)
+        public static VMat New(VMat Mat, Rect Rect, bool clamp = false)
         {
-            return Core.Cv.CreateMat(Mat, Rect);
+            double clmpX = Math.Max(0, Rect.X);
+            double clmpY = Math.Max(0, Rect.Y);
+            double clmpW = Math.Min(Mat.Width - 1, Rect.X + Rect.Width) - clmpX;
+            double clmpH = Math.Min(Mat.Height - 1, Rect.Y + Rect.Height) - clmpY;
+
+            return Core.Cv.CreateMat(Mat, new Rect(clmpX, clmpY, clmpW, clmpH));
         }
 
         public void ConvertColor(VMat output, ColorConversion convert)
@@ -142,7 +147,7 @@ namespace Vision
 
         public void DrawText(double x, double y, string text)
         {
-            DrawText(x, y, text, Scalar.White);
+            DrawText(x, y, text, Scalar.BgrWhite);
         }
 
         public void DrawText(double x, double y, string text, Scalar color)
@@ -152,7 +157,7 @@ namespace Vision
 
         public void DrawText(Point org, string txt)
         {
-            DrawText(org, txt, Scalar.White);
+            DrawText(org, txt, Scalar.BgrWhite);
         }
 
         public void DrawText(Point org, string txt, Scalar color)
@@ -169,10 +174,11 @@ namespace Vision
         protected abstract bool Empty();
         protected abstract int GetChannel();
         protected abstract long GetTotal();
-        
+
+        public abstract T At<T>(int d1, int d2) where T : struct;
         public abstract void CopyTo(VMat dist);
         public abstract void CopyTo(VMat dist, VMat mask);
-        public abstract float[] GetArray();
+        public abstract float[] GetArray(float[] buffer = null);
         public abstract VMat Clone();
         public abstract void Dispose();
     }

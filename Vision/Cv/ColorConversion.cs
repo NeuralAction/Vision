@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Vision
+namespace Vision.Cv
 {
     /// <summary>
     /// Color conversion operation for CvCvtColor

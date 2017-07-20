@@ -12,6 +12,9 @@ using System.Threading;
 using System.Diagnostics;
 using Android.Util;
 
+using Vision.Cv;
+using Vision.Detection;
+
 namespace AndroidTests
 {
     [Activity(Label = "AndroidTests", MainLauncher = true, Icon = "@drawable/icon")]
@@ -22,7 +25,9 @@ namespace AndroidTests
 
         FaceDetection detection;
         InceptionTests inception;
-        ImageProcTests imgtest;
+
+        FaceDetectorXmlLoader detectorXml;
+        FlandmarkModelLoader flandModel;
 
         protected override void OnCreate(Bundle bundle)
         {
@@ -49,7 +54,7 @@ namespace AndroidTests
 
                 index++;
                 index %= 2;
-                detection = new FaceDetection(index, new EyesDetectorXmlLoader());
+                detection = new FaceDetection(index, detectorXml, flandModel);
                 detection.Start();
 
                 //inception = new InceptionTests(index);
@@ -60,7 +65,10 @@ namespace AndroidTests
 
             Core.Init(new AndroidCore(this, this, img));
 
-            detection = new FaceDetection(index, new EyesDetectorXmlLoader());
+            detectorXml = new FaceDetectorXmlLoader();
+            flandModel = new FlandmarkModelLoader();
+
+            detection = new FaceDetection(index, detectorXml, flandModel);
             detection.Start();
 
             //inception = new InceptionTests(index);

@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Vision.Cv;
 using Xamarin.Forms;
 
-namespace Vision
+namespace Vision.Detection
 {
     public class EyeRect : Rect
     {
@@ -34,18 +35,19 @@ namespace Vision
             Point center = new Point(Parent.X + X + Width * 0.5, Parent.Y + Y + Height * 0.5);
             double radius = (Width + Height) * 0.25;
 
-            Core.Cv.DrawCircle(frame, center, radius, Scalar.Red, thickness, LineType.Link4, 0);
+            Core.Cv.DrawCircle(frame, center, radius, Scalar.BgrRed, thickness, LineType.Link4, 0);
+            Core.Cv.DrawCircle(frame, center, 2, Scalar.BgrYellow, 4, LineType.Link4, 0);
         }
 
         public VMat ROI(VMat frame)
         {
-            return VMat.New(frame, new Rect(Parent.X + X, Parent.Y + Y, Width, Height));
+            return VMat.New(frame, new Rect(Parent.X + X, Parent.Y + Y, Width, Height), true);
         }
 
         public VMat RoiCropByPercent(VMat frame, double percentOfFace = 0.33)
         {
             double size = Math.Max(Parent.Width, Parent.Height) * percentOfFace;
-            return VMat.New(frame, new Vision.Rect(Parent.X + Center.X - size * 0.5, Parent.Y + Center.Y - size * 0.5, size, size));
+            return VMat.New(frame, new Vision.Rect(Parent.X + Center.X - size * 0.5, Parent.Y + Center.Y - size * 0.5, size, size), true);
         }
     }
 }

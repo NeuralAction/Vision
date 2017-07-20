@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Vision;
+using Vision.Detection;
 using Vision.Tests;
 
 namespace WindowsTests
@@ -156,13 +157,13 @@ namespace WindowsTests
                 {
                     return;
                 }
-                detect = new FaceDetection(ind, new EyesDetectorXmlLoader());
+                detect = new FaceDetection(ind, new FaceDetectorXmlLoader(), new FlandmarkModelLoader());
             }
             else
             {
                 if (DialogResult.OK == ofd.ShowDialog())
                 {
-                    detect = new FaceDetection(ofd.FileName, new EyesDetectorXmlLoader());
+                    detect = new FaceDetection(ofd.FileName, new FaceDetectorXmlLoader(), new FlandmarkModelLoader());
                 }
             }
 

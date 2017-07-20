@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Vision.Cv;
+using Vision.Tensorflow;
 
-namespace Vision
+namespace Vision.Detection
 {
     public class EyeGazeDetector : IDisposable
     {
@@ -40,6 +42,8 @@ namespace Vision
             return Detect(lefteye, frame);
         }
 
+        float[] imgbuffer;
+        Tensor imgTensor;
         public Point Detect(EyeRect eye, VMat frame)
         {
             Profiler.Start("GazeDetect");
@@ -51,13 +55,13 @@ namespace Vision
                 {
                     if (!mat.IsEmpty)
                     {
-                        mat.Resize(new Size(160, 160));
-                        //TODO: Fix NormRGB droid
-                        //mat.NormalizeRGB();
-
-                        Tensor imgTensor = Tools.VMatRGB2Tensor(mat, -1, -1, new long[] { 1, 160, 160, 3 });
-                        Tensor[] fetch = sess.Run(new string[] { "output" },
-                                                    new Dictionary<string, Tensor>() { { "input_image", imgTensor }, { "phase_train", new Tensor(true) }, { "keep_prob", new Tensor(1.0f) } });
+                        mat.Resize(new Size(160, 160), 0, 0, Interpolation.NearestNeighbor);
+                        
+                        if (imgbuffer == null)
+                            imgbuffer = new float[160 * 160 * 3];
+                        imgTensor = Tools.VMatBgr2Tensor(mat, -1, -1, new long[] { 1, 160, 160, 3 }, imgbuffer);
+                        Tensor[] fetch = sess.Run(new string[] { "output" }, 
+                            new Dictionary<string, Tensor>() { { "input_image", imgTensor }, { "phase_train", new Tensor(true) }, { "keep_prob", new Tensor(1.0f) } });
 
                         Tensor result = fetch[0];
                         float[,] output = (float[,])result.GetValue();
@@ -69,8 +73,14 @@ namespace Vision
                         }
                         fetch = null;
                         result = null;
-                        imgTensor.Dispose();
-                        imgTensor = null;
+                        try
+                        {
+                            imgTensor.Dispose();
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Error(this, ex);
+                        }
                     }
                 }
             }

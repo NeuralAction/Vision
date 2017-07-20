@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Vision.Cv;
 
 namespace Vision.Windows
 {
@@ -37,7 +38,7 @@ namespace Vision.Windows
         private Thread captureThread;
         private Stopwatch sw;
         private bool flip = false;
-        private Vision.FlipMode flipMode;
+        private Cv.FlipMode flipMode;
 
         private WindowsCapture()
         {
@@ -61,7 +62,7 @@ namespace Vision.Windows
             Logger.Log($"Capture Size: (w:{w},h:{h})  CaptureFormat:{InnerCapture.Get(CaptureProperty.FourCC)}");
 
             flip = true;
-            flipMode = FlipMode.Y;
+            flipMode = Cv.FlipMode.Y;
         }
 
         public WindowsCapture(string filepath) : this()

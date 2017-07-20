@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OpenCvSharp;
+using Vision.Cv;
 
 namespace Vision.Windows
 {
-    public class WindowsCascadeClassifier : CascadeClassifier
+    public class WindowsCascadeClassifier : Cv.CascadeClassifier
     {
         public OpenCvSharp.CascadeClassifier InnerCascade;
         public override object Object
@@ -24,7 +24,7 @@ namespace Vision.Windows
 
         public override Rect[] DetectMultiScale(VMat mat, double scaleFactor = 1.1, int minNeighbors = 3, HaarDetectionType flags = HaarDetectionType.Zero, Size minSize = null, Size maxSize = null)
         {
-            OpenCvSharp.Rect[] rects = InnerCascade.DetectMultiScale((Mat)mat.Object, scaleFactor, minNeighbors, (OpenCvSharp.HaarDetectionType)flags, 
+            OpenCvSharp.Rect[] rects = InnerCascade.DetectMultiScale((OpenCvSharp.Mat)mat.Object, scaleFactor, minNeighbors, (OpenCvSharp.HaarDetectionType)flags, 
                 (minSize == null) ? OpenCvSharp.Size.Zero : new OpenCvSharp.Size(minSize.Width, minSize.Height), 
                 (maxSize == null) ? OpenCvSharp.Size.Zero : new OpenCvSharp.Size(maxSize.Width, maxSize.Height));
 

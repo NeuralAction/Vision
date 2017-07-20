@@ -5,8 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TensorFlow;
+using Vision.Cv;
 
-namespace Vision
+namespace Vision.Tensorflow
 {
     public enum ImageCodec
     {
@@ -18,7 +19,7 @@ namespace Vision
 
     public static class Tools
     {
-        public static Tensor VMatRGB2Tensor(VMat m, int resizeWidth = -1, int resizeHeight = -1, long[] shape = null)
+        public static Tensor VMatBgr2Tensor(VMat m, int resizeWidth = -1, int resizeHeight = -1, long[] shape = null, float[] imgbuffer=null)
         {
             if (resizeHeight != -1 && resizeWidth != -1)
                 m.Resize(new Size(resizeWidth, resizeHeight));
@@ -28,7 +29,7 @@ namespace Vision
                 shape = new long[] { (int)m.Height, (int)m.Width, m.Channel };
             }
 
-            float[] buffer = m.GetArray();
+            float[] buffer = m.GetArray(imgbuffer);
             TFTensor tensor = TFTensor.FromBuffer(new TFShape(shape), buffer, 0, buffer.Length);
 
             return new Tensor(tensor);

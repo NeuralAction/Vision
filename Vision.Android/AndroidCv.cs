@@ -11,10 +11,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Xamarin.Forms;
+using Vision.Cv;
 
 namespace Vision.Android
 {
-    public class AndroidCv : Cv
+    public class AndroidCv : Vision.Cv.Cv
     {
         public static AndroidCv Cv { get { return (AndroidCv)Core.Cv; } }
 
@@ -196,7 +197,7 @@ namespace Vision.Android
             Imgproc.Resize((Mat)input.Object, (Mat)dist.Object, new OpenCV.Core.Size(size.Width, size.Height), fx, fy, (int)inter);
         }
 
-        protected override CLAHE CreateCLAHE(double clip, Size gridSize)
+        protected override Cv.CLAHE CreateCLAHE(double clip, Size gridSize)
         {
             return new AndroidCLAHE(clip, gridSize);
         }

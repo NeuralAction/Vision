@@ -10,6 +10,7 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using OpenCV.Core;
+using Vision.Cv;
 
 namespace Vision.Android
 {

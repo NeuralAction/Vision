@@ -11,6 +11,7 @@ using Android.Views;
 using Android.Widget;
 using OpenCV.Core;
 using Vision;
+using Vision.Cv;
 
 namespace Vision.Android
 {
@@ -91,36 +92,40 @@ namespace Vision.Android
             return new AndroidMat(InnerMat.Clone());
         }
 
-        public override float[] GetArray()
+        public override float[] GetArray(float[] buf = null)
         {
             Profiler.Start("MatGetArray");
 
             int width = (int)Width;
             int height = (int)Height;
             int len = (int)width * (int)height * Channel;
-            double[] buffer = new double[len];
-            float[] f = new float[len];
-            int i = 0;
-            int b = 0;
+            float[] f;
+            if(buf == null)
+            {
+                f = new float[len];
+            }
+            else
+            {
+                if (buf.Length != len)
+                    throw new ArgumentOutOfRangeException();
+                f = buf;
+            }
+            int pixel = 0;
 
+            float temp;
             using (Mat m = new Mat())
             {
                 InnerMat.ConvertTo(m, CvType.Cv64fc3);
-                m.Get(0, 0, buffer);
+                m.Get(0, 0, f);
 
-                for (int y = 0; y < height; y++)
+                for (int y = 0; y < height * width; y++)
                 {
-                    for (int x = 0; x < width; x++)
-                    {
-                        //BGR to RGB
-                        f[i] = (float)buffer[b + 2];
-                        i++;
-                        f[i] = (float)buffer[b + 1];
-                        i++;
-                        f[i] = (float)buffer[b + 0];
-                        i++;
-                        b += 3;
-                    }
+                    //BGR to RGB
+                    temp = f[pixel];
+                    f[pixel] = f[pixel + 2];
+                    f[pixel + 2] = temp;
+
+                    pixel += 3;
                 }
             }
 
@@ -166,6 +171,13 @@ namespace Vision.Android
                 c.Add((Mat)((AndroidMat)m).Object);
             }
             OpenCV.Core.Core.Merge(c, InnerMat);
+        }
+
+        public override T At<T>(int d1, int d2)
+        {
+            double[] temp = InnerMat.Get(d1, d2);
+
+            return (T)Convert.ChangeType(temp[0], typeof(T));
         }
     }
 }

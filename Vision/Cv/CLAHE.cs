@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Vision
+namespace Vision.Cv
 {
     public abstract class CLAHE : VirtualObject, IDisposable
     {

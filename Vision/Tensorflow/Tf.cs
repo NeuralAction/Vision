@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TensorFlow;
 
-namespace Vision
+namespace Vision.Tensorflow
 {
     public static class Tf
     {

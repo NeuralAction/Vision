@@ -6,6 +6,8 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using TensorFlow;
+using Vision.Cv;
+using Vision.Tensorflow;
 
 namespace Vision.Tests
 {
@@ -123,14 +125,14 @@ namespace Vision.Tests
                 for(int i=0; i<3; i++)
                 {
                     InferenceResult r = inferences[i];
-                    e.VMat.DrawText(0, 50 + 40 * i, $"Top {i + 1}: {resultTag[r.Id]} ({(r.Result*100).ToString("0.00")}%)", Scalar.Green);
+                    e.VMat.DrawText(0, 50 + 40 * i, $"Top {i + 1}: {resultTag[r.Id]} ({(r.Result*100).ToString("0.00")}%)", Scalar.BgrGreen);
                 }
             }
             else
             {
-                e.VMat.DrawText(0, 50, $"Result: Wait for inference...", Scalar.Green);
+                e.VMat.DrawText(0, 50, $"Result: Wait for inference...", Scalar.BgrGreen);
             }
-            e.VMat.DrawText(0, e.VMat.Height - 50, $"Inference FPS: {Profiler.Get("InferenceFPS")} ({Profiler.Get("InferenceALL").ToString("0")}ms)", Scalar.Green);
+            e.VMat.DrawText(0, e.VMat.Height - 50, $"Inference FPS: {Profiler.Get("InferenceFPS")} ({Profiler.Get("InferenceALL").ToString("0")}ms)", Scalar.BgrGreen);
 
             Core.Cv.ImgShow("result", e.VMat);
         }
@@ -154,7 +156,7 @@ namespace Vision.Tests
             Profiler.Start("InferenceALL");
 
             Profiler.Start("InferenceDecodeImg");
-            Tensor img = Tools.VMatRGB2Tensor(mat, 224, 224, new long[] { 1, 224, 224, 3 });
+            Tensor img = Tools.VMatBgr2Tensor(mat, 224, 224, new long[] { 1, 224, 224, 3 });
             Profiler.End("InferenceDecodeImg");
 
             Profiler.Start("InferenceNormalizeImg");

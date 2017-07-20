@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Vision.Cv;
 
 namespace Vision.Windows
 {
@@ -37,7 +38,7 @@ namespace Vision.Windows
             InnerMat = new Mat(size.ToCvSize(), OpenCvSharp.MatType.CV_8UC3);
         }
 
-        public WindowsMat(Size size, MatType type)
+        public WindowsMat(Size size, Cv.MatType type)
         {
             InnerMat = new Mat(size.ToCvSize(), new OpenCvSharp.MatType(type.Value));
         }
@@ -89,11 +90,21 @@ namespace Vision.Windows
             return new WindowsMat(InnerMat.Clone());
         }
 
-        public override float[] GetArray()
+        public override float[] GetArray(float[] buffer=null)
         {
             int width = (int)Width;
             int height = (int)Height;
-            float[] f = new float[(int)width * (int)height * Channel];
+            float[] f; // = new float[(int)width * (int)height * Channel];
+            if (buffer == null)
+            {
+                f = new float[width * height * Channel];
+            }
+            else
+            {
+                if (buffer.Length < width * height * Channel)
+                    throw new ArgumentOutOfRangeException(nameof(buffer));
+                f = buffer;
+            }
             using (MatOfByte3 matByte = new MatOfByte3())
             {
                 InnerMat.CopyTo(matByte);
@@ -147,6 +158,11 @@ namespace Vision.Windows
                 m.Add((Mat)v.Object);
             }
             Cv2.Merge(m.ToArray(), (Mat)Object);
+        }
+
+        public override T At<T>(int d1, int d2)
+        {
+            return InnerMat.At<T>(d1, d2);
         }
     }
 }

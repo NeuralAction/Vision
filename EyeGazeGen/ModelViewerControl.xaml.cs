@@ -14,6 +14,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using Vision;
+using Vision.Cv;
+using Vision.Detection;
 using Vision.Windows;
 
 namespace EyeGazeGen
@@ -27,7 +29,7 @@ namespace EyeGazeGen
         public EyeGazeModel Model { get => model; set => model = value; }
         private double zoom = 1;
         public double Zoom { get => zoom; set => zoom = value; }
-        private EyesDetector Detector = new EyesDetector(new EyesDetectorXmlLoader());
+        private FaceDetector Detector = new FaceDetector(new FaceDetectorXmlLoader());
 
         public ModelViewerControl()
         {

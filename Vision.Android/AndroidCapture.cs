@@ -13,6 +13,7 @@ using Hardware = Android.Hardware;
 using Graphics = Android.Graphics;
 using OpenCV.VideoIO;
 using OpenCV.Core;
+using Vision.Cv;
 
 #pragma warning disable CS0618 // 형식 또는 멤버는 사용되지 않습니다.
 
@@ -34,7 +35,7 @@ namespace Vision.Android
 
         private double fps;
         public override double FPS => fps;
-        public bool MultiThread { get; set; } = true;
+        public bool MultiThread { get; set; } = false;
 
         private Hardware.Camera Camera;
         private int cameraIndex;

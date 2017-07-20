@@ -5,10 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Vision;
+using Vision.Cv;
 
 namespace Vision.Windows
 {
-    public class WindowsCv : Cv
+    public class WindowsCv : Vision.Cv.Cv
     {
         public WindowsCv()
         {
@@ -68,7 +69,7 @@ namespace Vision.Windows
             return (char)Cv2.WaitKey(duration);
         }
 
-        protected override CLAHE CreateCLAHE(double clip, Size gridSize)
+        protected override Cv.CLAHE CreateCLAHE(double clip, Size gridSize)
         {
             return new WindowsCLAHE(clip, gridSize);
         }
@@ -83,7 +84,7 @@ namespace Vision.Windows
             return new WindowsCapture(filePath);
         }
 
-        protected override CascadeClassifier CreateCascadeClassifier(string filePath)
+        protected override Cv.CascadeClassifier CreateCascadeClassifier(string filePath)
         {
             return new WindowsCascadeClassifier(filePath);
         }
@@ -98,7 +99,7 @@ namespace Vision.Windows
             return new WindowsMat(size);
         }
 
-        protected override VMat CreateMat(Size size, MatType type)
+        protected override VMat CreateMat(Size size, Cv.MatType type)
         {
             return new WindowsMat(size, type);
         }

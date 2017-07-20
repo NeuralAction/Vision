@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Vision
+namespace Vision.Cv
 {
     /// <summary>
     /// Matrix data type (depth and number of channels)

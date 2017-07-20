@@ -6,8 +6,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Vision;
+using Vision.Cv;
 
-namespace Vision
+namespace Vision.Detection
 {
     public class EyeGazePointArg
     {
@@ -96,17 +97,17 @@ namespace Vision
                     Random rnd = new Random();
                     Point pt = new Point(rnd.NextDouble(0, ScreenSize.Width), rnd.NextDouble(0, ScreenSize.Height));
 
-                    SetPoint.Invoke(this, new EyeGazePointArg(pt, Scalar.Red, 700));
+                    SetPoint.Invoke(this, new EyeGazePointArg(pt, Scalar.BgrRed, 700));
                     Core.Sleep(700);
 
                     if (tk.IsCancellationRequested)
                         return;
-                    SetPoint.Invoke(this, new EyeGazePointArg(pt, Scalar.Yellow, 500));
+                    SetPoint.Invoke(this, new EyeGazePointArg(pt, Scalar.BgrYellow, 500));
                     Core.Sleep(500);
 
                     if (tk.IsCancellationRequested)
                         return;
-                    SetPoint.Invoke(this, new EyeGazePointArg(pt, Scalar.Green, 100));
+                    SetPoint.Invoke(this, new EyeGazePointArg(pt, Scalar.BgrGreen, 100));
 
                     while (mat == null)
                     {

@@ -15,6 +15,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 using Vision;
+using Vision.Cv;
+using Vision.Detection;
 using Vision.Windows;
 
 namespace EyeGazeGen
@@ -25,7 +27,7 @@ namespace EyeGazeGen
     public partial class MainWindow : Window
     {
         EyeGazeModelRecorder recorder;
-        EyesDetector detector;
+        FaceDetector detector;
         VMat frame;
 
         public MainWindow()
@@ -34,7 +36,7 @@ namespace EyeGazeGen
 
             Vision.Core.Init(new Vision.Windows.WindowsCore());
 
-            detector = new EyesDetector(new EyesDetectorXmlLoader());
+            detector = new FaceDetector(new FaceDetectorXmlLoader());
 
             UpdateLib();
 
@@ -127,7 +129,7 @@ namespace EyeGazeGen
                 frame.DrawText(0, 50, $"fps:{Profiler.Get("fps").ToString().PadRight(2)} wpfFPS:{Profiler.Get("wpfFPS").ToString().PadRight(2)} recorded:{((recorder == null) ? 0 : recorder.CaptureCount)}");
                 if (recorder.IsPaused)
                 {
-                    frame.DrawText(-offset, 50, "PAUSED-PAUSED-PAUSED-PAUSED-PAUSED-PAUSED-PAUSED-PAUSED-PAUSED", Scalar.Blue);
+                    frame.DrawText(-offset, 50, "PAUSED-PAUSED-PAUSED-PAUSED-PAUSED-PAUSED-PAUSED-PAUSED-PAUSED", Scalar.BgrBlue);
                     offset += 2;
                     offset = offset % (26 * 7);
                 }

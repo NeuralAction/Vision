@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.12
+VisualStudioVersion = 15.0.26430.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vision", "Vision\Vision.csproj", "{67F9D3A8-F71E-4428-913F-C37AE82CDB24}"
 EndProject
@@ -580,7 +580,9 @@ Global
 		{69A8153D-4BA4-41DE-BB1E-C9F473FFD185}.Debug|x86.Build.0 = Debug|x86
 		{69A8153D-4BA4-41DE-BB1E-C9F473FFD185}.Debug|x86.Deploy.0 = Debug|x86
 		{69A8153D-4BA4-41DE-BB1E-C9F473FFD185}.Debug|x86_64.ActiveCfg = Debug|x86
-		{69A8153D-4BA4-41DE-BB1E-C9F473FFD185}.Release|Any CPU.ActiveCfg = Release|x86
+		{69A8153D-4BA4-41DE-BB1E-C9F473FFD185}.Release|Any CPU.ActiveCfg = Release|x64
+		{69A8153D-4BA4-41DE-BB1E-C9F473FFD185}.Release|Any CPU.Build.0 = Release|x64
+		{69A8153D-4BA4-41DE-BB1E-C9F473FFD185}.Release|Any CPU.Deploy.0 = Release|x64
 		{69A8153D-4BA4-41DE-BB1E-C9F473FFD185}.Release|ARM.ActiveCfg = Release|ARM
 		{69A8153D-4BA4-41DE-BB1E-C9F473FFD185}.Release|ARM.Build.0 = Release|ARM
 		{69A8153D-4BA4-41DE-BB1E-C9F473FFD185}.Release|ARM.Deploy.0 = Release|ARM

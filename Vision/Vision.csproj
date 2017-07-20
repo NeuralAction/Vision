@@ -55,19 +55,22 @@
     <Compile Include="Cv\Capture.cs" />
     <Compile Include="Cv\CascadeClassifier.cs" />
     <Compile Include="Cv\CLAHE.cs" />
+    <Compile Include="Cv\Flandmark.cs" />
+    <Compile Include="Cv\LibLBP.cs" />
     <Compile Include="Cv\MatType.cs" />
     <Compile Include="Detection\EyeGazeDetector.cs" />
     <Compile Include="Detection\EyeGazeModel.cs" />
     <Compile Include="Detection\EyeGazeModelRecorder.cs" />
-    <Compile Include="Detection\EyesDetectorXmlLoader.cs" />
+    <Compile Include="Detection\FaceDetectorXmlLoader.cs" />
     <Compile Include="Cv\ColorConversion.cs" />
     <Compile Include="Cv\Cv.cs" />
     <Compile Include="Cv\FlipMode.cs" />
     <Compile Include="Cv\FontFace.cs" />
     <Compile Include="Cv\Interpolation.cs" />
     <Compile Include="Detection\EyeRect.cs" />
-    <Compile Include="Detection\EyesDetector.cs" />
+    <Compile Include="Detection\FaceDetector.cs" />
     <Compile Include="Detection\EyeGazeInfo.cs" />
+    <Compile Include="Detection\FaceLandmarkDetector.cs" />
     <Compile Include="Detection\FaceRect.cs" />
     <Compile Include="Cv\HaarDetectionType.cs" />
     <Compile Include="Cv\LineType.cs" />
@@ -132,6 +135,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Detection\frozen_cpu.pb" />
     <EmbeddedResource Include="Detection\frozen_gpu.pb" />
+    <EmbeddedResource Include="Cv\flandmark_model.dat" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
