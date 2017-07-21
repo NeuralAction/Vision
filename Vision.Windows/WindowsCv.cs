@@ -54,9 +54,71 @@ namespace Vision.Windows
                 (int)Math.Round(thickness), (LineTypes)lineType, shift);
         }
 
+        public override void DrawText(VMat img, string text, Point org, FontFace fontFace, double fontScale, Scalar color, int thickness = 1, LineType lineType = LineType.Link8, bool bottomLeftOrigin = false)
+        {
+            Cv2.PutText((Mat)img.Object, text, new OpenCvSharp.Point(org.X, org.Y), (HersheyFonts)fontFace, fontScale,
+                new OpenCvSharp.Scalar(color.Value1, color.Value2, color.Value3, color.Value4), thickness, (LineTypes)lineType, bottomLeftOrigin);
+        }
+
+        public override void DrawLine(VMat img, Point start, Point end, Scalar color, int thickness = 1, LineType lineType = LineType.Link8, int shift = 0)
+        {
+            Cv2.Line(img.ToCvMat(), start.ToCvPoint(), end.ToCvPoint(), color.ToCvScalar(), thickness, (LineTypes)lineType, shift);
+        }
+
         public override void EqualizeHistogram(VMat input, VMat output)
         {
             Cv2.EqualizeHist((Mat)input.Object, (Mat)input.Object);
+        }
+
+        public override void Canny(VMat Input, VMat output, double thresold1, double thresold2, int apertureSize = 3, bool L2gradient = false)
+        {
+            Cv2.Canny((Mat)Input.Object, (Mat)output.Object, thresold1, thresold2, apertureSize, L2gradient);
+        }
+
+        public override void Transpose(VMat input, VMat output)
+        {
+            Cv2.Transpose((Mat)input.Object, (Mat)output.Object);
+        }
+
+        public override void Resize(VMat input, VMat dist, Size size, double fx = 0, double fy = 0, Interpolation inter = Interpolation.Linear)
+        {
+            Cv2.Resize((Mat)input.Object, (Mat)dist.Object, new OpenCvSharp.Size(size.Width, size.Height), fx, fy, (InterpolationFlags)inter);
+        }
+
+        public override void ProjectPoints(List<Point3D> objectPoints, double[] rvec, double[] tvec, double[,] cameraMatrix, double[] distCoeffs, out Point[] imagePoints, out double[,] jacobian)
+        {
+            List<Point3f> objpoints = new List<Point3f>(objectPoints.Count);
+            foreach (var pt in objectPoints)
+                objpoints.Add(new Point3f((float)pt.X, (float)pt.Y, (float)pt.Z));
+
+            Point2f[] point2D;
+            Cv2.ProjectPoints(objpoints, rvec, tvec, cameraMatrix, distCoeffs, out point2D, out jacobian);
+
+            imagePoints = new Point[point2D.Length];
+            for (int i = 0; i < point2D.Length; i++)
+                imagePoints[i] = new Point(point2D[i].X, point2D[i].Y);
+        }
+
+        public override void SolvePnP(List<Point3D> model_points, List<Point> image_point, double[,] cameraMatrix, double[] distCoeffs, out double[] rvec, out double[] tvec)
+        {
+            List<Point3f> modelpoints = new List<Point3f>(model_points.Count);
+            foreach (var pt in model_points)
+                modelpoints.Add(new Point3f((float)pt.X, (float)pt.Y, (float)pt.Z));
+
+            List<Point2f> imagepoints = new List<Point2f>(image_point.Count);
+            foreach (var pt in image_point)
+                imagepoints.Add(new Point2f((float)pt.X, (float)pt.Y));
+
+            using (Mat rotation_vector = new Mat())
+            using (Mat translation_vector = new Mat())
+            {
+                Cv2.SolvePnP(InputArray.Create(modelpoints), InputArray.Create(imagepoints), InputArray.Create(cameraMatrix), InputArray.Create(distCoeffs), rotation_vector, translation_vector);
+
+                rvec = new double[3];
+                rotation_vector.GetArray(0, 0, rvec);
+                tvec = new double[3];
+                translation_vector.GetArray(0, 0, tvec);
+            }
         }
 
         public override void ImgShow(string name, VMat img)
@@ -117,27 +179,6 @@ namespace Vision.Windows
         protected override void InternalImgWrite(string name, VMat img, int quality)
         {
             Cv2.ImWrite(name, (Mat)img.Object, new ImageEncodingParam(ImwriteFlags.JpegQuality, 80));
-        }
-
-        public override void DrawText(VMat img, string text, Point org, FontFace fontFace, double fontScale, Scalar color, int thickness = 1, LineType lineType = LineType.Link8, bool bottomLeftOrigin = false)
-        {
-            Cv2.PutText((Mat)img.Object, text, new OpenCvSharp.Point(org.X, org.Y), (HersheyFonts)fontFace, fontScale, 
-                new OpenCvSharp.Scalar(color.Value1, color.Value2, color.Value3, color.Value4), thickness, (LineTypes)lineType, bottomLeftOrigin);
-        }
-
-        public override void Canny(VMat Input, VMat output, double thresold1, double thresold2, int apertureSize = 3, bool L2gradient = false)
-        {
-            Cv2.Canny((Mat)Input.Object, (Mat)output.Object, thresold1, thresold2, apertureSize, L2gradient);
-        }
-
-        public override void Transpose(VMat input, VMat output)
-        {
-            Cv2.Transpose((Mat)input.Object, (Mat)output.Object);
-        }
-
-        public override void Resize(VMat input, VMat dist, Size size, double fx = 0, double fy = 0, Interpolation inter = Interpolation.Linear)
-        {
-            Cv2.Resize((Mat)input.Object, (Mat)dist.Object, new OpenCvSharp.Size(size.Width, size.Height), fx, fy, (InterpolationFlags)inter);
         }
     }
 }

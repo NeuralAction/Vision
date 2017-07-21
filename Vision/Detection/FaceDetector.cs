@@ -20,15 +20,20 @@ namespace Vision.Detection
         public double EyesScaleFactor { get; set; } = 1.2;
         public double EyesMinFactor { get; set; } = 0.2;
         public double EyesMaxFactor { get; set; } = 0.5;
-        public int MaxFaceSize { get; set; } = 110;
+        public int MaxFaceSize { get; set; } = 100;
 
         public bool LandmarkDetect { get; set; } = true;
+        public bool LandmarkSolve { get; set; } = true;
+
+        public bool Smooth { get; set; } = true;
         
         public Interpolation Interpolation { get; set; } = Interpolation.NearestNeighbor;
 
         CascadeClassifier FaceCascade;
         CascadeClassifier EyesCascade;
         FaceLandmarkDetector Landmark;
+        
+        List<FaceSmoother> Smoother = new List<FaceSmoother>();
 
         public FaceDetector(string FaceXml, string EyesXml)
         {
@@ -75,8 +80,13 @@ namespace Vision.Detection
                 Profiler.End("DetectionFace");
                 
                 Profiler.Start("DetectionEyes");
+                int index = 0;
                 foreach (Rect face in faces)
                 {
+                    if (Smoother.Count <= index)
+                        Smoother.Add(new FaceSmoother());
+                    FaceSmoother smoothCurrent = Smoother[index];
+
                     FaceRect faceRect = new FaceRect(face);
                     faceRect.Scale(1 / scaleFactor);
 
@@ -88,6 +98,18 @@ namespace Vision.Detection
                         Profiler.Start("DetectionLandmark");
                         Landmark.Interpolation = Interpolation;
                         Landmark.Detect(frame_face, faceRect);
+                        if (Smooth)
+                            smoothCurrent.SmoothLandmark(faceRect);
+
+                        Profiler.Start("DetectionLandmarkSolve");
+                        if (LandmarkSolve)
+                        {
+                            Landmark.Solve(frame_face, faceRect);
+                            if (Smooth)
+                                smoothCurrent.SmoothVectors(faceRect);
+                        }
+                        Profiler.End("DetectionLandmarkSolve");
+
                         Profiler.End("DetectionLandmark");
                     }
 
@@ -121,6 +143,7 @@ namespace Vision.Detection
                     }
 
                     FaceList.Add(faceRect);
+                    index++;
                 }
                 Profiler.End("DetectionEyes");
                 
@@ -129,7 +152,9 @@ namespace Vision.Detection
                     frame_face.Dispose();
                     frame_face = null;
                 }
-                return FaceList.ToArray();
+                var rect = FaceList.ToArray();
+
+                return rect;
             }
         }
 
@@ -145,6 +170,47 @@ namespace Vision.Detection
             {
                 FaceCascade.Dispose();
                 FaceCascade = null;
+            }
+        }
+    }
+
+    public class FaceSmoother
+    {
+        PointKalmanFilter[] LandmarkFilter;
+        ArrayKalmanFilter TvecFilter;
+        ArrayKalmanFilter RvecFilter;
+
+        public FaceSmoother()
+        {
+            LandmarkFilter = new PointKalmanFilter[8];
+            for (int i = 0; i < 8; i++)
+            {
+                LandmarkFilter[i] = new PointKalmanFilter();
+            }
+
+            TvecFilter = new ArrayKalmanFilter(3);
+            RvecFilter = new ArrayKalmanFilter(3);
+        }
+
+        public void SmoothLandmark(FaceRect face)
+        {
+            if (face.Landmarks != null)
+            {
+                for (int i = 0; i < LandmarkFilter.Length; i++)
+                {
+                    face.Landmarks[i] = LandmarkFilter[i].Calculate(face.Landmarks[i]);
+                }
+            }
+        }
+
+        public void SmoothVectors(FaceRect face)
+        {
+            return;
+
+            if (face.LandmarkRotationVector != null && face.LandmarkRotationVector != null)
+            {
+                face.LandmarkTransformVector = TvecFilter.Calculate(face.LandmarkTransformVector);
+                face.LandmarkRotationVector = RvecFilter.Calculate(face.LandmarkRotationVector);
             }
         }
     }

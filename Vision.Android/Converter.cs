@@ -9,6 +9,7 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using Vision.Cv;
 
 namespace Vision.Android
 {
@@ -27,6 +28,32 @@ namespace Vision.Android
         public static OpenCV.Core.Rect ToCvRect(this Rect rt)
         {
             return new OpenCV.Core.Rect(rt.Point.ToCvPoint(), rt.Size.ToCvSize());
+        }
+
+        public static OpenCV.Core.Scalar ToCvScalar(this Scalar s)
+        {
+            return new OpenCV.Core.Scalar(s.Value1, s.Value2, s.Value3, s.Value4);
+        }
+
+        public static OpenCV.Core.Mat ToCvMat(this VMat mat)
+        {
+            return (OpenCV.Core.Mat)mat.Object;
+        }
+
+        public static OpenCV.Core.Mat ToCvMat(int row, int col, double[] buffer)
+        {
+            OpenCV.Core.Mat m = new OpenCV.Core.Mat(row, col, MatType.CV_64FC1);
+            m.Put(0, 0, buffer);
+            return m;
+        }
+
+        public static OpenCV.Core.Mat ToCvMat(int row, int col, double[,] buffer)
+        {
+            OpenCV.Core.Mat m = new OpenCV.Core.Mat(row, col, MatType.CV_64FC1);
+            for (int r = 0; r < row; r++)
+                for (int c = 0; c < col; c++)
+                    m.Put(r, c, buffer[r, c]);
+            return m;
         }
     }
 }

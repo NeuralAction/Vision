@@ -82,6 +82,35 @@ namespace Vision.Cv
         FLANDMARK_Model model;
 
         public Interpolation Inter { get; set; } = Interpolation.NearestNeighbor;
+
+        public static int Nose = 7;
+        public static int MouthLeft = 3;
+        public static int MouthRight = 4;
+        public static int LeftEyeLeft = 5;
+        public static int LeftEyeRight = 1;
+        public static int RightEyeLeft = 2;
+        public static int RightEyeRight = 6;
+        public static int LandmarkCenter = 0;
+        public static List<Point3D> DefaultModel
+        {
+            get
+            {
+                List<Point3D> model_points = new List<Point3D>()
+                {
+                    //nose
+                    new Point3D(0, 0, 0),
+                    //lefteye left
+                    new Point3D(-225, 170, -135),
+                    //righteye right
+                    new Point3D(225, 170, -135),
+                    //mouth left
+                    new Point3D(-150, -150, -125),
+                    //mouth right
+                    new Point3D(150, -150, -125),
+                };
+                return model_points;
+            }
+        }
         
         public Flandmark(FileNode filename)
         {

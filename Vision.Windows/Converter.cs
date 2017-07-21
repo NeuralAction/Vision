@@ -29,6 +29,21 @@ namespace Vision.Windows
             return new OpenCvSharp.Rect((int)r.Width, (int)r.Height, (int)r.Width, (int)r.Height);
         }
 
+        public static OpenCvSharp.Point ToCvPoint(this Point pt)
+        {
+            return new OpenCvSharp.Point(pt.X, pt.Y);
+        }
+
+        public static OpenCvSharp.Scalar ToCvScalar(this Scalar s)
+        {
+            return new OpenCvSharp.Scalar(s.Value1, s.Value2, s.Value3, s.Value4);
+        }
+
+        public static OpenCvSharp.Mat ToCvMat(this VMat v)
+        {
+            return (OpenCvSharp.Mat)v.Object;
+        }
+
         public static System.Drawing.Bitmap VMatToBitmap(VMat mat)
         {
             return OpenCvSharp.Extensions.BitmapConverter.ToBitmap((OpenCvSharp.Mat)mat.Object);

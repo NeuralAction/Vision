@@ -20,6 +20,8 @@ namespace Vision
             Current = core;
 
             core.Initialize();
+
+            Logger.Log($"Environment: Core: {Environment.ProcessorCount}");
         }
 
         public static void Sleep(int duration)

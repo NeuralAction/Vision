@@ -118,15 +118,17 @@ namespace Vision.Android
                 callback.PreviewUpdated += Callback_PreviewUpdated;
 
                 Hardware.Camera.Parameters parameter = Camera.GetParameters();
-                List<Hardware.Camera.Size> supportSize = parameter.SupportedPreviewSizes.ToList();
+                List<Hardware.Camera.Size> supportSize = parameter.SupportedPreviewSizes.OrderByDescending(x=>x.Width).ToList();
                 foreach (Hardware.Camera.Size size in supportSize)
                 {
                     Logger.Log(this, $"Camera Support Size: W{size.Width},H{size.Height}");
 
                     if (size.Width == 1280 && size.Height == 720)
+                    //if(size.Width == size.Height)
                     {
                         parameter.SetPreviewSize(size.Width, size.Height);
                         Logger.Log(this, $"SET Camera Size: W{size.Width},H{size.Height}");
+                        break;
                     }
                 }
 
@@ -229,7 +231,7 @@ namespace Vision.Android
             Profiler.End("CaptureCvt.CvtColor" + threadindex);
 
             Profiler.Start("CaptureCvt.Tp" + threadindex);
-            mat = mat.T();
+            OpenCV.Core.Core.Transpose(mat, mat);
             Profiler.End("CaptureCvt.Tp" + threadindex);
 
             Profiler.Start("CaptureCvt.Flip" + threadindex);

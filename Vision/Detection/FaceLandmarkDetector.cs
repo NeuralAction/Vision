@@ -23,12 +23,14 @@ namespace Vision.Detection
     public class FaceLandmarkDetector
     {
         public Interpolation Interpolation { get => detector.Inter; set => detector.Inter = value; }
+        public List<Point3D> ModelPoints { get; set; }
 
         Flandmark detector;
 
         public FaceLandmarkDetector(FileNode node)
         {
             detector = new Flandmark(node);
+            ModelPoints = Flandmark.DefaultModel;
         }
 
         public FaceLandmarkDetector(FlandmarkModelLoader loader) : this(loader.Data)
@@ -45,7 +47,7 @@ namespace Vision.Detection
         {
             if(margin == null)
             {
-                margin = new int[] { 10, 10 };
+                margin = new int[] { 3, 3 };
             }
 
             var pt = detector.Detect(mat, new int[] { (int)face.X, (int)face.Y, (int)(face.X + face.Width), (int)(face.Y + face.Height) }, margin);
@@ -57,6 +59,42 @@ namespace Vision.Detection
             }
 
             return pt;
+        }
+
+        public void Solve(VMat mat, FaceRect face)
+        {
+            if (face.Landmarks != null)
+            {
+                List<Point> image_points = new List<Point>()
+                {
+                    face.Landmarks[Flandmark.Nose],
+                    face.Landmarks[Flandmark.LeftEyeLeft],
+                    face.Landmarks[Flandmark.RightEyeRight],
+                    face.Landmarks[Flandmark.MouthLeft],
+                    face.Landmarks[Flandmark.MouthRight],
+                };
+
+                var model_points = ModelPoints;
+
+                float focal_length = (float)mat.Width;
+                Point center = new Point(mat.Width / 2, mat.Height / 2);
+                double[,] camera_matrix = new double[,]
+                {
+                { focal_length, 0, (float)center.X },
+                { 0, focal_length, (float)center.Y },
+                { 0, 0, 1 }
+                };
+                var dist_coeffs = new double[4] { 0, 0, 0, 0 };
+
+                double[] rotation_vector;
+                double[] translation_vector;
+                Core.Cv.SolvePnP(model_points, image_points, camera_matrix, dist_coeffs, out rotation_vector, out translation_vector);
+
+                face.LandmarkRotationVector = rotation_vector;
+                face.LandmarkTransformVector = translation_vector;
+                face.LandmarkDistCoeffs = dist_coeffs;
+                face.LandmarkCameraMatrix = camera_matrix;
+            }
         }
 
         public static void CalcEyes(FaceRect face)

@@ -51,6 +51,7 @@ namespace Vision.Cv
         //TODO: Image Proc Funcs. this should moved to VMAT class file.
         public abstract void DrawCircle(VMat img, Point center, double radius, Scalar color, double thickness = 1, LineType lineType = LineType.Link8, int shift = 0);
         public abstract void DrawEllipse(VMat img, Point center, Size axes, double angle, double startAngle, double endAngle, Scalar color, double thickness = 1, LineType lineType = LineType.Link8, int shift = 0);
+        public abstract void DrawLine(VMat img, Point start, Point end, Scalar color, int thickness = 1, LineType lineType = LineType.Link8, int shift = 0);
         public abstract void DrawText(VMat img, string text, Point org, FontFace fontFace, double fontScale, Scalar color, int thickness = 1, LineType lineType = LineType.Link8, bool bottomLeftOrigin = false);
         public abstract void ConvertColor(VMat src, VMat output, ColorConversion convertMode);
         public abstract void EqualizeHistogram(VMat input, VMat output);
@@ -87,5 +88,9 @@ namespace Vision.Cv
         public abstract void CloseWindow(string name);
         public abstract void CloseAllWindows();
         public abstract char WaitKey(int duration);
+
+        //solver
+        public abstract void SolvePnP(List<Point3D> model_points, List<Point> image_point, double[,] cameraMatrix, double[] distCoeffs, out double[] rvec, out double[] tvec);
+        public abstract void ProjectPoints(List<Point3D> objectPoints, double[] rvec, double[] tvec, double[,] cameraMatrix, double[] distCoeffs, out Point[] imagePoints, out double[,] jacobian);
     }
 }

@@ -58,4 +58,26 @@ namespace Vision
             return ret;
         }
     }
+
+    public class ArrayKalmanFilter
+    {
+        KalmanFilter[] filters;
+
+        public ArrayKalmanFilter(int length)
+        {
+            filters = new KalmanFilter[length];
+            for (int i = 0; i < length; i++)
+                filters[i] = new KalmanFilter();
+        }
+
+        public double[] Calculate(double[] array)
+        {
+            double[] ret = new double[array.Length];
+            for (int i = 0; i < array.Length; i++)
+            {
+                ret[i] = filters[i].Calculate(array[i]);
+            }
+            return ret;
+        }
+    }
 }

@@ -53,8 +53,8 @@ namespace Vision.Windows
             InnerCapture.Set(CaptureProperty.FourCC, (double)FourCC.MJPG);
             InnerCapture.Set(CaptureProperty.Fps, 30);
 
-            InnerCapture.Set(CaptureProperty.FrameWidth, 1920);
-            InnerCapture.Set(CaptureProperty.FrameHeight, 1080);
+            InnerCapture.Set(CaptureProperty.FrameWidth, 2048);
+            InnerCapture.Set(CaptureProperty.FrameHeight, 2048);
 
             double w = InnerCapture.Get(CaptureProperty.FrameWidth);
             double h = InnerCapture.Get(CaptureProperty.FrameHeight);
