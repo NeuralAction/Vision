@@ -112,6 +112,7 @@ namespace Vision.Android
                 Bitmap bit = Bitmap.CreateBitmap((int)img.Width, (int)img.Height, Bitmap.Config.Argb8888);
 
                 VMat mat = VMat.New();
+
                 img.ConvertColor(mat, ColorConversion.BgrToRgb);
 
                 Utils.MatToBitmap((Mat)mat.Object, bit);
@@ -120,6 +121,8 @@ namespace Vision.Android
                 {
                     imageView.SetImageBitmap(bit);
                 });
+
+                mat.Dispose();
             }
         }
 
@@ -158,24 +161,25 @@ namespace Vision.Android
                 var pt = objectPoints[i];
                 objpoints_buffer[i] = new Point3(pt.X, pt.Y, pt.Z);
             }
-            MatOfPoint3f objpoints = new MatOfPoint3f(objpoints_buffer);
-            Mat rvecMat = Converter.ToCvMat(3, 1, rvec);
-            Mat tvecMat = Converter.ToCvMat(3, 1, tvec);
-            Mat cameraMatrixMat = Converter.ToCvMat(3, 3, cameraMatrix);
-            MatOfDouble distCoeffsMat = new MatOfDouble(distCoeffs);
 
-            MatOfPoint2f imgpoints = new MatOfPoint2f();
-            Mat jacobianMat = new Mat();
-
-            OpenCV.Calib3d.Calib3d.ProjectPoints(objpoints, rvecMat, tvecMat, cameraMatrixMat, distCoeffsMat, imgpoints, jacobianMat, 0);
-
-            OpenCV.Core.Point[] ret = imgpoints.ToArray();
-            imagePoints = new Point[ret.Length];
-            for(int i=0; i < ret.Length; i++)
+            using (MatOfPoint3f objpoints = new MatOfPoint3f(objpoints_buffer))
+            using (Mat rvecMat = Converter.ToCvMat(3, 1, rvec))
+            using (Mat tvecMat = Converter.ToCvMat(3, 1, tvec))
+            using (Mat cameraMatrixMat = Converter.ToCvMat(3, 3, cameraMatrix))
+            using (MatOfDouble distCoeffsMat = new MatOfDouble(distCoeffs))
+            using (MatOfPoint2f imgpoints = new MatOfPoint2f())
+            using (Mat jacobianMat = new Mat())
             {
-                imagePoints[i] = new Point(ret[i].X, ret[i].Y);
+                OpenCV.Calib3d.Calib3d.ProjectPoints(objpoints, rvecMat, tvecMat, cameraMatrixMat, distCoeffsMat, imgpoints, jacobianMat, 0);
+
+                OpenCV.Core.Point[] ret = imgpoints.ToArray();
+                imagePoints = new Point[ret.Length];
+                for (int i = 0; i < ret.Length; i++)
+                {
+                    imagePoints[i] = new Point(ret[i].X, ret[i].Y);
+                }
+                jacobian = null;
             }
-            jacobian = null;
         }
 
         public override void SolvePnP(List<Point3D> model_points, List<Point> image_point, double[,] cameraMatrix, double[] distCoeffs, out double[] rvec, out double[] tvec)
@@ -186,25 +190,27 @@ namespace Vision.Android
                 var pt = model_points[i];
                 modelpt_buffer[i] = new Point3(pt.X, pt.Y, pt.Z);
             }
-            MatOfPoint3f modelpt = new MatOfPoint3f(modelpt_buffer);
             OpenCV.Core.Point[] imagept_buffer = new OpenCV.Core.Point[image_point.Count];
-            for(int i=0; i<imagept_buffer.Length; i++)
+            for (int i = 0; i < imagept_buffer.Length; i++)
             {
                 var pt = image_point[i];
                 imagept_buffer[i] = new OpenCV.Core.Point(pt.X, pt.Y);
             }
-            MatOfPoint2f imagept = new MatOfPoint2f(imagept_buffer);
-            Mat cameraMatrixMat = Converter.ToCvMat(3, 3, cameraMatrix);
-            MatOfDouble distCoeffsMat = new MatOfDouble(distCoeffs);
-            Mat rvecMat = new Mat();
-            Mat tvecMat = new Mat();
 
-            OpenCV.Calib3d.Calib3d.SolvePnP(modelpt, imagept, cameraMatrixMat, distCoeffsMat, rvecMat, tvecMat);
+            using (MatOfPoint3f modelpt = new MatOfPoint3f(modelpt_buffer))
+            using (MatOfPoint2f imagept = new MatOfPoint2f(imagept_buffer))
+            using (Mat cameraMatrixMat = Converter.ToCvMat(3, 3, cameraMatrix))
+            using (MatOfDouble distCoeffsMat = new MatOfDouble(distCoeffs))
+            using (Mat rvecMat = new Mat())
+            using (Mat tvecMat = new Mat())
+            {
+                OpenCV.Calib3d.Calib3d.SolvePnP(modelpt, imagept, cameraMatrixMat, distCoeffsMat, rvecMat, tvecMat);
 
-            rvec = new double[3];
-            rvecMat.Get(0, 0, rvec);
-            tvec = new double[3];
-            tvecMat.Get(0, 0, tvec);
+                rvec = new double[3];
+                rvecMat.Get(0, 0, rvec);
+                tvec = new double[3];
+                tvecMat.Get(0, 0, tvec);
+            }
         }
 
         public override void Resize(VMat input, VMat dist, Size size, double fx = 0, double fy = 0, Interpolation inter = Interpolation.Linear)
@@ -259,9 +265,11 @@ namespace Vision.Android
 
         protected override void InternalImgWrite(string name, VMat img, int quality)
         {
-            MatOfInt mat = new MatOfInt();
-            mat.Put(0, 0, new int[] { OpenCV.ImgCodecs.Imgcodecs.ImwriteJpegQuality, quality });
-            OpenCV.ImgCodecs.Imgcodecs.Imwrite(name, (Mat)img.Object, mat);
+            using (MatOfInt mat = new MatOfInt())
+            {
+                mat.Put(0, 0, new int[] { OpenCV.ImgCodecs.Imgcodecs.ImwriteJpegQuality, quality });
+                OpenCV.ImgCodecs.Imgcodecs.Imwrite(name, (Mat)img.Object, mat);
+            }
         }
     }
 }

@@ -61,6 +61,7 @@ namespace Vision.Cv
     {
         public VMat VMat { get; set; }
         public char LastKey { get; set; }
+        public bool VMatDispose { get; set; } = true;
         public bool Break { get; set; } = false;
 
         public FrameArgs(VMat mat, char k = (char)0)

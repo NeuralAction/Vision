@@ -171,19 +171,7 @@ namespace WindowsTests
             {
                 detect.Detected += (obj, arg) =>
                 {
-                    if (arg.Results != null && arg.Results.Length > 0)
-                    {
-                        string print = arg.Results.Length + " faces detected.";
-                        double sum = 0;
-                        double count = 0;
-                        foreach (var item in arg.Results[0].Children)
-                        {
-                            count++;
-                            sum += item.Width;
-                        }
-                        print += " eyes size mean: " + (sum / count).ToString("0.00");
-                        Logger.Log(print);
-                    }
+
                 };
                 detect.Run();
             }

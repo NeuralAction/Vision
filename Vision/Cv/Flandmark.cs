@@ -347,7 +347,7 @@ namespace Vision.Cv
         private void flandmark_detect(ref VMat img, int[] bbox, ref FLANDMARK_Model model, out double[] landmarks, int[] bw_margin = null)
         {
             landmarks = new double[model.data.options.M * 2];
-
+            
             if (bw_margin != null)
             {
                 model.data.options.bw_margin[0] = bw_margin[0];
@@ -359,9 +359,9 @@ namespace Vision.Cv
                 landmarks = null;
                 return;
             }
-            
-            flandmark_detect_base(model.normalizedImageFrame, model, landmarks);
 
+            flandmark_detect_base(model.normalizedImageFrame, model, landmarks);
+            
             model.sf[0] = (float)(model.bb[2] - model.bb[0]) / model.data.options.bw[0];
             model.sf[1] = (float)(model.bb[3] - model.bb[1]) / model.data.options.bw[1];
 
@@ -399,26 +399,28 @@ namespace Vision.Cv
             flag = input.Width <= 0 || input.Height <= 0 || region.Width <= 0 || region.Height <= 0;
             if (flag)
                 return false;
-
-            VMat resizedImage = VMat.New(input, region);
-
-            resizedImage.Resize(new Size(model.data.options.bw[0], model.data.options.bw[1]), 0, 0, Inter);
-            resizedImage.EqualizeHistogram();
-
-            for (int x = 0; x < model.data.options.bw[0]; ++x)
-            {
-                for (int y = 0; y < model.data.options.bw[1]; ++y)
-                {
-                    face_img[GetIndex(y, x, model.data.options.bw[1])] = resizedImage.At<byte>(y, x);
-                }
-            }
             
-            resizedImage.Dispose();
+            using (var resizedImage = VMat.New(input, region))
+            {
+                resizedImage.Resize(new Size(model.data.options.bw[0], model.data.options.bw[1]), 0, 0, Inter);
+                resizedImage.EqualizeHistogram();
+
+                for (int x = 0; x < model.data.options.bw[0]; ++x)
+                {
+                    for (int y = 0; y < model.data.options.bw[1]; ++y)
+                    {
+                        face_img[GetIndex(y, x, model.data.options.bw[1])] = resizedImage.At<byte>(y, x);
+                    }
+                }
+
+                resizedImage.Dispose();
+            }
 
             return true;
         }
 
         FLANDMARK_PSI_SPARSE[] Cached_Psi_sparse;
+        double[] q_temp = null;
         private void flandmark_detect_base(byte[] face_image, FLANDMARK_Model model, double[] landmarks)
         {
             int M = model.data.options.M;
@@ -435,7 +437,7 @@ namespace Vision.Cv
             {
                 Cached_Psi_sparse = new FLANDMARK_PSI_SPARSE[M];
             }
-
+            
             Parallel.For(0, M, new ParallelOptions() { MaxDegreeOfParallelism=M }, (idx) =>
             {
                 if (Cached_Psi_sparse[idx] == null)
@@ -445,6 +447,7 @@ namespace Vision.Cv
 
                 flandmark_get_psi_mat_sparse(ref Cached_Psi_sparse[idx], ref model, idx);
             });
+            
             //for (int idx = 0; idx < M; idx++)
             //{
             //    Psi_sparse[idx] = new FLANDMARK_PSI_SPARSE();
@@ -458,14 +461,21 @@ namespace Vision.Cv
             List<double[]> g = new List<double[]>(M - 1);
             for (int i = 0; i < M - 1; i++)
                 g.Add(null);
-
+            
             int idx_qtemp = 0;
 
             for (int idx = 0; idx < M; ++idx)
             {
                 tsize = mapTable[GetIndex(idx, 1, M)] - mapTable[GetIndex(idx, 0, M)] + 1;
 
-                double[] q_temp = new double[tsize];
+                if(q_temp == null)
+                    q_temp = new double[tsize];
+                else
+                {
+                    if (q_temp.Length < tsize)
+                        q_temp = new double[tsize];
+                }
+
                 Array.Copy(W, mapTable[GetIndex(idx, 0, M)] - 1, q_temp, 0, tsize);
 
                 // sparse dot product <W_q, PSI_q>
@@ -483,7 +493,6 @@ namespace Vision.Cv
                     }
                     q[idx][i] = dotprod;
                 }
-                q_temp = null;
 
                 if (idx > 0)
                 {
@@ -494,7 +503,7 @@ namespace Vision.Cv
             }
 
             flandmark_argmax(landmarks, ref model.data.options, mapTable, Cached_Psi_sparse, q, g);
-
+            
             g.Clear();
             q.Clear();
         }
@@ -670,15 +679,18 @@ namespace Vision.Cv
 
         private void flandmark_maximize_gdotprod(ref double maximum, ref double idx, double[] first, double[] second, int[] third, int cols, int tsize)
         {
+            double dotprod = 0;
+
             maximum = -float.MaxValue;
             idx = -1;
             for (int dp_i = 0; dp_i < cols; ++dp_i)
             {
-                double dotprod = 0.0f;
+                dotprod = 0;
                 for (int dp_j = 0; dp_j < tsize; ++dp_j)
                 {
-                    dotprod += second[dp_j] * (double)(third[dp_i * tsize + dp_j]);
+                    dotprod += second[dp_j] * third[dp_i * tsize + dp_j];
                 }
+
                 if (maximum < first[dp_i] + dotprod)
                 {
                     idx = dp_i;

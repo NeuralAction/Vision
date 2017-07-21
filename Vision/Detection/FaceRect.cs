@@ -101,8 +101,6 @@ namespace Vision.Detection
                     Core.Cv.DrawLine(frame, Landmarks[Flandmark.Nose], nose_end_point2D[0], Scalar.BgrRed, 2);
                     string msgTv = $"tv:{tv[0].ToString("0.0").PadRight(5)},{tv[1].ToString("0.0").PadRight(5)},{tv[2].ToString("0.0").PadRight(5)}";
                     string msgRv = $"rv:{rv[0].ToString("0.0").PadRight(5)},{rv[1].ToString("0.0").PadRight(5)},{rv[2].ToString("0.0").PadRight(5)}";
-                    Logger.Log(msgTv);
-                    Logger.Log(msgRv);
                     frame.DrawText(Landmarks[Flandmark.Nose].X + 35, Landmarks[Flandmark.Nose].Y, msgTv);
                     frame.DrawText(Landmarks[Flandmark.Nose].X + 35, Landmarks[Flandmark.Nose].Y + 45, msgRv);
                     Profiler.End("FaceRectProject");

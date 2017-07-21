@@ -28,7 +28,7 @@ namespace Vision.Tests
 
         public bool DrawOn { get; set; } = true;
 
-        public bool DetectGaze { get; set; } = false;
+        public bool DetectGaze { get; set; } = true;
 
         public event EventHandler<FaceDetectedArgs> Detected;
 
@@ -108,7 +108,8 @@ namespace Vision.Tests
                     Profiler.Start("DetectionALL");
 
                     Profiler.Start("DetectionFaceTaskStart");
-                    VMat cloned = mat.Clone();
+                    e.VMatDispose = false;
+                    VMat cloned = mat;
                     FaceDetectionTask = new Task(() =>
                     {
                         FaceDetectProc(cloned);
@@ -134,6 +135,18 @@ namespace Vision.Tests
                 case 'e':
                     Core.Cv.CloseAllWindows();
                     e.Break = true;
+                    break;
+                case 'l':
+                    detector.LandmarkDetect = !detector.LandmarkDetect;
+                    break;
+                case 's':
+                    detector.Smooth = !detector.Smooth;
+                    break;
+                case 'g':
+                    DetectGaze = !DetectGaze;
+                    break;
+                case ' ':
+                    Core.Cv.WaitKey(0);
                     break;
                 default:
                     break;

@@ -244,6 +244,8 @@ namespace Vision.Android
             Profiler.End("CaptureCvt" + threadindex);
             capturedBuffer = mat;
 
+            var args = new FrameArgs(new AndroidMat(mat));
+
             if (MultiThread)
             {
                 lock (capturedBufferLocker)
@@ -259,11 +261,25 @@ namespace Vision.Android
 
                     lastFrame = frameIndex;
                 }
-                FrameReady?.Invoke(this, new FrameArgs(new AndroidMat(capturedBuffer)));
+                FrameReady?.Invoke(this, args);
             }
             else
             {
-                FrameReady?.Invoke(this, new FrameArgs(new AndroidMat(capturedBuffer)));
+                FrameReady?.Invoke(this, args);
+            }
+
+            if (args.VMatDispose)
+            {
+                mat.Release();
+                mat.Dispose();
+                mat = null;
+            }
+
+            if (args.Break)
+            {
+                Dispose();
+                Stop();
+                return;
             }
         }
 

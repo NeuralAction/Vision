@@ -164,27 +164,34 @@ namespace Vision.Windows
             char lastkey = (char)0;
             while (true)
             {
-                using (Mat frame = new Mat())
+                Mat frame = new Mat();
+                if (CaptureRead(frame))
                 {
-                    if (CaptureRead(frame))
-                    {
-                        FrameArgs arg = new FrameArgs(new WindowsMat(frame), lastkey);
-                        FrameReady?.Invoke(this, arg);
-                        if (arg.Break)
-                        {
-                            Dispose();
-                            Stop();
-                            return;
-                        }
+                    FrameArgs arg = new FrameArgs(new WindowsMat(frame), lastkey);
+                    FrameReady?.Invoke(this, arg);
 
-                        int sleep = (int)Math.Round(Math.Max(1, Math.Min(1000, (1000 / fps) - sw.ElapsedMilliseconds + lastMs)));
-                        lastMs = sw.ElapsedMilliseconds;
-                        lastkey = Core.Cv.WaitKey(sleep);
-                    }
-                    else
+                    if (arg.VMatDispose)
                     {
-                        lastkey = Core.Cv.WaitKey(1);
+                        frame.Dispose();
+                        frame = null;
                     }
+
+                    if (arg.Break)
+                    {
+                        Dispose();
+                        Stop();
+                        return;
+                    }
+
+                    int sleep = (int)Math.Round(Math.Max(1, Math.Min(1000, (1000 / fps) - sw.ElapsedMilliseconds + lastMs)));
+                    lastMs = sw.ElapsedMilliseconds;
+                    lastkey = Core.Cv.WaitKey(1);
+                }
+                else
+                {
+                    frame.Dispose();
+                    frame = null;
+                    lastkey = Core.Cv.WaitKey(1);
                 }
             }
         }

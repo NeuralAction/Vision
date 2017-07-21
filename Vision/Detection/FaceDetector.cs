@@ -12,7 +12,7 @@ namespace Vision.Detection
         public double FaceScaleFactor { get; set; } = 1.2;
         public double FaceMinFactor { get; set; } = 0.15;
         public double FaceMaxFactor { get; set; } = 1;
-        public int MaxSize { get; set; } = 100;
+        public int MaxSize { get; set; } = 180;
         
         public bool EyesDetect { get; set; } = true;
         public bool EyesUseLandmark { get; set; } = true;
@@ -62,8 +62,7 @@ namespace Vision.Detection
                 VMat frame_face = null;
                 if(scaleFactor != 1)
                 {
-                    frame_face = VMat.New();
-                    frame_gray.CopyTo(frame_face);
+                    frame_face = frame_gray.Clone();
                     frame_gray.ClampSize(MaxSize, Interpolation);
                 }
                 else
@@ -75,7 +74,7 @@ namespace Vision.Detection
 
                 Profiler.Start("DetectionFace");
                 double frameMinSize = Math.Min(frame_gray.Width, frame_gray.Height);
-                Rect[] faces = FaceCascade.DetectMultiScale(frame_gray, FaceScaleFactor, 3, HaarDetectionType.ScaleImage, new Size(frameMinSize * FaceMinFactor), new Size(frameMinSize * FaceMaxFactor));
+                Rect[] faces = FaceCascade.DetectMultiScale(frame_gray, FaceScaleFactor, 2, HaarDetectionType.ScaleImage, new Size(frameMinSize * FaceMinFactor), new Size(frameMinSize * FaceMaxFactor));
                 List<FaceRect> FaceList = new List<FaceRect>();
                 Profiler.End("DetectionFace");
                 
@@ -93,7 +92,7 @@ namespace Vision.Detection
                     if (debug)
                         faceRect.Draw(frame, drawLandmarks: true);
 
-                    if (LandmarkDetect || EyesUseLandmark)
+                    if (LandmarkDetect && EyesUseLandmark)
                     {
                         Profiler.Start("DetectionLandmark");
                         Landmark.Interpolation = Interpolation;
@@ -105,8 +104,6 @@ namespace Vision.Detection
                         if (LandmarkSolve)
                         {
                             Landmark.Solve(frame_face, faceRect);
-                            if (Smooth)
-                                smoothCurrent.SmoothVectors(faceRect);
                         }
                         Profiler.End("DetectionLandmarkSolve");
 
@@ -177,8 +174,6 @@ namespace Vision.Detection
     public class FaceSmoother
     {
         PointKalmanFilter[] LandmarkFilter;
-        ArrayKalmanFilter TvecFilter;
-        ArrayKalmanFilter RvecFilter;
 
         public FaceSmoother()
         {
@@ -187,9 +182,6 @@ namespace Vision.Detection
             {
                 LandmarkFilter[i] = new PointKalmanFilter();
             }
-
-            TvecFilter = new ArrayKalmanFilter(3);
-            RvecFilter = new ArrayKalmanFilter(3);
         }
 
         public void SmoothLandmark(FaceRect face)
@@ -200,17 +192,6 @@ namespace Vision.Detection
                 {
                     face.Landmarks[i] = LandmarkFilter[i].Calculate(face.Landmarks[i]);
                 }
-            }
-        }
-
-        public void SmoothVectors(FaceRect face)
-        {
-            return;
-
-            if (face.LandmarkRotationVector != null && face.LandmarkRotationVector != null)
-            {
-                face.LandmarkTransformVector = TvecFilter.Calculate(face.LandmarkTransformVector);
-                face.LandmarkRotationVector = RvecFilter.Calculate(face.LandmarkRotationVector);
             }
         }
     }

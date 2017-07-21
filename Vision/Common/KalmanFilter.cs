@@ -72,6 +72,9 @@ namespace Vision
 
         public double[] Calculate(double[] array)
         {
+            if (array.Length != filters.Length)
+                throw new ArgumentOutOfRangeException();
+
             double[] ret = new double[array.Length];
             for (int i = 0; i < array.Length; i++)
             {

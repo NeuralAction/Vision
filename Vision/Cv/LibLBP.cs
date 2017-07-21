@@ -10,7 +10,7 @@ namespace Vision.Cv
     {
         public static void PyrFeaturesSparse(ref UInt32[] vec, UInt32 vecNDim, UInt32[] imgData, UInt16 imgNumRows, UInt16 imgNumCols, UInt32 vecStartInd = 0)
         {
-            UInt32 offset, ww, hh, x, y, center, j, idx;
+            uint offset, ww, hh, x, y, center, j, idx, x1hh, x11hh, xhh, y1, y11;
             byte pattern;
 
             idx = 0;
@@ -23,16 +23,21 @@ namespace Vision.Cv
                 {
                     for (y = 1; y < hh - 1; y++)
                     {
+                        xhh = x * imgNumRows;
+                        x1hh = (x + 1) * imgNumRows;
+                        x11hh = (x - 1) * imgNumRows;
+                        y1 = y + 1;
+                        y11 = y - 1;
                         pattern = 0;
-                        center = imgData[GetIndex(y, x, imgNumRows)];
-                        if (imgData[GetIndex(y - 1, x - 1, imgNumRows)] < center) pattern = (byte)(pattern | 0x01);
-                        if (imgData[GetIndex(y - 1, x, imgNumRows)] < center) pattern = (byte)(pattern | 0x02);
-                        if (imgData[GetIndex(y - 1, x + 1, imgNumRows)] < center) pattern = (byte)(pattern | 0x04);
-                        if (imgData[GetIndex(y, x - 1, imgNumRows)] < center) pattern = (byte)(pattern | 0x08);
-                        if (imgData[GetIndex(y, x + 1, imgNumRows)] < center) pattern = (byte)(pattern | 0x10);
-                        if (imgData[GetIndex(y + 1, x - 1, imgNumRows)] < center) pattern = (byte)(pattern | 0x20);
-                        if (imgData[GetIndex(y + 1, x, imgNumRows)] < center) pattern = (byte)(pattern | 0x40);
-                        if (imgData[GetIndex(y + 1, x + 1, imgNumRows)] < center) pattern = (byte)(pattern | 0x80);
+                        center = imgData[y + xhh];
+                        if (imgData[y11 + x11hh] < center) pattern |= 0x01;
+                        if (imgData[y11 + xhh] < center) pattern |= 0x02;
+                        if (imgData[y11 + x1hh] < center) pattern |= 0x04;
+                        if (imgData[y + x11hh] < center) pattern |= 0x08;
+                        if (imgData[y + x1hh] < center) pattern |= 0x10;
+                        if (imgData[y1 + x11hh] < center) pattern |= 0x20;
+                        if (imgData[y1 + xhh] < center) pattern |= 0x40;
+                        if (imgData[y1 + x1hh] < center) pattern |= 0x80;
 
                         vec[vecStartInd + idx++] = offset + pattern;
                         offset += 256;
@@ -47,16 +52,22 @@ namespace Vision.Cv
                 ww = ww / 2;
 
                 for (x = 0; x < ww; x++)
+                {
                     for (j = 0; j < hh; j++)
-                        imgData[GetIndex(j, x, imgNumRows)] = imgData[GetIndex(j, 2 * x, imgNumRows)] +
-                          imgData[GetIndex(j, 2 * x + 1, imgNumRows)];
+                    {
+                        imgData[GetIndex(j, x, imgNumRows)] = imgData[GetIndex(j, 2 * x, imgNumRows)] + imgData[GetIndex(j, 2 * x + 1, imgNumRows)];
+                    }
+                }
 
                 hh = hh / 2;
 
                 for (y = 0; y < hh; y++)
+                {
                     for (j = 0; j < ww; j++)
-                        imgData[GetIndex(y, j, imgNumRows)] = imgData[GetIndex(2 * y, j, imgNumRows)] +
-                          imgData[GetIndex(2 * y + 1, j, imgNumRows)];
+                    {
+                        imgData[GetIndex(y, j, imgNumRows)] = imgData[GetIndex(2 * y, j, imgNumRows)] + imgData[GetIndex(2 * y + 1, j, imgNumRows)];
+                    }
+                }
             }
         }
 
