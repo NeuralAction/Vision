@@ -18,6 +18,8 @@ namespace Vision
         public static Scalar BgrYellow => new Scalar(0, 255, 255);
         public static Scalar BgrCyan => new Scalar(255, 255, 0);
 
+        private static Random rand = new Vision.Random();
+
         public double Value1;
         public double Value2;
         public double Value3;
@@ -34,6 +36,11 @@ namespace Vision
         public static Scalar All(double val)
         {
             return new Scalar(val, val, val, val);
+        }
+
+        public static Scalar Random()
+        {
+            return new Scalar(rand.NextDouble(0, 255), rand.NextDouble(0, 255), rand.NextDouble(0, 255));
         }
     }
 }

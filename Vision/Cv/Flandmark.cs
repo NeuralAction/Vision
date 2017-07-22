@@ -83,14 +83,19 @@ namespace Vision.Cv
 
         public Interpolation Inter { get; set; } = Interpolation.NearestNeighbor;
 
-        public static int Nose = 7;
-        public static int MouthLeft = 3;
-        public static int MouthRight = 4;
-        public static int LeftEyeLeft = 5;
-        public static int LeftEyeRight = 1;
-        public static int RightEyeLeft = 2;
-        public static int RightEyeRight = 6;
+        public static int LandmarkNose = 7;
+        public static int LandmarkMouthLeft = 3;
+        public static int LandmarkMouthRight = 4;
+        public static int LandmarkLeftEyeLeft = 5;
+        public static int LandmarkLeftEyeRight = 1;
+        public static int LandmarkRightEyeLeft = 2;
+        public static int LandmarkRightEyeRight = 6;
         public static int LandmarkCenter = 0;
+        public static int ModelNose = 0;
+        public static int ModelLeftEyeLeft = 1;
+        public static int ModelRightEyeRight = 2;
+        public static int ModelMouthLeft = 3;
+        public static int ModelMouthRight = 4;
         public static List<Point3D> DefaultModel
         {
             get
@@ -120,7 +125,6 @@ namespace Vision.Cv
             Stream fin = filename.Open();
             StreamReader reader = new StreamReader(fin);
 
-            // allocate memory for FLANDMARK_Model
             FLANDMARK_Model tst = new FLANDMARK_Model();
 
             fin.Position = 0;

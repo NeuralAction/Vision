@@ -43,6 +43,18 @@ namespace Vision
 
             return x;
         }
+
+        public KalmanFilter Clone()
+        {
+            KalmanFilter filter = new KalmanFilter();
+            filter.x = x;
+            filter.z = z;
+            filter.P = P;
+            filter.K = K;
+            filter.init = init;
+
+            return filter;
+        }
     }
 
     public class PointKalmanFilter
@@ -81,6 +93,14 @@ namespace Vision
                 ret[i] = filters[i].Calculate(array[i]);
             }
             return ret;
+        }
+
+        public ArrayKalmanFilter Clone()
+        {
+            ArrayKalmanFilter filter = new ArrayKalmanFilter(filters.Length);
+            for (int i = 0; i < filters.Length; i++)
+                filter.filters[i] = filters[i].Clone();
+            return filter;
         }
     }
 }

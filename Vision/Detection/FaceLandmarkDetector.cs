@@ -47,7 +47,7 @@ namespace Vision.Detection
         {
             if(margin == null)
             {
-                margin = new int[] { 7, 7 };
+                margin = new int[] { 10, 10 };
             }
 
             var pt = detector.Detect(mat, new int[] { (int)face.X, (int)face.Y, (int)(face.X + face.Width), (int)(face.Y + face.Height) }, margin);
@@ -67,11 +67,11 @@ namespace Vision.Detection
             {
                 List<Point> image_points = new List<Point>()
                 {
-                    face.Landmarks[Flandmark.Nose],
-                    face.Landmarks[Flandmark.LeftEyeLeft],
-                    face.Landmarks[Flandmark.RightEyeRight],
-                    face.Landmarks[Flandmark.MouthLeft],
-                    face.Landmarks[Flandmark.MouthRight],
+                    face.Landmarks[Flandmark.LandmarkNose],
+                    face.Landmarks[Flandmark.LandmarkLeftEyeLeft],
+                    face.Landmarks[Flandmark.LandmarkRightEyeRight],
+                    face.Landmarks[Flandmark.LandmarkMouthLeft],
+                    face.Landmarks[Flandmark.LandmarkMouthRight],
                 };
 
                 var model_points = ModelPoints;
@@ -117,6 +117,7 @@ namespace Vision.Detection
             center.Y = center.Y / 2 - face.Y;
             double diff = Math.Abs(landmark[0].X - landmark[1].X);
             double width = face.Width * 0.25;
+            center.Y -= width * 0.07;
             EyeRect r = new EyeRect(face, new Rect(center.X - width / 2, center.Y - width / 2, width, width));
             return r;
         }

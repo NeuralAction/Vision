@@ -88,7 +88,13 @@ namespace Vision.Detection
                 if (LandmarkTransformVector != null && LandmarkRotationVector != null && LandmarkDistCoeffs != null && LandmarkCameraMatrix != null)
                 {
                     Profiler.Start("FaceRectProject");
-                    List<Point3D> nose_end_point3D = new List<Point3D>() { new Point3D(0, 0, 450) };
+                    List<Point3D> nose_end_point3D = new List<Point3D>()
+                    {
+                        new Point3D(450,0,0),
+                        new Point3D(0,450,0),
+                        new Point3D(0,0,450),
+                    };
+
                     double[] rv = LandmarkRotationVector;
                     double[] tv = LandmarkTransformVector;
                     double[] dc = LandmarkDistCoeffs;
@@ -98,11 +104,15 @@ namespace Vision.Detection
                     double[,] jacobia;
                     Core.Cv.ProjectPoints(nose_end_point3D, rv, tv, cm, dc, out nose_end_point2D, out jacobia);
 
-                    Core.Cv.DrawLine(frame, Landmarks[Flandmark.Nose], nose_end_point2D[0], Scalar.BgrRed, 2);
+                    Point start_nose = Landmarks[Flandmark.LandmarkNose];
+                    Core.Cv.DrawLine(frame, start_nose, nose_end_point2D[0], Scalar.BgrRed, 2);
+                    Core.Cv.DrawLine(frame, start_nose, nose_end_point2D[1], Scalar.BgrGreen, 2);
+                    Core.Cv.DrawLine(frame, start_nose, nose_end_point2D[2], Scalar.BgrBlue, 2);
+
                     string msgTv = $"tv:{tv[0].ToString("0.0").PadRight(5)},{tv[1].ToString("0.0").PadRight(5)},{tv[2].ToString("0.0").PadRight(5)}";
                     string msgRv = $"rv:{rv[0].ToString("0.0").PadRight(5)},{rv[1].ToString("0.0").PadRight(5)},{rv[2].ToString("0.0").PadRight(5)}";
-                    frame.DrawText(Landmarks[Flandmark.Nose].X + 35, Landmarks[Flandmark.Nose].Y, msgTv);
-                    frame.DrawText(Landmarks[Flandmark.Nose].X + 35, Landmarks[Flandmark.Nose].Y + 45, msgRv);
+                    frame.DrawText(Landmarks[Flandmark.LandmarkNose].X + 35, Landmarks[Flandmark.LandmarkNose].Y, msgTv);
+                    frame.DrawText(Landmarks[Flandmark.LandmarkNose].X + 35, Landmarks[Flandmark.LandmarkNose].Y + 45, msgRv);
                     Profiler.End("FaceRectProject");
                 }
             }

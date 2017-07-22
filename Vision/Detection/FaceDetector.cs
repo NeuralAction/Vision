@@ -17,7 +17,7 @@ namespace Vision.Detection
         public bool EyesDetect { get; set; } = true;
         public bool EyesUseLandmark { get; set; } = true;
 
-        public double EyesScaleFactor { get; set; } = 1.2;
+        public double EyesScaleFactor { get; set; } = 1.3;
         public double EyesMinFactor { get; set; } = 0.2;
         public double EyesMaxFactor { get; set; } = 0.5;
         public int MaxFaceSize { get; set; } = 100;
@@ -25,7 +25,7 @@ namespace Vision.Detection
         public bool LandmarkDetect { get; set; } = true;
         public bool LandmarkSolve { get; set; } = true;
 
-        public bool Smooth { get; set; } = true;
+        public bool Smooth { get; set; } = false;
         
         public Interpolation Interpolation { get; set; } = Interpolation.NearestNeighbor;
 
@@ -92,7 +92,7 @@ namespace Vision.Detection
                     if (debug)
                         faceRect.Draw(frame, drawLandmarks: true);
 
-                    if (LandmarkDetect && EyesUseLandmark)
+                    if (LandmarkDetect || EyesUseLandmark)
                     {
                         Profiler.Start("DetectionLandmark");
                         Landmark.Interpolation = Interpolation;
@@ -104,6 +104,8 @@ namespace Vision.Detection
                         if (LandmarkSolve)
                         {
                             Landmark.Solve(frame_face, faceRect);
+                            if (Smooth)
+                                smoothCurrent.SmoothVector(faceRect);
                         }
                         Profiler.End("DetectionLandmarkSolve");
 
@@ -123,7 +125,7 @@ namespace Vision.Detection
                                 double eyeScale = faceROI.ClampSize(MaxFaceSize, Interpolation);
                                 double faceMinSize = Math.Min(faceROI.Width, faceROI.Height);
                                 Profiler.Start("DetectionEye");
-                                Rect[] eyes = EyesCascade.DetectMultiScale(faceROI, EyesScaleFactor, 1, HaarDetectionType.ScaleImage, new Size(faceMinSize * EyesMinFactor), new Size(faceMinSize * EyesMaxFactor));
+                                Rect[] eyes = EyesCascade.DetectMultiScale(faceROI, EyesScaleFactor, 2, HaarDetectionType.ScaleImage, new Size(faceMinSize * EyesMinFactor), new Size(faceMinSize * EyesMaxFactor));
 
                                 foreach (Rect eye in eyes)
                                 {
@@ -174,6 +176,7 @@ namespace Vision.Detection
     public class FaceSmoother
     {
         PointKalmanFilter[] LandmarkFilter;
+        ArrayKalmanFilter TranslateFilter;
 
         public FaceSmoother()
         {
@@ -182,6 +185,8 @@ namespace Vision.Detection
             {
                 LandmarkFilter[i] = new PointKalmanFilter();
             }
+
+            TranslateFilter = new ArrayKalmanFilter(3);
         }
 
         public void SmoothLandmark(FaceRect face)
@@ -192,6 +197,39 @@ namespace Vision.Detection
                 {
                     face.Landmarks[i] = LandmarkFilter[i].Calculate(face.Landmarks[i]);
                 }
+            }
+        }
+
+        private double translateLimit = 5000;
+        public void SmoothVector(FaceRect face)
+        {
+            if(face.LandmarkTransformVector!=null && face.LandmarkRotationVector != null)
+            {
+                if(face.LandmarkTransformVector[2] < 0)
+                {
+                    ArrayMul(face.LandmarkTransformVector, -1);
+                }
+
+                double min = face.LandmarkTransformVector.Min();
+                double max = face.LandmarkTransformVector.Max();
+                double absMax = Math.Max(Math.Abs(min), Math.Abs(max));
+                if(absMax > translateLimit)
+                {
+                    ArrayMul(face.LandmarkTransformVector, translateLimit/absMax);
+                    face.LandmarkTransformVector = TranslateFilter.Clone().Calculate(face.LandmarkTransformVector);
+                }
+                else
+                {
+                    face.LandmarkTransformVector = TranslateFilter.Calculate(face.LandmarkTransformVector);
+                }
+            }
+        }
+
+        private void ArrayMul(double[] array, double right)
+        {
+            for(int i=0; i<array.Length; i++)
+            {
+                array[i] *= right;
             }
         }
     }

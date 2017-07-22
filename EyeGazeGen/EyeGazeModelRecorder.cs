@@ -158,6 +158,7 @@ namespace Vision.Detection
                 }
 
                 mat = e.VMat;
+                e.VMatDispose = false;
                 FrameReady?.Invoke(this, mat);
             }
         }

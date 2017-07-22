@@ -59,8 +59,6 @@
     <Compile Include="Cv\LibLBP.cs" />
     <Compile Include="Cv\MatType.cs" />
     <Compile Include="Detection\EyeGazeDetector.cs" />
-    <Compile Include="Detection\EyeGazeModel.cs" />
-    <Compile Include="Detection\EyeGazeModelRecorder.cs" />
     <Compile Include="Detection\FaceDetectorXmlLoader.cs" />
     <Compile Include="Cv\ColorConversion.cs" />
     <Compile Include="Cv\Cv.cs" />

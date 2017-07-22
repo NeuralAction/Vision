@@ -22,14 +22,7 @@ namespace Vision.Android
             get { return InnerMat; }
             set { throw new NotImplementedException(); }
         }
-        private Mat innermat;
-        public Mat InnerMat { get => innermat; set
-            {
-                innermat = value;
-                if (value == null)
-                    Logger.Log("nulled");
-            }
-        }
+        public Mat InnerMat;
 
         public AndroidMat()
         {

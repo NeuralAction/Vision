@@ -28,7 +28,7 @@ namespace Vision.Tests
 
         public bool DrawOn { get; set; } = true;
 
-        public bool DetectGaze { get; set; } = true;
+        public bool DetectGaze { get; set; } = false;
 
         public event EventHandler<FaceDetectedArgs> Detected;
 
