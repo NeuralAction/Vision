@@ -179,5 +179,15 @@ namespace Vision.Android
 
             return (T)Convert.ChangeType(temp[0], typeof(T));
         }
+
+        protected override int GetCols()
+        {
+            return InnerMat.Cols();
+        }
+
+        protected override int GetRows()
+        {
+            return InnerMat.Rows();
+        }
     }
 }

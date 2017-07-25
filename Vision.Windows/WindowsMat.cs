@@ -164,5 +164,15 @@ namespace Vision.Windows
         {
             return InnerMat.At<T>(d1, d2);
         }
+
+        protected override int GetCols()
+        {
+            return InnerMat.Cols;
+        }
+
+        protected override int GetRows()
+        {
+            return InnerMat.Rows;
+        }
     }
 }

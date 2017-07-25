@@ -19,7 +19,6 @@ namespace Vision.Windows
 
             TensorFlowSharp.Windows.NativeBinding.Init();
             TensorFlow.NativeBinding.PrintFunc = new TensorFlow.NativeBinding.Print((s) => { Logger.Log(s); });
-            Logger.Log("TensorFlow Version: " + TensorFlow.TFCore.Version);
         }
 
         protected override void InternalSleep(int duration)

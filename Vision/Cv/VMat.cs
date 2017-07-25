@@ -9,21 +9,35 @@ namespace Vision.Cv
 {
     public abstract class VMat : VirtualObject, IDisposable
     {
-        public virtual bool IsEmpty { get => Object == null || Empty(); }
+        public virtual bool IsEmpty => Object == null || Empty();
+        public virtual Size Size => (Object == null) ? null : GetSize();
+        public virtual double Width => Size.Width;
+        public virtual double Height => Size.Height;
+        public virtual int Channel => GetChannel();
+        public virtual int Cols => GetCols();
+        public virtual int Rows => GetRows();
+        public virtual long Total => GetTotal();
 
-        public virtual Size Size { get => (Object == null) ? null : GetSize(); }
-
-        public virtual double Width { get => Size.Width;  }
-
-        public virtual double Height { get => Size.Height; }
-
-        public virtual int Channel { get => GetChannel(); }
-
-        public virtual long Total { get => GetTotal(); }
+        #region Init
 
         public static VMat New()
         {
             return Core.Cv.CreateMat();
+        }
+
+        public static VMat New(Size size)
+        {
+            return Core.Cv.CreateMat(size);
+        }
+
+        public static VMat New(Size size, MatType type)
+        {
+            return Core.Cv.CreateMat(size, type);
+        }
+
+        public static VMat New(Size size, MatType type, Array buffer)
+        {
+            return Core.Cv.CreateMat(size, type, buffer);
         }
 
         public static VMat New(VMat Mat, Rect Rect, bool clamp = false)
@@ -35,6 +49,10 @@ namespace Vision.Cv
 
             return Core.Cv.CreateMat(Mat, new Rect(clmpX, clmpY, clmpW, clmpH));
         }
+
+        #endregion Init
+
+        #region ImgProc
 
         public void ConvertColor(VMat output, ColorConversion convert)
         {
@@ -145,6 +163,10 @@ namespace Vision.Cv
             Core.Cv.Resize(this, output, size, fx, fy, inter);
         }
 
+        #endregion ImgProc
+
+        #region Draw
+
         public void DrawText(double x, double y, string text)
         {
             DrawText(x, y, text, Scalar.BgrWhite);
@@ -165,14 +187,59 @@ namespace Vision.Cv
             Core.Cv.DrawText(this, txt, org, FontFace.HersheyPlain, 2.5, color, 2, LineType.Link4);
         }
 
-        public void Transpose()
+        public void DrawRectangle(Rect rect, Scalar color, int thickness = 1, LineType lineType = LineType.Link8, int shift = 0)
         {
-            Core.Cv.Transpose(this, this);
+            Core.Cv.DrawRectangle(this, rect, color, thickness, lineType, shift);
         }
+
+        public void DrawCircle(Point center, double radius, Scalar color, double thickness = 1, LineType lineType = LineType.Link8, int shift = 0)
+        {
+            Core.Cv.DrawCircle(this, center, radius, color, thickness, lineType, shift);
+        }
+
+        public void DrawEllipse(Point center, Size axes, double angle, double startAngle, double endAngle, Scalar color, double thickness = 1, LineType lineType = LineType.Link8, int shift = 0)
+        {
+            Core.Cv.DrawEllipse(this, center, axes, angle, startAngle, endAngle, color, thickness, lineType, shift);
+        }
+
+        #endregion Draw
+
+        #region Math
+
+        public VMat Transpose()
+        {
+            return Core.Cv.Transpose(this);
+        }
+
+        public VMat T()
+        {
+            return Transpose();
+        }
+
+        public VMat Inv()
+        {
+            return Core.Cv.Inv(this);
+        }
+
+        public VMat Mul(VMat right)
+        {
+            return Core.Cv.Mul(this, right);
+        }
+        
+        public static VMat operator * (VMat left, VMat right)
+        {
+            return Core.Cv.Mul(left, right);
+        }
+
+        #endregion Math
+
+        #region Misc
 
         protected abstract Size GetSize();
         protected abstract bool Empty();
         protected abstract int GetChannel();
+        protected abstract int GetCols();
+        protected abstract int GetRows();
         protected abstract long GetTotal();
 
         public abstract T At<T>(int d1, int d2) where T : struct;
@@ -181,5 +248,24 @@ namespace Vision.Cv
         public abstract float[] GetArray(float[] buffer = null);
         public abstract VMat Clone();
         public abstract void Dispose();
+
+        public string Print()
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.Append("{ ");
+            for (int r = 0; r < Rows; r++)
+            {
+                builder.Append("{ ");
+                for (int c = 0; c < Cols; c++)
+                {
+                    builder.Append($"{At<double>(r, c)}, ");
+                }
+                builder.AppendLine("}");
+            }
+            builder.AppendLine("}");
+            return builder.ToString();
+        }
+
+        #endregion Misc
     }
 }

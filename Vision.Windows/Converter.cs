@@ -26,7 +26,7 @@ namespace Vision.Windows
 
         public static OpenCvSharp.Rect ToCvRect(this Rect r)
         {
-            return new OpenCvSharp.Rect((int)r.Width, (int)r.Height, (int)r.Width, (int)r.Height);
+            return new OpenCvSharp.Rect((int)r.X, (int)r.Y, (int)r.Width, (int)r.Height);
         }
 
         public static OpenCvSharp.Point ToCvPoint(this Point pt)
@@ -42,6 +42,11 @@ namespace Vision.Windows
         public static OpenCvSharp.Mat ToCvMat(this VMat v)
         {
             return (OpenCvSharp.Mat)v.Object;
+        }
+
+        public static VMat ToVMat(this OpenCvSharp.Mat v)
+        {
+            return new WindowsMat(v);
         }
 
         public static System.Drawing.Bitmap VMatToBitmap(VMat mat)

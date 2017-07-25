@@ -52,12 +52,14 @@
     <Compile Include="Common\Rotation.cs" />
     <Compile Include="Common\Storage.cs" />
     <Compile Include="Common\Util.cs" />
+    <Compile Include="Cv\BorderTypes.cs" />
     <Compile Include="Cv\Capture.cs" />
     <Compile Include="Cv\CascadeClassifier.cs" />
     <Compile Include="Cv\CLAHE.cs" />
     <Compile Include="Cv\Flandmark.cs" />
     <Compile Include="Cv\LibLBP.cs" />
     <Compile Include="Cv\MatType.cs" />
+    <Compile Include="Cv\RotationMatrixTransform.cs" />
     <Compile Include="Detection\EyeGazeDetector.cs" />
     <Compile Include="Detection\FaceDetectorXmlLoader.cs" />
     <Compile Include="Cv\ColorConversion.cs" />
@@ -93,6 +95,7 @@
     <Compile Include="Tests\SimpleCapture.cs" />
     <Compile Include="Tests\SimpleVideoPlayer.cs" />
     <Compile Include="Core.cs" />
+    <Compile Include="Tests\ThreeDimTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Cv\haarcascade_eye_tree_eyeglasses.xml" />

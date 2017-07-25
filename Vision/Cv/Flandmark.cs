@@ -9,77 +9,62 @@ namespace Vision.Cv
 {
     public class Flandmark
     {
-        enum EError_T
+        public class FlandmarkPsiG
         {
-            NO_ERR = 0,
-            ERROR_M = 1,
-            ERROR_BW = 2,
-            ERROR_BW_MARGIN = 3,
-            ERROR_W = 4,
-            ERROR_DATA_IMAGES = 5,
-            ERROR_DATA_MAPTABLE = 6,
-            ERROR_DATA_LBP = 7,
-            ERROR_DATA_OPTIONS_S = 8,
-            ERROR_DATA_OPTIONS_PSIG = 9,
-            UNKNOWN_ERROR = 100
-        };
-
-        class FLANDMARK_PSIG
-        {
-            public int[] disp;
-            public int ROWS, COLS;
+            public int[] Disp;
+            public int Rows, Cols;
         }
 
-        class FLANDMARK_Options
+        public class FlandmarkOptions
         {
             public byte M;
             public int[] S;
             public int[] bw = new int[2];
             public int[] bw_margin = new int[2];
-            public FLANDMARK_PSIG[] PsiGS0, PsiGS1, PsiGS2;
-            public int[] PSIG_ROWS = new int[3];
-            public int[] PSIG_COLS = new int[3];
+            public FlandmarkPsiG[] PsiGS0, PsiGS1, PsiGS2;
+            public int[] PsiGRows = new int[3];
+            public int[] PsiGCols = new int[3];
         }
 
-        class FLANDMARK_LBP
+        public class FlandmarkLBP
         {
-            public int[] winSize = new int[2];
-            public byte hop;
-            public uint[] wins;
-            public uint WINS_ROWS, WINS_COLS;
+            public int[] WinSize = new int[2];
+            public byte HOP;
+            public uint[] Wins;
+            public uint WinsRows, WinsCols;
         }
 
-        class FLANDMARK_Data
+        public class FlandmarkData
         {
-            public FLANDMARK_LBP[] lbp;
-            public int[] imSize = new int[2];
-            public int[] mapTable;
-            public FLANDMARK_Options options = new FLANDMARK_Options();
+            public FlandmarkLBP[] LBP;
+            public int[] ImSize = new int[2];
+            public int[] MapTable;
+            public FlandmarkOptions Options = new FlandmarkOptions();
         }
 
-        class FLANDMARK_Model
+        public class FlandmarkModel
         {
             public double[] W;
-            public int W_ROWS, W_COLS;
-            public FLANDMARK_Data data = new FLANDMARK_Data();
-            public byte[] normalizedImageFrame;
+            public int WRows, WCols;
+            public FlandmarkData Data = new FlandmarkData();
+            public byte[] NormalizedImageFrame;
             public double[] bb;
             public float[] sf;
         }
 
-        class FLANDMARK_PSI
+        public class FlandmarkPSI
         {
-            public char[] data;
-            public uint PSI_ROWS, PSI_COLS;
+            public char[] Data;
+            public uint PsiRows, PsiCols;
         }
 
-        class FLANDMARK_PSI_SPARSE
+        public class FlandmarkPSISparse
         {
-            public uint[] idxs;
-            public uint PSI_ROWS, PSI_COLS;
+            public uint[] Idxs;
+            public uint PsiRows, PsiCols;
         }
 
-        FLANDMARK_Model model;
+        public FlandmarkModel Model;
 
         public Interpolation Inter { get; set; } = Interpolation.NearestNeighbor;
 
@@ -91,32 +76,35 @@ namespace Vision.Cv
         public static int LandmarkRightEyeLeft = 2;
         public static int LandmarkRightEyeRight = 6;
         public static int LandmarkCenter = 0;
+
         public static int ModelNose = 0;
         public static int ModelLeftEyeLeft = 1;
         public static int ModelRightEyeRight = 2;
         public static int ModelMouthLeft = 3;
         public static int ModelMouthRight = 4;
+
         public static List<Point3D> DefaultModel
         {
             get
             {
-                List<Point3D> model_points = new List<Point3D>()
+                return new List<Point3D>()
                 {
                     //nose
                     new Point3D(0, 0, 0),
                     //lefteye left
-                    new Point3D(-225, 170, -135),
+                    new Point3D(-225, -170, 135),
                     //righteye right
-                    new Point3D(225, 170, -135),
+                    new Point3D(225, -170, 135),
                     //mouth left
-                    new Point3D(-150, -150, -125),
+                    new Point3D(-150, 150, 125),
                     //mouth right
-                    new Point3D(150, -150, -125),
+                    new Point3D(150, 150, 125),
                 };
-                return model_points;
             }
         }
         
+        StringBuilder builder = new StringBuilder();
+
         public Flandmark(FileNode filename)
         {
             int[] p_int;
@@ -125,70 +113,71 @@ namespace Vision.Cv
             Stream fin = filename.Open();
             StreamReader reader = new StreamReader(fin);
 
-            FLANDMARK_Model tst = new FLANDMARK_Model();
+            FlandmarkModel tst = new FlandmarkModel();
 
             fin.Position = 0;
 
             ReadUntilSpace(reader);
-            tst.data.options.M = (byte)ReadUntilSpace(reader)[0];
+            tst.Data.Options.M = (byte)ReadUntilSpace(reader)[0];
 
             ReadUntilSpace(reader);
-            tst.data.options.bw[0] = Convert.ToInt32(ReadUntilSpace(reader));
-            tst.data.options.bw[1] = Convert.ToInt32(ReadUntilSpace(reader));
+            tst.Data.Options.bw[0] = Convert.ToInt32(ReadUntilSpace(reader));
+            tst.Data.Options.bw[1] = Convert.ToInt32(ReadUntilSpace(reader));
 
             ReadUntilSpace(reader);
-            tst.data.options.bw_margin[0] = Convert.ToInt32(ReadUntilSpace(reader));
-            tst.data.options.bw_margin[1] = Convert.ToInt32(ReadUntilSpace(reader));
+            tst.Data.Options.bw_margin[0] = Convert.ToInt32(ReadUntilSpace(reader));
+            tst.Data.Options.bw_margin[1] = Convert.ToInt32(ReadUntilSpace(reader));
 
             ReadUntilSpace(reader);
-            tst.W_ROWS = Convert.ToInt32(ReadUntilSpace(reader));
-            tst.W_COLS = Convert.ToInt32(ReadUntilSpace(reader));
+            tst.WRows = Convert.ToInt32(ReadUntilSpace(reader));
+            tst.WCols = Convert.ToInt32(ReadUntilSpace(reader));
 
             ReadUntilSpace(reader);
-            tst.data.imSize[0] = Convert.ToInt32(ReadUntilSpace(reader));
-            tst.data.imSize[1] = Convert.ToInt32(ReadUntilSpace(reader));
+            tst.Data.ImSize[0] = Convert.ToInt32(ReadUntilSpace(reader));
+            tst.Data.ImSize[1] = Convert.ToInt32(ReadUntilSpace(reader));
 
-            int M = tst.data.options.M;
+            int M = tst.Data.Options.M;
 
-            tst.data.lbp = new FLANDMARK_LBP[M];
+            tst.Data.LBP = new FlandmarkLBP[M];
 
             for (int i = 0; i < M; i++)
             {
                 ReadUntilSpace(reader);
 
-                var lbp = new FLANDMARK_LBP();
+                var lbp = new FlandmarkLBP();
 
-                lbp.WINS_ROWS = (uint)Convert.ToInt32(ReadUntilSpace(reader));
-                lbp.WINS_COLS = (uint)Convert.ToInt32(ReadUntilSpace(reader));
+                lbp.WinsRows = (uint)Convert.ToInt32(ReadUntilSpace(reader));
+                lbp.WinsCols = (uint)Convert.ToInt32(ReadUntilSpace(reader));
 
-                tst.data.lbp[i] = lbp;
+                tst.Data.LBP[i] = lbp;
             }
 
             for (int i = 0; i < 3; i++)
             {
                 ReadUntilSpace(reader);
-                tst.data.options.PSIG_ROWS[i] = Convert.ToInt32(ReadUntilSpace(reader));
-                tst.data.options.PSIG_COLS[i] = Convert.ToInt32(ReadUntilSpace(reader));
+                tst.Data.Options.PsiGRows[i] = Convert.ToInt32(ReadUntilSpace(reader));
+                tst.Data.Options.PsiGCols[i] = Convert.ToInt32(ReadUntilSpace(reader));
             }
             
             fin.Dispose();
             reader.Dispose();
 
             fin = filename.Open();
+            //TODO: fix position
             fin.Position = 111;
             BinaryReader breader = new BinaryReader(fin);
 
-            // load model.W -----------------------------------------------------------
-            tst.W = new double[tst.W_ROWS];
+            // load model.W
+            tst.W = new double[tst.WRows];
 
-            for (int i = 0; i < tst.W_ROWS; i++)
+            for (int i = 0; i < tst.WRows; i++)
             {
                 tst.W[i] = breader.ReadDouble();
             }
 
-            // load model.data.mapTable -----------------------------------------------
+            // load model.data.mapTable
             p_int = new int[M * 4];
-            tst.data.mapTable = new int[M * 4];
+            tst.Data.MapTable = new int[M * 4];
 
             for (int i = 0; i < M * 4; i++)
             {
@@ -197,11 +186,11 @@ namespace Vision.Cv
 
             for (int i = 0; i < M * 4; i++)
             {
-                tst.data.mapTable[i] = p_int[i];
+                tst.Data.MapTable[i] = p_int[i];
             }
             p_int = null;
 
-            // load model.data.lbp ---------------------------------------------------
+            // load model.data.lbp
             for (int i = 0; i < M; i++)
             {
                 // lbp{idx}.winSize
@@ -210,79 +199,79 @@ namespace Vision.Cv
                 p_int[0] = breader.ReadInt32();
                 p_int[1] = breader.ReadInt32();
 
-                tst.data.lbp[i].winSize[0] = p_int[0];
-                tst.data.lbp[i].winSize[1] = p_int[1];
+                tst.Data.LBP[i].WinSize[0] = p_int[0];
+                tst.Data.LBP[i].WinSize[1] = p_int[1];
 
                 p_int = null;
 
                 // lbp{idx}.hop
-                tst.data.lbp[i].hop = breader.ReadByte();
+                tst.Data.LBP[i].HOP = breader.ReadByte();
 
                 // lbp{idx}.wins
-                tsize = (int)(tst.data.lbp[i].WINS_ROWS * tst.data.lbp[i].WINS_COLS);
+                tsize = (int)(tst.Data.LBP[i].WinsRows * tst.Data.LBP[i].WinsCols);
 
-                tst.data.lbp[i].wins = new uint[tsize];
+                tst.Data.LBP[i].Wins = new uint[tsize];
                 for (int r = 0; r < tsize; r++)
                 {
-                    tst.data.lbp[i].wins[r] = breader.ReadUInt32();
+                    tst.Data.LBP[i].Wins[r] = breader.ReadUInt32();
                 }
             }
 
-            // load model.options.S --------------------------------------------------
-            tst.data.options.S = new int[4 * M];
+            // load model.options.S
+            tst.Data.Options.S = new int[4 * M];
 
             for (int i = 0; i < 4 * M; i++)
             {
-                tst.data.options.S[i] = breader.ReadInt32();
+                tst.Data.Options.S[i] = breader.ReadInt32();
             }
             p_int = null;
 
-            // load model.options.PsiG -----------------------------------------------
-            FLANDMARK_PSIG[] PsiGi = null;
+            // load model.options.PsiG
+            FlandmarkPsiG[] PsiGi = null;
 
             for (int psigs_ind = 0; psigs_ind < 3; psigs_ind++)
             {
-                tsize = tst.data.options.PSIG_ROWS[psigs_ind] * tst.data.options.PSIG_COLS[psigs_ind];
+                tsize = tst.Data.Options.PsiGRows[psigs_ind] * tst.Data.Options.PsiGCols[psigs_ind];
 
                 switch (psigs_ind)
                 {
                     case 0:
-                        tst.data.options.PsiGS0 = new FLANDMARK_PSIG[tsize];
-                        PsiGi = tst.data.options.PsiGS0;
+                        tst.Data.Options.PsiGS0 = new FlandmarkPsiG[tsize];
+                        PsiGi = tst.Data.Options.PsiGS0;
                         break;
                     case 1:
-                        tst.data.options.PsiGS1 = new FLANDMARK_PSIG[tsize];
-                        PsiGi = tst.data.options.PsiGS1;
+                        tst.Data.Options.PsiGS1 = new FlandmarkPsiG[tsize];
+                        PsiGi = tst.Data.Options.PsiGS1;
                         break;
                     case 2:
-                        tst.data.options.PsiGS2 = new FLANDMARK_PSIG[tsize];
-                        PsiGi = tst.data.options.PsiGS2;
+                        tst.Data.Options.PsiGS2 = new FlandmarkPsiG[tsize];
+                        PsiGi = tst.Data.Options.PsiGS2;
                         break;
                 }
 
                 int temp = 0;
                 for (int i = 0; i < tsize; i++)
                 {
-                    PsiGi[i] = new FLANDMARK_PSIG();
+                    PsiGi[i] = new FlandmarkPsiG();
 
                     // disp ROWS
                     temp = breader.ReadInt32();
 
-                    PsiGi[i].ROWS = temp;
+                    PsiGi[i].Rows = temp;
 
                     // disp COLS
                     temp = breader.ReadInt32();
 
-                    PsiGi[i].COLS = temp;
+                    PsiGi[i].Cols = temp;
 
                     // disp
-                    tmp_tsize = PsiGi[i].ROWS * PsiGi[i].COLS;
+                    tmp_tsize = PsiGi[i].Rows * PsiGi[i].Cols;
 
-                    PsiGi[i].disp = new int[tmp_tsize];
+                    PsiGi[i].Disp = new int[tmp_tsize];
 
                     for (int r = 0; r < tmp_tsize; r++)
                     {
-                        PsiGi[i].disp[r] = breader.ReadInt32();
+                        PsiGi[i].Disp[r] = breader.ReadInt32();
                     }
                 }
             }
@@ -290,49 +279,18 @@ namespace Vision.Cv
             fin.Dispose();
             breader.Dispose();
 
-            tst.normalizedImageFrame = new byte[tst.data.options.bw[0] * tst.data.options.bw[1]];
+            tst.NormalizedImageFrame = new byte[tst.Data.Options.bw[0] * tst.Data.Options.bw[1]];
             tst.bb = new double[4];
             tst.sf = new float[2];
 
-            model = tst;
-        }
-
-        static int GetIndex(int r, int c, int nr)
-        {
-            return c * nr + r;
-        }
-
-        static int GetRow(int i, int r)
-        {
-            return (i - 1) % r;
-        }
-
-        static int GetCol(int i, int r)
-        {
-            return (i - 1) / r;
-        }
-
-        StringBuilder builder = new StringBuilder();
-        private string ReadUntilSpace(StreamReader reader)
-        {
-            char current = char.MinValue;
-
-            while (current != ' ')
-            {
-                current = (char)reader.Read();
-                builder.Append(current);
-            }
-
-            string ret = builder.ToString();
-            builder.Clear();
-            return ret;
+            Model = tst;
         }
 
         public Point[] Detect(VMat m, int[] boundBox, int[] margin = null)
         {
             double[] landmarks;
 
-            flandmark_detect(ref m, boundBox, ref model, out landmarks, margin);
+            flandmark_detect(ref m, boundBox, ref Model, out landmarks, margin);
 
             if (landmarks != null)
             {
@@ -348,35 +306,65 @@ namespace Vision.Cv
             return null;
         }
 
-        private void flandmark_detect(ref VMat img, int[] bbox, ref FLANDMARK_Model model, out double[] landmarks, int[] bw_margin = null)
+        private static int GetIndex(int r, int c, int nr)
         {
-            landmarks = new double[model.data.options.M * 2];
+            return c * nr + r;
+        }
+
+        private static int GetRow(int i, int r)
+        {
+            return (i - 1) % r;
+        }
+
+        private static int GetCol(int i, int r)
+        {
+            return (i - 1) / r;
+        }
+
+        private string ReadUntilSpace(StreamReader reader)
+        {
+            char current = char.MinValue;
+
+            while (current != ' ')
+            {
+                current = (char)reader.Read();
+                builder.Append(current);
+            }
+
+            string ret = builder.ToString();
+            builder.Clear();
+            return ret;
+        }
+
+        private void flandmark_detect(ref VMat img, int[] bbox, ref FlandmarkModel model, out double[] landmarks, int[] bw_margin = null)
+        {
+            landmarks = new double[model.Data.Options.M * 2];
             
             if (bw_margin != null)
             {
-                model.data.options.bw_margin[0] = bw_margin[0];
-                model.data.options.bw_margin[1] = bw_margin[1];
+                model.Data.Options.bw_margin[0] = bw_margin[0];
+                model.Data.Options.bw_margin[1] = bw_margin[1];
             }
 
-            if (!flandmark_get_normalized_image_frame(ref img, bbox, ref model.bb, ref model.normalizedImageFrame, ref model))
+            if (!flandmark_get_normalized_image_frame(ref img, bbox, ref model.bb, ref model.NormalizedImageFrame, ref model))
             {
                 landmarks = null;
                 return;
             }
 
-            flandmark_detect_base(model.normalizedImageFrame, model, landmarks);
+            flandmark_detect_base(model.NormalizedImageFrame, model, landmarks);
             
-            model.sf[0] = (float)(model.bb[2] - model.bb[0]) / model.data.options.bw[0];
-            model.sf[1] = (float)(model.bb[3] - model.bb[1]) / model.data.options.bw[1];
+            model.sf[0] = (float)(model.bb[2] - model.bb[0]) / model.Data.Options.bw[0];
+            model.sf[1] = (float)(model.bb[3] - model.bb[1]) / model.Data.Options.bw[1];
 
-            for (int i = 0; i < 2 * model.data.options.M; i += 2)
+            for (int i = 0; i < 2 * model.Data.Options.M; i += 2)
             {
                 landmarks[i] = landmarks[i] * model.sf[0] + model.bb[0];
                 landmarks[i + 1] = landmarks[i + 1] * model.sf[1] + model.bb[1];
             }
         }
 
-        private bool flandmark_get_normalized_image_frame(ref VMat input, int[] bbox, ref double[] bb, ref byte[] face_img, ref FLANDMARK_Model model)
+        private bool flandmark_get_normalized_image_frame(ref VMat input, int[] bbox, ref double[] bb, ref byte[] face_img, ref FlandmarkModel model)
         {
             bool flag;
             int[] d = new int[2];
@@ -385,8 +373,8 @@ namespace Vision.Cv
             // extend bbox by bw_margin
             d[0] = bbox[2] - bbox[0] + 1; d[1] = bbox[3] - bbox[1] + 1;
             c[0] = (bbox[2] + bbox[0]) / 2.0f; c[1] = (bbox[3] + bbox[1]) / 2.0f;
-            nd[0] = d[0] * model.data.options.bw_margin[0] / 100.0f + d[0];
-            nd[1] = d[1] * model.data.options.bw_margin[1] / 100.0f + d[1];
+            nd[0] = d[0] * model.Data.Options.bw_margin[0] / 100.0f + d[0];
+            nd[1] = d[1] * model.Data.Options.bw_margin[1] / 100.0f + d[1];
 
             bb[0] = (c[0] - nd[0] / 2.0f);
             bb[1] = (c[1] - nd[1] / 2.0f);
@@ -406,52 +394,62 @@ namespace Vision.Cv
             
             using (var resizedImage = VMat.New(input, region))
             {
-                resizedImage.Resize(new Size(model.data.options.bw[0], model.data.options.bw[1]), 0, 0, Inter);
+                resizedImage.Resize(new Size(model.Data.Options.bw[0], model.Data.Options.bw[1]), 0, 0, Inter);
                 resizedImage.EqualizeHistogram();
 
-                for (int x = 0; x < model.data.options.bw[0]; ++x)
+                // TODO: parallized
+                int step = model.Data.Options.bw[1];
+                byte[] face_img_tmp = face_img;
+                Parallel.For(0, model.Data.Options.bw[0] * model.Data.Options.bw[1], new ParallelOptions() { MaxDegreeOfParallelism = Environment.ProcessorCount }, (ind) =>
                 {
-                    for (int y = 0; y < model.data.options.bw[1]; ++y)
-                    {
-                        face_img[GetIndex(y, x, model.data.options.bw[1])] = resizedImage.At<byte>(y, x);
-                    }
-                }
-
-                resizedImage.Dispose();
+                    int x = ind / step;
+                    int y = ind % step;
+                    face_img_tmp[x * step + y] = resizedImage.At<byte>(y, x);
+                });
+                face_img = face_img_tmp;
+                //for (int x = 0; x < model.Data.Options.bw[0]; ++x)
+                //{
+                //    for (int y = 0; y < model.Data.Options.bw[1]; ++y)
+                //    {
+                //        face_img[GetIndex(y, x, model.Data.Options.bw[1])] = resizedImage.At<byte>(y, x);
+                //    }
+                //}
             }
 
             return true;
         }
 
-        FLANDMARK_PSI_SPARSE[] Cached_Psi_sparse;
+        FlandmarkPSISparse[] Cached_Psi_sparse;
         double[] q_temp = null;
-        private void flandmark_detect_base(byte[] face_image, FLANDMARK_Model model, double[] landmarks)
+        private void flandmark_detect_base(byte[] face_image, FlandmarkModel model, double[] landmarks)
         {
-            int M = model.data.options.M;
+            Profiler.Start("flandmark_detect_base");
+
+            int M = model.Data.Options.M;
             double[] W = model.W;
             int tsize = -1, cols = -1, rows = -1;
-            int[] mapTable = model.data.mapTable;
+            int[] mapTable = model.Data.MapTable;
 
-            if (model.normalizedImageFrame == null)
+            if (model.NormalizedImageFrame == null)
             {
-                model.normalizedImageFrame = face_image;
+                model.NormalizedImageFrame = face_image;
             }
 
             if(Cached_Psi_sparse == null)
             {
-                Cached_Psi_sparse = new FLANDMARK_PSI_SPARSE[M];
+                Cached_Psi_sparse = new FlandmarkPSISparse[M];
             }
-            
+
+            Profiler.Start("flandmark_get_psi_mat_sparse");
             Parallel.For(0, M, new ParallelOptions() { MaxDegreeOfParallelism=M }, (idx) =>
             {
                 if (Cached_Psi_sparse[idx] == null)
-                {
-                    Cached_Psi_sparse[idx] = new FLANDMARK_PSI_SPARSE();
-                }
+                    Cached_Psi_sparse[idx] = new FlandmarkPSISparse();
 
                 flandmark_get_psi_mat_sparse(ref Cached_Psi_sparse[idx], ref model, idx);
             });
-            
+            Profiler.End("flandmark_get_psi_mat_sparse");
+
             //for (int idx = 0; idx < M; idx++)
             //{
             //    Psi_sparse[idx] = new FLANDMARK_PSI_SPARSE();
@@ -483,10 +481,11 @@ namespace Vision.Cv
                 Array.Copy(W, mapTable[GetIndex(idx, 0, M)] - 1, q_temp, 0, tsize);
 
                 // sparse dot product <W_q, PSI_q>
-                cols = (int)Cached_Psi_sparse[idx].PSI_COLS;
-                rows = (int)Cached_Psi_sparse[idx].PSI_ROWS;
-                uint[] psi_temp = Cached_Psi_sparse[idx].idxs;
-                q[idx] = new double[cols];
+                cols = (int)Cached_Psi_sparse[idx].PsiCols;
+                rows = (int)Cached_Psi_sparse[idx].PsiRows;
+                uint[] psi_temp = Cached_Psi_sparse[idx].Idxs;
+                //q[idx] = new double[cols];
+                double[] qind = new double[cols];
                 for (int i = 0; i < cols; ++i)
                 {
                     double dotprod = 0.0f;
@@ -495,8 +494,9 @@ namespace Vision.Cv
                         idx_qtemp = (int)psi_temp[(rows * i) + j];
                         dotprod += q_temp[idx_qtemp];
                     }
-                    q[idx][i] = dotprod;
+                    qind[i] = dotprod;
                 }
+                q[idx] = qind;
 
                 if (idx > 0)
                 {
@@ -506,31 +506,35 @@ namespace Vision.Cv
                 }
             }
 
-            flandmark_argmax(landmarks, ref model.data.options, mapTable, Cached_Psi_sparse, q, g);
-            
+            Profiler.Start("flandmark_argmax");
+            flandmark_argmax(landmarks, ref model.Data.Options, mapTable, Cached_Psi_sparse, q, g);
+            Profiler.End("flandmark_argmax");
+
             g.Clear();
             q.Clear();
+
+            Profiler.End("flandmark_detect_base");
         }
 
-        private void flandmark_get_psi_mat_sparse(ref FLANDMARK_PSI_SPARSE Psi, ref FLANDMARK_Model model, int lbpidx)
+        private void flandmark_get_psi_mat_sparse(ref FlandmarkPSISparse Psi, ref FlandmarkModel model, int lbpidx)
         {
             //uint[] Features;
-            byte[] Images = model.normalizedImageFrame;
-            uint im_H = (uint)model.data.imSize[0];
-            uint im_W = (uint)model.data.imSize[1];
-            uint[] Wins = model.data.lbp[lbpidx].wins;
-            UInt16 win_H = (UInt16)model.data.lbp[lbpidx].winSize[0];
-            UInt16 win_W = (UInt16)model.data.lbp[lbpidx].winSize[1];
-            UInt16 nPyramids = model.data.lbp[lbpidx].hop;
+            byte[] Images = model.NormalizedImageFrame;
+            uint im_H = (uint)model.Data.ImSize[0];
+            uint im_W = (uint)model.Data.ImSize[1];
+            uint[] Wins = model.Data.LBP[lbpidx].Wins;
+            UInt16 win_H = (UInt16)model.Data.LBP[lbpidx].WinSize[0];
+            UInt16 win_W = (UInt16)model.Data.LBP[lbpidx].WinSize[1];
+            UInt16 nPyramids = model.Data.LBP[lbpidx].HOP;
             uint nDim = LibLBP.PyrGetDim(win_H, win_W, nPyramids) / 256;
-            uint nData = model.data.lbp[lbpidx].WINS_COLS;
+            uint nData = model.Data.LBP[lbpidx].WinsCols;
 
             uint cnt0, mirror, x, x1, y, y1, idx;
             uint[] win;
 
-            if (Psi.idxs == null) // Psi.idxs.Length != nDim * nData)
+            if (Psi.Idxs == null) // Psi.idxs.Length != nDim * nData)
             {
-                Psi.idxs = new uint[nDim * nData];
+                Psi.Idxs = new uint[nDim * nData];
             }
 
             win = new uint[win_H * win_W];
@@ -559,15 +563,15 @@ namespace Vision.Cv
                             win[cnt0++] = Images[img_ptr + GetIndex((int)y, (int)x, (int)im_H)];
                 }
 
-                LibLBP.PyrFeaturesSparse(ref Psi.idxs, nDim, win, win_H, win_W, nDim * i);
+                LibLBP.PyrFeaturesSparse(ref Psi.Idxs, nDim, win, win_H, win_W, nDim * i);
             }
 
-            Psi.PSI_COLS = nData;
-            Psi.PSI_ROWS = nDim;
+            Psi.PsiCols = nData;
+            Psi.PsiRows = nDim;
             //Psi.idxs = Features;
         }
 
-        private void flandmark_argmax(double[] smax, ref FLANDMARK_Options options, int[] mapTable, FLANDMARK_PSI_SPARSE[] Psi_sparse, List<double[]> q, List<double[]> g)
+        private void flandmark_argmax(double[] smax, ref FlandmarkOptions options, int[] mapTable, FlandmarkPSISparse[] Psi_sparse, List<double[]> q, List<double[]> g)
         {
             byte M = options.M;
 
@@ -575,7 +579,7 @@ namespace Vision.Cv
             int tsize = mapTable[GetIndex(1, 3, M)] - mapTable[GetIndex(1, 2, M)] + 1;
 
             // left branch - store maximum and index of s5 for all positions of s1
-            int q1_length = (int)Psi_sparse[1].PSI_COLS;
+            int q1_length = (int)Psi_sparse[1].PsiCols;
 
             double[] s1 = new double[2 * q1_length];
             double[] s1_maxs = new double[q1_length];
@@ -586,8 +590,8 @@ namespace Vision.Cv
                 flandmark_maximize_gdotprod(
                         //s2_maxs, s2_idxs,
                         ref s1[GetIndex(0, i, 2)], ref s1[GetIndex(1, i, 2)],
-                        q[5], g[4], options.PsiGS1[GetIndex(i, 0, options.PSIG_ROWS[1])].disp,
-                        options.PsiGS1[GetIndex(i, 0, options.PSIG_ROWS[1])].COLS, tsize
+                        q[5], g[4], options.PsiGS1[GetIndex(i, 0, options.PsiGRows[1])].Disp,
+                        options.PsiGS1[GetIndex(i, 0, options.PsiGRows[1])].Cols, tsize
                         );
                 s1[GetIndex(0, i, 2)] += q[1][i];
             }
@@ -598,7 +602,7 @@ namespace Vision.Cv
             }
 
             // right branch (s2->s6) - store maximum and index of s6 for all positions of s2
-            int q2_length = (int)Psi_sparse[2].PSI_COLS;
+            int q2_length = (int)Psi_sparse[2].PsiCols;
             double[] s2 = new double[2 * q2_length];
             double[] s2_maxs = new double[q2_length];
 
@@ -608,8 +612,8 @@ namespace Vision.Cv
                 flandmark_maximize_gdotprod(
                         //s2_maxs, s2_idxs,
                         ref s2[GetIndex(0, i, 2)], ref s2[GetIndex(1, i, 2)],
-                        q[6], g[5], options.PsiGS2[GetIndex(i, 0, options.PSIG_ROWS[2])].disp,
-                        options.PsiGS2[GetIndex(i, 0, options.PSIG_ROWS[2])].COLS, tsize);
+                        q[6], g[5], options.PsiGS2[GetIndex(i, 0, options.PsiGRows[2])].Disp,
+                        options.PsiGS2[GetIndex(i, 0, options.PsiGRows[2])].Cols, tsize);
                 s2[GetIndex(0, i, 2)] += q[2][i];
             }
 
@@ -618,7 +622,7 @@ namespace Vision.Cv
                 s2_maxs[i] = s2[GetIndex(0, i, 2)];
             }
 
-            int q0_length = (int)Psi_sparse[0].PSI_COLS;
+            int q0_length = (int)Psi_sparse[0].PsiCols;
             double maxs0 = -float.MaxValue;
             int maxs0_idx = -1;
             double maxq10 = -float.MaxValue, maxq20 = -float.MaxValue, maxq30 = -float.MaxValue, maxq40 = -float.MaxValue, maxq70 = -float.MaxValue;
@@ -630,34 +634,34 @@ namespace Vision.Cv
                 maxq10 = -float.MaxValue;
                 flandmark_maximize_gdotprod(
                         ref maxq10, ref s0[GetIndex(1, i, M)],
-                        s1_maxs, g[0], options.PsiGS0[GetIndex(i, 0, options.PSIG_ROWS[0])].disp,
-                        options.PsiGS0[GetIndex(i, 0, options.PSIG_ROWS[0])].COLS, tsize);
+                        s1_maxs, g[0], options.PsiGS0[GetIndex(i, 0, options.PsiGRows[0])].Disp,
+                        options.PsiGS0[GetIndex(i, 0, options.PsiGRows[0])].Cols, tsize);
                 s0[GetIndex(5, i, M)] = s1[GetIndex(1, (int)s0[GetIndex(1, i, M)], 2)];
                 // q20
                 maxq20 = -float.MaxValue;
                 flandmark_maximize_gdotprod(
                         ref maxq20, ref s0[GetIndex(2, i, M)],
-                        s2_maxs, g[1], options.PsiGS0[GetIndex(i, 1, options.PSIG_ROWS[0])].disp,
-                        options.PsiGS0[GetIndex(i, 1, options.PSIG_ROWS[0])].COLS, tsize);
+                        s2_maxs, g[1], options.PsiGS0[GetIndex(i, 1, options.PsiGRows[0])].Disp,
+                        options.PsiGS0[GetIndex(i, 1, options.PsiGRows[0])].Cols, tsize);
                 s0[GetIndex(6, i, M)] = s2[GetIndex(1, (int)s0[GetIndex(2, i, M)], 2)];
                 // q30
                 maxq30 = -float.MaxValue;
                 flandmark_maximize_gdotprod(
                         ref maxq30, ref s0[GetIndex(3, i, M)],
-                        q[3], g[2], options.PsiGS0[GetIndex(i, 2, options.PSIG_ROWS[0])].disp,
-                        options.PsiGS0[GetIndex(i, 2, options.PSIG_ROWS[0])].COLS, tsize);
+                        q[3], g[2], options.PsiGS0[GetIndex(i, 2, options.PsiGRows[0])].Disp,
+                        options.PsiGS0[GetIndex(i, 2, options.PsiGRows[0])].Cols, tsize);
                 // q40
                 maxq40 = -float.MaxValue;
                 flandmark_maximize_gdotprod(
                         ref maxq40, ref s0[GetIndex(4, i, M)],
-                        q[4], g[3], options.PsiGS0[GetIndex(i, 3, options.PSIG_ROWS[0])].disp,
-                        options.PsiGS0[GetIndex(i, 3, options.PSIG_ROWS[0])].COLS, tsize);
+                        q[4], g[3], options.PsiGS0[GetIndex(i, 3, options.PsiGRows[0])].Disp,
+                        options.PsiGS0[GetIndex(i, 3, options.PsiGRows[0])].Cols, tsize);
                 // q70
                 maxq70 = -float.MaxValue;
                 flandmark_maximize_gdotprod(
                         ref maxq70, ref s0[GetIndex(7, i, M)],
-                        q[7], g[6], options.PsiGS0[GetIndex(i, 4, options.PSIG_ROWS[0])].disp,
-                        options.PsiGS0[GetIndex(i, 4, options.PSIG_ROWS[0])].COLS, tsize);
+                        q[7], g[6], options.PsiGS0[GetIndex(i, 4, options.PsiGRows[0])].Disp,
+                        options.PsiGS0[GetIndex(i, 4, options.PsiGRows[0])].Cols, tsize);
                 // sum q10+q20+q30+q40+q70
                 if (maxs0 < maxq10 + maxq20 + maxq30 + maxq40 + maxq70 + q[0][i])
                 {

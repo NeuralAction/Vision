@@ -16,6 +16,11 @@ namespace Vision
             Width = Height = all;
         }
 
+        /// <summary>
+        /// Size
+        /// </summary>
+        /// <param name="width">rows</param>
+        /// <param name="height">cols</param>
         public Size(double width, double height)
         {
             Width = width;

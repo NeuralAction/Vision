@@ -12,11 +12,11 @@ namespace Vision
         public static bool IsDebug = true;
         public static Stopwatch Stopwatch;
         public static event EventHandler<Dictionary<string, ProfilerData>> Reported;
-        public static long ReportWait = 1000;
+        public static double ReportWait = 1000;
 
         static object DataLocker = new object();
         static Dictionary<string, ProfilerData> Data = new Dictionary<string, ProfilerData>();
-        static long lastMs = 0;
+        static double lastMs = 0;
 
         static Profiler()
         {
@@ -35,7 +35,7 @@ namespace Vision
             lock (DataLocker)
             {
                 SignKey(name);
-                Data[name].Start(Stopwatch.ElapsedMilliseconds);
+                Data[name].Start(GetCurrent());
                 Report();
             }
         }
@@ -51,7 +51,7 @@ namespace Vision
             lock (DataLocker)
             {
                 SignKey(name);
-                Data[name].End(Stopwatch.ElapsedMilliseconds);
+                Data[name].End(GetCurrent());
                 Report();
             }
         }
@@ -60,7 +60,7 @@ namespace Vision
         {
             if (!IsDebug)
                 return;
-
+            
             lock (DataLocker)
             {
                 SignKey(name);
@@ -91,6 +91,11 @@ namespace Vision
             }
         }
 
+        private static double GetCurrent()
+        {
+            return Stopwatch.Elapsed.Ticks / TimeSpan.TicksPerMillisecond;
+        }
+
         private static void SignKey(string key)
         {
             if (!Data.ContainsKey(key))
@@ -102,8 +107,10 @@ namespace Vision
         static StringBuilder sb = new StringBuilder();
         private static void Report()
         {
-            if(Stopwatch.ElapsedMilliseconds - lastMs > ReportWait)
+            if(GetCurrent() - lastMs > ReportWait)
             {
+                lastMs = GetCurrent();
+
                 sb.AppendLine("Profiler Report ==");
                 foreach (ProfilerData d in Data.Values)
                 {
@@ -117,7 +124,6 @@ namespace Vision
                 sb.Clear();
                 
                 Reported?.Invoke(null, Data);
-                lastMs = Stopwatch.ElapsedMilliseconds;
             }
         }
     }
@@ -129,7 +135,7 @@ namespace Vision
         public int CaptureCount = 0;
         public double CaptureSum = 0;
 
-        long startMs = 0;
+        double startMs = 0;
         bool isStarted = false;
 
         public ProfilerData(string name)
@@ -137,7 +143,7 @@ namespace Vision
             Name = name;
         }
 
-        public void Start(long nowMs)
+        public void Start(double nowMs)
         {
             if (!isStarted)
             {
@@ -150,7 +156,7 @@ namespace Vision
             isStarted = true;
         }
 
-        public void End(long nowMs)
+        public void End(double nowMs)
         {
             if (isStarted)
             {

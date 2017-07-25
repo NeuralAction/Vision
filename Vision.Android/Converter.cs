@@ -55,5 +55,24 @@ namespace Vision.Android
                     m.Put(r, c, buffer[r, c]);
             return m;
         }
+
+        public static double[,] ToMatrixArray(int row, int col, double[] buffer)
+        {
+            double[,] ret = new double[row, col];
+            for(int r = 0; r < row; r++)
+            {
+                for (int c = 0; c < col; c++)
+                {
+                    //TODO: index fix
+                    ret[r, c] = buffer[r * col + c];
+                }
+            }
+            return ret;
+        }
+
+        public static VMat ToVMat(this OpenCV.Core.Mat m)
+        {
+            return new AndroidMat(m);
+        }
     }
 }

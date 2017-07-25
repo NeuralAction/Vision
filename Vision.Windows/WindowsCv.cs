@@ -9,7 +9,7 @@ using Vision.Cv;
 
 namespace Vision.Windows
 {
-    public class WindowsCv : Vision.Cv.Cv
+    public class WindowsCv : Cv.Cv
     {
         public WindowsCv()
         {
@@ -179,6 +179,81 @@ namespace Vision.Windows
         protected override void InternalImgWrite(string name, VMat img, int quality)
         {
             Cv2.ImWrite(name, (Mat)img.Object, new ImageEncodingParam(ImwriteFlags.JpegQuality, 80));
+        }
+
+        protected override VMat CreateMat(Size size, Cv.MatType type, Array buffer)
+        {
+            return new Mat((int)size.Width, (int)size.Height, type.Value, buffer).ToVMat();
+        }
+
+        public override void DrawRectangle(VMat img, Rect rect, Scalar color, int thickness = 1, LineType lineType = LineType.Link8, int shift = 0)
+        {
+            Cv2.Rectangle(img.ToCvMat(), rect.ToCvRect(), color.ToCvScalar(), thickness, (LineTypes)lineType, shift);
+        }
+
+        public override void WarpPerspective(VMat src, VMat dst, VMat transform, Size dsize, Interpolation flags = Interpolation.Linear, Cv.BorderTypes borderMode = Cv.BorderTypes.Constant, Scalar borderValue = null)
+        {
+            OpenCvSharp.Scalar? s = null;
+            if (borderValue != null)
+                s = borderValue.ToCvScalar();
+            Cv2.WarpPerspective(src.ToCvMat(), dst.ToCvMat(), transform.ToCvMat(), dsize.ToCvSize(), (InterpolationFlags)flags, (OpenCvSharp.BorderTypes)borderMode, s);
+        }
+
+        public override VMat Mul(VMat left, VMat right)
+        {
+            Mat m = left.ToCvMat() * right.ToCvMat();
+            return m.ToVMat();
+        }
+
+        public override void Mul(VMat output, VMat left, VMat right)
+        {
+            Cv2.Multiply(left.ToCvMat(), right.ToCvMat(), output.ToCvMat());
+        }
+
+        public override VMat Inv(VMat input)
+        {
+            return input.ToCvMat().Inv().ToVMat();
+        }
+
+        public override void Inv(VMat input, VMat output)
+        {
+            Cv2.Invert(input.ToCvMat(), output.ToCvMat());
+        }
+
+        public override VMat Transpose(VMat input)
+        {
+            var inp = input.ToCvMat();
+            return inp.Transpose().ToVMat();
+        }
+
+        public override void Rodrigues(double[] vector, out double[,] matrix, out double[,] jacobian)
+        {
+            Cv2.Rodrigues(vector, out matrix, out jacobian);
+        }
+
+        public override void Rodrigues(double[,] matrix, out double[] vector, out double[,] jacobian)
+        {
+            Cv2.Rodrigues(matrix, out vector, out jacobian);
+        }
+
+        protected override int GetNumThreads()
+        {
+            return Cv2.GetNumThreads();
+        }
+
+        protected override void SetNumThreads(int t)
+        {
+            Cv2.SetNumThreads(t);
+        }
+
+        protected override bool GetUseOptimized()
+        {
+            return Cv2.UseOptimized();
+        }
+
+        protected override void SetUseOptimized(bool b)
+        {
+            Cv2.SetUseOptimized(b);
         }
     }
 }

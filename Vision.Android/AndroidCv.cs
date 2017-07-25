@@ -271,5 +271,112 @@ namespace Vision.Android
                 OpenCV.ImgCodecs.Imgcodecs.Imwrite(name, (Mat)img.Object, mat);
             }
         }
+
+        protected override int GetNumThreads()
+        {
+            return OpenCV.Core.Core.NumThreads;
+        }
+
+        protected override void SetNumThreads(int t)
+        {
+            OpenCV.Core.Core.NumThreads = t;
+        }
+
+        protected override bool GetUseOptimized()
+        {
+            return true;
+        }
+
+        protected override void SetUseOptimized(bool b)
+        {
+            //
+        }
+
+        protected override VMat CreateMat(Size size, MatType type, Array buffer)
+        {
+            Type at = buffer.GetType().GetElementType();
+            if (at != typeof(double))
+                throw new NotImplementedException();
+
+            if(buffer.Rank == 1)
+            {
+                double[] arr = (double[])buffer;
+                return Converter.ToCvMat((int)size.Width, (int)size.Height, arr).ToVMat();
+            }
+            else if(buffer.Rank == 2)
+            {
+                double[,] arr = (double[,])buffer;
+                return Converter.ToCvMat((int)size.Width, (int)size.Height, arr).ToVMat();
+            }
+            else
+            {
+                throw new ArgumentException();
+            }
+        }
+
+        public override void DrawRectangle(VMat img, Rect rect, Scalar color, int thickness = 1, LineType lineType = LineType.Link8, int shift = 0)
+        {
+            OpenCV.ImgProc.Imgproc.Rectangle(img.ToCvMat(), new OpenCV.Core.Point(rect.X, rect.Y), new OpenCV.Core.Point(rect.X + rect.Width, rect.Y + rect.Height), color.ToCvScalar(), thickness, (int)lineType, shift);
+        }
+
+        public override void WarpPerspective(VMat src, VMat dst, VMat transform, Size dsize, Interpolation flags = Interpolation.Linear, BorderTypes borderMode = BorderTypes.Constant, Scalar borderValue = null)
+        {
+            OpenCV.ImgProc.Imgproc.WarpPerspective(src.ToCvMat(), dst.ToCvMat(), transform.ToCvMat(), dsize.ToCvSize(), (int)flags, (int)borderMode, borderValue.ToCvScalar());
+        }
+
+        public override VMat Mul(VMat left, VMat right)
+        {
+            return left.ToCvMat().Mul(right.ToCvMat()).ToVMat();
+        }
+
+        public override void Mul(VMat output, VMat left, VMat right)
+        {
+            OpenCV.Core.Core.Multiply(left.ToCvMat(), right.ToCvMat(), output.ToCvMat());
+        }
+
+        public override VMat Inv(VMat input)
+        {
+            return input.ToCvMat().Inv().ToVMat();
+        }
+
+        public override void Inv(VMat input, VMat output)
+        {
+            OpenCV.Core.Core.Invert(input.ToCvMat(), output.ToCvMat());
+        }
+
+        public override VMat Transpose(VMat input)
+        {
+            return input.ToCvMat().T().ToVMat();
+        }
+
+        public override void Rodrigues(double[] vector, out double[,] matrix, out double[,] jacobian)
+        {
+            using (var mvec = Converter.ToCvMat(vector.Length, 1, vector))
+            using (var mmat = new OpenCV.Core.Mat(3, 3, MatType.CV_64FC1))
+            using (var mjac = new OpenCV.Core.Mat(3, 9, MatType.CV_64FC1))
+            {
+                OpenCV.Calib3d.Calib3d.Rodrigues(mvec, mmat, mjac);
+                var mmat_array = mmat.Get(0, 0);
+                var mjac_array = mjac.Get(0, 0);
+
+                matrix = Converter.ToMatrixArray(3, 3, mmat_array);
+                jacobian = Converter.ToMatrixArray(3, 9, mjac_array);
+            }
+        }
+
+        public override void Rodrigues(double[,] matrix, out double[] vector, out double[,] jacobian)
+        {
+            using (var mmat = Converter.ToCvMat(3, 3, matrix))
+            using (var mvec = new OpenCV.Core.Mat(3, 1, MatType.CV_64FC1))
+            using (var mjac = new OpenCV.Core.Mat(3, 9, MatType.CV_64FC1))
+            {
+                OpenCV.Calib3d.Calib3d.Rodrigues(mmat, mvec, mjac);
+                var mvec_array = mvec.Get(0, 0);
+                var mjac_array = mjac.Get(0, 0);
+
+                vector = mvec_array;
+                jacobian = Converter.ToMatrixArray(3, 9, mjac_array);
+            }
+        }
     }
 }

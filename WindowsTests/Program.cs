@@ -25,6 +25,7 @@ namespace WindowsTests
             "VIDEO   \t Video playing test",
             "CAM     \t Camera streaming test",
             "IMGPROC \t Image processing test",
+            "THREED  \t 3D transform test",
             "OBJCLS  \t Object classify test (Google Inception)",
             "INFO    \t Build Information of CV",
             "CLR     \t Clear console",
@@ -64,6 +65,9 @@ namespace WindowsTests
                     case "imgproc":
                         ImgProcTest();
                         break;
+                    case "threed":
+                        ThreeDimTest();
+                        break;
                     case "objcls":
                         ObjectClassify();
                         break;
@@ -87,6 +91,12 @@ namespace WindowsTests
                         break;
                 }
             }
+        }
+
+        public void ThreeDimTest()
+        {
+            ThreeDimTests t = new ThreeDimTests();
+            t.Run();
         }
 
         public void ObjectClassify()

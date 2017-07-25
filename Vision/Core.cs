@@ -21,7 +21,8 @@ namespace Vision
 
             core.Initialize();
 
-            Logger.Log($"Environment: Core: {Environment.ProcessorCount}");
+            Logger.Log("Core", $"Environment: Core: {Environment.ProcessorCount}");
+            Logger.Log("Core", $"TensorFlow Version: {TensorFlow.TFCore.Version}");
         }
 
         public static void Sleep(int duration)
