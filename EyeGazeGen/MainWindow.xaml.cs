@@ -62,6 +62,7 @@ namespace EyeGazeGen
             WindowStyle = WindowStyle.None;
             WindowState = WindowState.Maximized;
             Topmost = true;
+            Topmost = false;
             Panel_StartMenu.Visibility = Visibility.Hidden;
             Panel_StartMenu.IsEnabled = false;
             panel_rec.Visibility = Visibility.Visible;
@@ -76,7 +77,16 @@ namespace EyeGazeGen
             recorder.SetPoint += Recorder_SetPoint;
             recorder.FrameReady += Recorder_FrameReady;
             recorder.Captured += Recorder_Captured;
-            recorder.Start();
+            int index = 0;
+            try
+            {
+                index = Convert.ToInt32(Tb_Camera.Text);
+            }
+            catch
+            {
+                MessageBox.Show("Camera index is not valid. Use default");
+            }
+            recorder.Start(index);
         }
 
         SolidColorBrush white;
@@ -136,7 +146,8 @@ namespace EyeGazeGen
 
                 Dispatcher.Invoke(() =>
                 {
-                    Background = new ImageBrush(frame.ToBitmapSource())
+                    var source = frame.ToBitmapSource();
+                    Background = new ImageBrush(source)
                     {
                         Stretch = System.Windows.Media.Stretch.Uniform
                     };
@@ -214,6 +225,8 @@ namespace EyeGazeGen
                 return;
 
             recorder.IsPaused = !recorder.IsPaused;
+            Topmost = true;
+            Topmost = false;
             if (recorder.IsPaused)
             {
                 Bt_Pause.Content = "Resume";
@@ -261,11 +274,14 @@ namespace EyeGazeGen
         {
             List<string> libs = new List<string>();
             DirectoryNode[] files = Storage.Root.GetDirectories();
-            foreach(DirectoryNode node in files)
+            if (files != null)
             {
-                if (EyeGazeModel.IsModel(node))
+                foreach (DirectoryNode node in files)
                 {
-                    libs.Add(node.Path);
+                    if (EyeGazeModel.IsModel(node))
+                    {
+                        libs.Add(node.Path);
+                    }
                 }
             }
             LibItemSource = libs;

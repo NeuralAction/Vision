@@ -29,7 +29,15 @@ namespace EyeGazeGen
         public EyeGazeModel Model { get => model; set => model = value; }
         private double zoom = 1;
         public double Zoom { get => zoom; set => zoom = value; }
-        private FaceDetector Detector = new FaceDetector(new FaceDetectorXmlLoader());
+        private FaceDetector Detector = new FaceDetector(new FaceDetectorXmlLoader())
+        {
+            EyesDetectCascade = true,
+            EyesDetectLandmark = true,
+            LandmarkDetect = true,
+            LandmarkSolve = true,
+            SmoothLandmarks = false,
+            SmoothVectors = true
+        };
 
         public ModelViewerControl()
         {
@@ -59,18 +67,18 @@ namespace EyeGazeGen
             Vision.Point origin = null;
             zoom = 1;
             double canvasRatio = canvas.ActualWidth / canvas.ActualHeight;
-            double modelRatio = model.ScreenSize.Width / model.ScreenSize.Height;
+            double modelRatio = model.ScreenPixelSize.Width / model.ScreenPixelSize.Height;
             if(modelRatio > canvasRatio)
             {
                 //모델 가로를 줄임
-                zoom = canvas.ActualWidth / model.ScreenSize.Width;
-                origin = new Vision.Point(0, (canvas.ActualHeight - model.ScreenSize.Height * zoom) * 0.5);
+                zoom = canvas.ActualWidth / model.ScreenPixelSize.Width;
+                origin = new Vision.Point(0, (canvas.ActualHeight - model.ScreenPixelSize.Height * zoom) * 0.5);
             }
             else
             {
                 //모델 세로를 줄임
-                zoom = canvas.ActualHeight / model.ScreenSize.Height;
-                origin = new Vision.Point((canvas.ActualWidth - model.ScreenSize.Width * zoom) * 0.5, 0);
+                zoom = canvas.ActualHeight / model.ScreenPixelSize.Height;
+                origin = new Vision.Point((canvas.ActualWidth - model.ScreenPixelSize.Width * zoom) * 0.5, 0);
             }
 
             foreach(EyeGazeModelElement ele in model.Elements)
@@ -88,7 +96,7 @@ namespace EyeGazeGen
         {
             if(fill == null)
             {
-                fill = new SolidColorBrush(Color.FromArgb(10, 255, 255, 255));
+                fill = new SolidColorBrush(Color.FromArgb(1, 255, 255, 255));
                 fill.Freeze();
                 stroke = new SolidColorBrush(Color.FromArgb(80, 0, 255, 255));
                 stroke.Freeze();
@@ -109,18 +117,13 @@ namespace EyeGazeGen
 
                 EyeGazeModelElement element = (EyeGazeModelElement)ellipse.Tag;
                 string filepath = element.File.AbosolutePath;
-                BitmapImage img = new BitmapImage();
-                img.BeginInit();
-                img.UriSource = new Uri(filepath);
-                img.CacheOption = BitmapCacheOption.OnLoad;
-                img.CreateOptions = BitmapCreateOptions.DelayCreation;
-                img.EndInit();
-                Img_Background.Source = img;
                 using (VMat mat = Core.Cv.ImgRead(element.File))
                 {
                     FaceRect[] rect = Detector.Detect(mat);
                     if (rect.Length > 0 && rect[0].Children.Count > 0)
                     {
+                        rect[0].Draw(mat, 2, true, true);
+
                         EyeRect eye = rect[0].LeftEye;
                         if (eye != null)
                         {
@@ -143,6 +146,8 @@ namespace EyeGazeGen
                         Logger.Error("no eyes found");
                         Img_Eyes.Source = null;
                     }
+
+                    Img_Background.Source = mat.ToBitmapSource();
                 }
                 Tb_Info.Text = $"Index:{element.Index} Point:{element.Point}";
             };

@@ -101,7 +101,7 @@ namespace Vision.Detection
         {
             var pt = face.Landmarks;
             
-            if (face.Children.Count == 0 && pt != null)
+            if (pt != null)
             {
                 EyeRect left = GetEyeRect(face, new Point[] { pt[1], pt[5] });
                 EyeRect right = GetEyeRect(face, new Point[] { pt[2], pt[6] });

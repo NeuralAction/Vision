@@ -13,6 +13,10 @@
         <TextBlock Text="Vision EyeGaze DataSet Generator" HorizontalAlignment="Center" Margin="10" Opacity="0.66"/>
             <TextBlock Text="Session Name" Margin="10,5"/>
             <TextBox Text="Windows" Margin="10,0" Height="24" VerticalContentAlignment="Center" x:Name="Tb_Session"/>
+            <Grid Margin="10,5">
+                <TextBlock Text="Camera" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                <TextBox Text="0" Height="24" VerticalContentAlignment="Center" Margin="48,0,0,0" x:Name="Tb_Camera"/>
+            </Grid>
             <Button Content="Start" Margin="10,5" x:Name="Bt_Start" Click="Bt_Start_Click"/>
             <TextBlock Margin="10,5,10,2" Text="Space Key: Pause" Opacity="0.66"/>
             <TextBlock Margin="10,0,10,5" Text="ESC Key: Stop" Opacity="0.66"/>

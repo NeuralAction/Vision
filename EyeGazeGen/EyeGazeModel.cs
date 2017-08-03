@@ -20,7 +20,9 @@ namespace Vision.Detection
         public string SessionName { get; set; }
         public string TimeStamp { get; set; }
         public string SubmoduleDesc { get; set; }
+        public Size ScreenPixelSize { get; set; }
         public Size ScreenSize { get; set; }
+        public Point3D ScreenOrigin { get; set; }
 
         public List<EyeGazeModelElement> Elements { get; set; } = new List<EyeGazeModelElement>();
 
@@ -76,17 +78,49 @@ namespace Vision.Detection
             string[] lines = file.ReadLines();
             foreach (string line in lines)
             {
+                string[] spl = line.Split(':');
+                string content = spl[1];
                 if (line.StartsWith("scr:"))
                 {
-                    string[] spl = line.Split(':');
-                    string[] screenSizes = spl[1].Split(',');
-                    ScreenSize = new Size(Convert.ToDouble(screenSizes[0]), Convert.ToDouble(screenSizes[1]));
+                    string[] screenSizes = content.Split(',');
+                    ScreenPixelSize = new Size(Convert.ToDouble(screenSizes[0]), Convert.ToDouble(screenSizes[1]));
                 }
                 else if (line.StartsWith("sub:"))
                 {
-                    string[] spl = line.Split(':');
-                    SubmoduleDesc = spl[1];
+                    SubmoduleDesc = content;
                 }
+                else if (line.StartsWith("scrmm:"))
+                {
+                    string[] screenSizes = content.Split(',');
+                    ScreenSize = new Size(Convert.ToDouble(screenSizes[0]), Convert.ToDouble(screenSizes[1]));
+                }
+                else if (line.StartsWith("scrorigin:"))
+                {
+                    string[] screenSizes = content.Split(',');
+                    ScreenOrigin = new Point3D(Convert.ToDouble(screenSizes[0]), Convert.ToDouble(screenSizes[1]), Convert.ToDouble(screenSizes[2]));
+                }
+                else
+                {
+                    Logger.Error("Exception while reading model.txt: " + line);
+                }
+            }
+
+            if(ScreenPixelSize == null)
+            {
+                ScreenPixelSize = new Size(1920, 1080);
+                Logger.Error("ScreenPixelSize == null !");
+            }
+
+            if(ScreenSize == null)
+            {
+                ScreenSize = new Size(1920 / 3.84, 1080 / 3.84);
+                Logger.Error("ScreenSize == null !");
+            }
+
+            if (ScreenOrigin == null)
+            {
+                ScreenOrigin = new Point3D(-ScreenSize.Width / 2, 0, 0);
+                Logger.Error("ScreenOrigin == null !");
             }
         }
 
@@ -94,7 +128,12 @@ namespace Vision.Detection
         {
             using (StreamWriter writer = new StreamWriter(stream))
             {
-                writer.WriteLine($"scr:{ScreenSize.Width},{ScreenSize.Height}");
+                if(ScreenPixelSize != null)
+                    writer.WriteLine($"scr:{ScreenPixelSize.Width},{ScreenPixelSize.Height}");
+                if (ScreenSize != null)
+                    writer.WriteLine($"scrmm:{ScreenSize.Width},{ScreenSize.Height}");
+                if (ScreenOrigin != null)
+                    writer.WriteLine($"scrorigin:{ScreenOrigin.X},{ScreenOrigin.Y},{ScreenOrigin.Z}");
                 if (SubmoduleDesc != null)
                     writer.WriteLine($"sub:{SubmoduleDesc}");
             }

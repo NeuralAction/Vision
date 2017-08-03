@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MathNet.Numerics.LinearAlgebra;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -51,6 +52,49 @@ namespace Vision
         public static void Error(object sender, Exception ex)
         {
             Error(sender, ex.ToString());
+        }
+
+        public static string Print(Vector<double> vec)
+        {
+            return Print(vec.ToArray());
+        }
+
+        public static string Print(Matrix<double> mat)
+        {
+            return Print(mat.ToArray(), mat.RowCount, mat.ColumnCount);
+        }
+
+        public static string Print(double[] arry, string format= "0.0000")
+        {
+            StringBuilder builder = new StringBuilder();
+
+            builder.Append("{ ");
+            foreach (double d in arry)
+            {
+                builder.Append($"{d.ToString(format)}, ");
+            }
+            builder.Append("}");
+
+            return builder.ToString();
+        }
+
+        public static string Print(double[,] arry, double row, double col, string format = "0.0000")
+        {
+            StringBuilder builder = new StringBuilder();
+
+            builder.Append("{ ");
+            for (int r = 0; r < row; r++)
+            {
+                builder.Append("{ ");
+                for (int c = 0; c < col; c++)
+                {
+                    builder.Append($"{arry[r, c].ToString(format)}, ");
+                }
+                builder.Append("}");
+            }
+            builder.Append(" }");
+
+            return builder.ToString();
         }
 
         private static void WriteLine(string str)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -64,10 +65,6 @@ namespace Vision.Cv
             public uint PsiRows, PsiCols;
         }
 
-        public FlandmarkModel Model;
-
-        public Interpolation Inter { get; set; } = Interpolation.NearestNeighbor;
-
         public static int LandmarkNose = 7;
         public static int LandmarkMouthLeft = 3;
         public static int LandmarkMouthRight = 4;
@@ -102,6 +99,20 @@ namespace Vision.Cv
                 };
             }
         }
+        
+        /// <summary>
+        /// Distance between left eye left point to right eye right point in MM. 
+        /// </summary>
+        public static double EyeDistance { get; set; } = 90;
+
+        /// <summary>
+        /// Unit/Millimeter based on eye distance
+        /// </summary>
+        public static double UnitPerMM => (Math.Abs(DefaultModel[ModelLeftEyeLeft].X) + Math.Abs(DefaultModel[ModelRightEyeRight].X)) / EyeDistance;
+
+        public FlandmarkModel Model;
+
+        public Interpolation Inter { get; set; } = Interpolation.NearestNeighbor;
         
         StringBuilder builder = new StringBuilder();
 
@@ -306,16 +317,19 @@ namespace Vision.Cv
             return null;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int GetIndex(int r, int c, int nr)
         {
             return c * nr + r;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int GetRow(int i, int r)
         {
             return (i - 1) % r;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int GetCol(int i, int r)
         {
             return (i - 1) / r;
@@ -381,30 +395,51 @@ namespace Vision.Cv
             bb[2] = (c[0] + nd[0] / 2.0f);
             bb[3] = (c[1] + nd[1] / 2.0f);
 
-            flag = bb[0] > 0 && bb[1] > 0 && bb[2] < input.Width && bb[3] < input.Height
-                && bbox[0] > 0 && bbox[1] > 0 && bbox[2] < input.Width && bbox[3] < input.Height;
-            if (!flag)
-                return false;
+            //flag = bb[0] > 0 && bb[1] > 0 && bb[2] < input.Width && bb[3] < input.Height
+            //    && bbox[0] > 0 && bbox[1] > 0 && bbox[2] < input.Width && bbox[3] < input.Height;
+            //if (!flag)
+            //    return false;
 
             Rect region = new Rect((int)bb[0], (int)bb[1], (int)bb[2] - (int)bb[0] + 1, (int)bb[3] - (int)bb[1] + 1);
 
             flag = input.Width <= 0 || input.Height <= 0 || region.Width <= 0 || region.Height <= 0;
             if (flag)
                 return false;
-            
-            using (var resizedImage = VMat.New(input, region))
+
+            Rect clipRegion = new Rect(
+                Util.Clamp(region.X, 0, input.Width-1), Util.Clamp(region.Y, 0, input.Height-1), 
+                Util.Clamp(region.Width, 0, input.Width), Util.Clamp(region.Height, 0, input.Height));
+
+            using (var resizedImage = VMat.New(input, clipRegion))
             {
-                resizedImage.Resize(new Size(model.Data.Options.bw[0], model.Data.Options.bw[1]), 0, 0, Inter);
+                double scalefactor = model.Data.Options.bw[0] / region.Width;
+                //resizedImage.Resize(new Size(model.Data.Options.bw[0], model.Data.Options.bw[1]), 0, 0, Inter);
+                resizedImage.Resize(new Size(clipRegion.Width * scalefactor, clipRegion.Height * scalefactor), 0, 0, Inter);
                 resizedImage.EqualizeHistogram();
 
                 // TODO: parallized
                 int step = model.Data.Options.bw[1];
                 byte[] face_img_tmp = face_img;
+                double regX = region.X, regY = region.Y, inpW = input.Width, inpH = input.Height;
                 Parallel.For(0, model.Data.Options.bw[0] * model.Data.Options.bw[1], new ParallelOptions() { MaxDegreeOfParallelism = Environment.ProcessorCount }, (ind) =>
                 {
                     int x = ind / step;
                     int y = ind % step;
-                    face_img_tmp[x * step + y] = resizedImage.At<byte>(y, x);
+                    double preX = x / scalefactor + regX;
+                    double preY = y / scalefactor + regY;
+                    byte value;
+                    // TODO: padding
+                    if (preX < 0 || preX >= inpW || preY < 0 || preY >= inpH)
+                    {
+                        value = 1;
+                    }
+                    else
+                    {
+                        int newY = (int)((Util.Clamp(preY, 0, inpH) - clipRegion.Y) * scalefactor);
+                        int newX = (int)((Util.Clamp(preX, 0, inpW) - clipRegion.X) * scalefactor);
+                        value = resizedImage.At<byte>(newY, newX);
+                    }
+                    face_img_tmp[x * step + y] = value;
                 });
                 face_img = face_img_tmp;
                 //for (int x = 0; x < model.Data.Options.bw[0]; ++x)

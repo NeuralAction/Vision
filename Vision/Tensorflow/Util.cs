@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MathNet.Numerics.LinearAlgebra;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,9 +18,27 @@ namespace Vision.Tensorflow
         BMP = 3
     }
 
+    public enum NormalizeMode
+    {
+        /// <summary>
+        /// Don't normalize. Use 0 ~ 255 values
+        /// </summary>
+        None = -1,
+
+        /// <summary>
+        /// Normalize into Zero mean. Use -1 ~ 1 values
+        /// </summary>
+        ZeroMean = 0,
+
+        /// <summary>
+        /// Normalize into Zero to One. Use 0 ~ 1 values
+        /// </summary>
+        ZeroOne = 1
+    }
+
     public static class Tools
     {
-        public static Tensor VMatBgr2Tensor(VMat m, int resizeWidth = -1, int resizeHeight = -1, long[] shape = null, float[] imgbuffer=null)
+        public static Tensor VMatBgr2Tensor(VMat m, NormalizeMode mode = NormalizeMode.None, int resizeWidth = -1, int resizeHeight = -1, long[] shape = null, float[] imgbuffer=null)
         {
             if (resizeHeight != -1 && resizeWidth != -1)
                 m.Resize(new Size(resizeWidth, resizeHeight));
@@ -30,6 +49,22 @@ namespace Vision.Tensorflow
             }
 
             float[] buffer = m.GetArray(imgbuffer);
+            if (mode != NormalizeMode.None)
+            {
+                Vector<float> imgBuf = CreateVector.Dense(buffer);
+
+                switch (mode)
+                {
+                    case NormalizeMode.ZeroMean:
+                        imgBuf = imgBuf / 127.5f - 1.0f;
+                        break;
+                    case NormalizeMode.ZeroOne:
+                        imgBuf = imgBuf / 255.0f;
+                        break;
+                }
+
+                buffer = imgBuf.ToArray();
+            }
             TFTensor tensor = TFTensor.FromBuffer(new TFShape(shape), buffer, 0, buffer.Length);
 
             return new Tensor(tensor);

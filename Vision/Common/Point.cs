@@ -22,6 +22,26 @@ namespace Vision
 
         }
 
+        public double EucludianLength()
+        {
+            return Math.Sqrt(X*X+Y*Y);
+        }
+
+        public static Point operator +(Point a, Point b)
+        {
+            return new Point(a.X + b.X, a.Y + b.Y);
+        }
+
+        public static Point operator - (Point a, Point b)
+        {
+            return new Point(a.X - b.X, a.Y - b.Y);
+        }
+
+        public static double EucludianDistance(Point a, Point b)
+        {
+            return (a - b).EucludianLength();
+        }
+
         public override string ToString()
         {
             return $"({X}, {Y})";
@@ -41,9 +61,36 @@ namespace Vision
             this.Z = Z;
         }
 
+        public Point3D(double[] array)
+        {
+            if (array == null)
+                throw new ArgumentNullException(nameof(array));
+            if (array.Length != 3)
+                throw new ArgumentOutOfRangeException(nameof(array));
+
+            X = array[0];
+            Y = array[1];
+            Z = array[2];
+        }
+
         public Point3D()
         {
 
+        }
+
+        public static Point3D operator +(Point3D a, Point3D b)
+        {
+            return new Point3D(a.X+b.X, a.Y+b.Y, a.Z+b.Z);
+        }
+
+        public static Point3D operator -(Point3D a, Point3D b)
+        {
+            return new Point3D(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
+        }
+
+        public double[] ToArray()
+        {
+            return new double[] { X, Y, Z };
         }
 
         public override string ToString()

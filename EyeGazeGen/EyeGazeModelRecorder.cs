@@ -69,7 +69,7 @@ namespace Vision.Detection
             }
         }
 
-        public void Start()
+        public void Start(int index)
         {
             Stop();
 
@@ -78,7 +78,7 @@ namespace Vision.Detection
                 throw new ArgumentNullException(nameof(SetPoint));
             }
 
-            capture = Capture.New(0);
+            capture = Capture.New(index);
             capture.FrameReady += Capture_FrameReady;
             capture.Start();
 

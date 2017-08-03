@@ -81,7 +81,24 @@ namespace Vision.Cv
                 Logger.Error("Cv", "Context is already created");
             }
         }
-        public abstract void ImgShow(string name, VMat img);
+        protected abstract void InternalImgShow(string name, VMat img);
+        public void ImgShow(string name, VMat img)
+        {
+            try
+            {
+                if (name == null)
+                    throw new ArgumentNullException();
+                if (img == null || img.IsEmpty)
+                    throw new ArgumentNullException();
+            }
+            catch (ObjectDisposedException ex)
+            {
+                Logger.Error(this, "img is disposed");
+                return;
+            }
+
+            InternalImgShow(name, img);
+        }
         protected abstract VMat InternalImgRead(string path);
         public VMat ImgRead(FileNode node)
         {
@@ -125,5 +142,25 @@ namespace Vision.Cv
             Rodrigues(matrix, out vector, out jacobian);
         }
         public abstract void Rodrigues(double[,] matrix, out double[] vector, out double[,] jacobian);
+        public double RodriguesTheta(double[] vector)
+        {
+            if (vector == null)
+                throw new ArgumentNullException();
+            if (vector.Length != 3)
+                throw new ArgumentOutOfRangeException();
+
+            return Math.Sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
+        }
+        public double[] RodriguesVector(double[] vector)
+        {
+            if (vector == null)
+                throw new ArgumentNullException();
+            if (vector.Length != 3)
+                throw new ArgumentOutOfRangeException();
+
+            double theta = RodriguesTheta(vector);
+
+            return new double[] { vector[0] / theta, vector[1] / theta, vector[2] / theta };
+        }
     }
 }

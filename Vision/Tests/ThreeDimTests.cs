@@ -145,12 +145,12 @@ namespace Vision.Tests
                         tvec[2] += tvec_step;
                         break;
                     case '1':
-                        Logger.Log($"th:{theta}  vec:{Print(vec)}");
+                        Logger.Log($"th:{theta}  vec:{Logger.Print(vec)}");
                         Core.Cv.Rodrigues(rvec.ToArray(), out rodriues);
-                        Logger.Log(Print(rodriues, 3, 3));
+                        Logger.Log(Logger.Print(rodriues, 3, 3));
                         break;
                     case '2':
-                        Logger.Log($"th:{theta}  vec:{Print(vec)}");
+                        Logger.Log($"th:{theta}  vec:{Logger.Print(vec)}");
                         tvec[0] = -tvec[0];
                         tvec[1] = -tvec[1];
                         tvec[2] = -tvec[2];
@@ -181,7 +181,7 @@ namespace Vision.Tests
                     case '8':
                         // TODO: FileDialog
                         if (rodriues != null)
-                            Logger.Log(Print(rodriues, 3, 3));
+                            Logger.Log(Logger.Print(rodriues, 3, 3));
                         if (!rod.IsEmpty)
                             Logger.Log(rod.Print());
                         break;
@@ -280,39 +280,6 @@ namespace Vision.Tests
 
                 Profiler.End("Transform");
             }
-        }
-
-        private string Print(double[] arry)
-        {
-            StringBuilder builder = new StringBuilder();
-
-            builder.Append("{ ");
-            foreach (double d in arry)
-            {
-                builder.Append($"{d}, ");
-            }
-            builder.Append("}");
-
-            return builder.ToString();
-        }
-
-        private string Print(double[,] arry, double row, double col, string format = "0.000")
-        {
-            StringBuilder builder = new StringBuilder();
-
-            builder.Append("{ ");
-            for (int r = 0; r < row; r++)
-            {
-                builder.Append("{ ");
-                for (int c = 0; c < col; c++)
-                {
-                    builder.Append($"{arry[r, c].ToString(format)}, ");
-                }
-                builder.Append("}");
-            }
-            builder.Append(" }");
-
-            return builder.ToString();
         }
     }
 }

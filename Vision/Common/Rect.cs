@@ -99,6 +99,14 @@ namespace Vision
             _height = height;
         }
 
+        public Rect(Point leftTop, Point rightBot)
+        {
+            _x = leftTop.X;
+            _y = leftTop.Y;
+            _width = rightBot.X - leftTop.X;
+            _height = rightBot.Y - leftTop.Y;
+        }
+
         public Rect(Rect rect)
         {
             _x = rect.X;

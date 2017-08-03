@@ -121,7 +121,7 @@ namespace Vision.Windows
             }
         }
 
-        public override void ImgShow(string name, VMat img)
+        protected override void InternalImgShow(string name, VMat img)
         {
             Cv2.ImShow(name, (Mat)img.Object);
         }

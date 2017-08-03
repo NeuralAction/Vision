@@ -47,40 +47,65 @@ namespace EyeGazeGen
             if (dir != null)
             {
                 FileNode text = dir.NewFile("model.txt");
-                StringBuilder build = new StringBuilder();
-                build.AppendLine($"scr:{model.ScreenSize.Width},{model.ScreenSize.Height}");
-                build.AppendLine($"sub:{model.Directory.Name}");
-                text.WriteText(build);
-
-                using (FaceDetector detector = new FaceDetector(new FaceDetectorXmlLoader()))
+                using(var stream = text.Open())
                 {
-                    int count = 0;
-                    detector.MaxSize = 480;
-                    detector.MaxFaceSize = 420;
-                    detector.EyesScaleFactor = 1.05;
-                    detector.FaceScaleFactor = 1.05;
-                    detector.EyesMinFactor = 0.01;
-                    detector.EyesMaxFactor = 1;
+                    model.WriteModelText(stream);
+                }
 
-                    foreach (EyeGazeModelElement ele in model.Elements)
+                FaceDetector detector = new FaceDetector(new FaceDetectorXmlLoader())
+                {
+                    MaxSize = 480,
+                    MaxFaceSize = 420,
+                    EyesScaleFactor = 1.05,
+                    FaceScaleFactor = 1.05,
+                    EyesMinFactor = 0.1,
+                    EyesMaxFactor = 1,
+                    EyesDetectCascade = true,
+                    EyesDetectLandmark = true,
+                    FaceMaxFactor = 1,
+                    FaceMinFactor = 0.15,
+                    Interpolation = Interpolation.Cubic,
+                    LandmarkDetect = true,
+                    LandmarkSolve = true,
+                    ScreenProperties = new ScreenProperties()
                     {
-                        count++;
-                        using (VMat frame = Core.Cv.ImgRead(ele.File))
+                        Origin = model.ScreenOrigin,
+                        PixelSize = model.ScreenPixelSize,
+                        Size = model.ScreenSize
+                    },
+                    SmoothLandmarks = false,
+                    SmoothVectors = true
+                };
+                int count = 0;
+
+                foreach (EyeGazeModelElement ele in model.Elements)
+                {
+                    count++;
+                    using (VMat frame = Core.Cv.ImgRead(ele.File))
+                    {
+                        FaceRect[] faces = detector.Detect(frame);
+                        if (faces != null && faces.Length > 0)
                         {
-                            FaceRect[] faces = detector.Detect(frame);
-                            if (faces.Length > 0 && faces[0].LeftEye != null)
+                            foreach (var face in faces)
                             {
-                                using(VMat eyeROI = faces[0].LeftEye.RoiCropByPercent(frame))
+                                if (Math.Abs(face.LandmarkTransformVector[2]) < 7500 && face.LeftEye != null)
                                 {
-                                    FileNode eyeFile = dir.GetFile($"{ele.Index},{ele.Point.X},{ele.Point.Y}.jpg");
-                                    eyeROI.NormalizeRGB();
-                                    Core.Cv.ImgWrite(eyeFile, eyeROI, 92);
+                                    using (VMat eyeROI = face.LeftEye.RoiCropByPercent(frame))
+                                    {
+                                        var rod = face.SolveLookScreenVector(ele.Point, detector.ScreenProperties, Flandmark.UnitPerMM).ToArray();
+                                        
+                                        FileNode eyeFile = dir.GetFile($"{ele.Index},{rod[0]},{rod[1]},{rod[2]}.jpg");
+
+                                        Core.Cv.ImgWrite(eyeFile, eyeROI, 92);
+                                    }
                                 }
                             }
                         }
-                        Logger.Log($"Extracted [{count}/{model.Elements.Count}]");
                     }
+                    Logger.Log($"Extracted [{count}/{model.Elements.Count}]");
                 }
+
+                detector.Dispose();
             }
             else
             {
@@ -105,7 +130,7 @@ namespace EyeGazeGen
                 return;
             }
 
-            Vision.Size oldSize = model.ScreenSize;
+            Vision.Size oldSize = model.ScreenPixelSize;
             Vision.Size newSize = new Vision.Size(newWidth, newHeight);
 
             foreach(EyeGazeModelElement ele in model.Elements)
@@ -119,7 +144,7 @@ namespace EyeGazeGen
                 ele.File = newFile;
             }
 
-            model.ScreenSize = newSize;
+            model.ScreenPixelSize = newSize;
 
             FileNode node = model.ModelTxt;
             if(node.IsExist)

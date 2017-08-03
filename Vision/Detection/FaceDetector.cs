@@ -14,10 +14,10 @@ namespace Vision.Detection
         public double FaceMaxFactor { get; set; } = 1;
         public int MaxSize { get; set; } = 180;
         
-        public bool EyesDetect { get; set; } = true;
-        public bool EyesUseLandmark { get; set; } = true;
+        public bool EyesDetectCascade { get; set; } = true;
+        public bool EyesDetectLandmark { get; set; } = true;
 
-        public double EyesScaleFactor { get; set; } = 1.3;
+        public double EyesScaleFactor { get; set; } = 1.2;
         public double EyesMinFactor { get; set; } = 0.2;
         public double EyesMaxFactor { get; set; } = 0.5;
         public int MaxFaceSize { get; set; } = 100;
@@ -25,9 +25,12 @@ namespace Vision.Detection
         public bool LandmarkDetect { get; set; } = true;
         public bool LandmarkSolve { get; set; } = true;
 
-        public bool Smooth { get; set; } = false;
+        public bool SmoothLandmarks { get; set; } = false;
+        public bool SmoothVectors { get; set; } = false;
         
         public Interpolation Interpolation { get; set; } = Interpolation.NearestNeighbor;
+
+        public ScreenProperties ScreenProperties { get; set; }
 
         CascadeClassifier FaceCascade;
         CascadeClassifier EyesCascade;
@@ -92,53 +95,51 @@ namespace Vision.Detection
                     if (debug)
                         faceRect.Draw(frame, drawLandmarks: true);
 
-                    if (LandmarkDetect || EyesUseLandmark)
+                    if (LandmarkDetect || EyesDetectLandmark)
                     {
                         Profiler.Start("DetectionLandmark");
                         Landmark.Interpolation = Interpolation;
                         Landmark.Detect(frame_face, faceRect);
-                        if (Smooth)
+                        if (SmoothLandmarks)
                             smoothCurrent.SmoothLandmark(faceRect);
 
                         Profiler.Start("DetectionLandmarkSolve");
                         if (LandmarkSolve)
                         {
                             Landmark.Solve(frame_face, faceRect);
-                            if (Smooth)
+                            if (SmoothVectors)
                                 smoothCurrent.SmoothVector(faceRect);
                         }
                         Profiler.End("DetectionLandmarkSolve");
 
                         Profiler.End("DetectionLandmark");
                     }
-
-                    if (EyesDetect)
+                    
+                    if(EyesDetectCascade)
                     {
-                        if (EyesUseLandmark)
+                        using (VMat faceROI = VMat.New(frame_face, faceRect))
                         {
-                            FaceLandmarkDetector.CalcEyes(faceRect);
-                        }
-                        else
-                        {
-                            using (VMat faceROI = VMat.New(frame_face, faceRect))
+                            double eyeScale = faceROI.ClampSize(MaxFaceSize, Interpolation);
+                            double faceMinSize = Math.Min(faceROI.Width, faceROI.Height);
+                            Profiler.Start("DetectionEye");
+                            Rect[] eyes = EyesCascade.DetectMultiScale(faceROI, EyesScaleFactor, 2, HaarDetectionType.ScaleImage, new Size(faceMinSize * EyesMinFactor), new Size(faceMinSize * EyesMaxFactor));
+
+                            foreach (Rect eye in eyes)
                             {
-                                double eyeScale = faceROI.ClampSize(MaxFaceSize, Interpolation);
-                                double faceMinSize = Math.Min(faceROI.Width, faceROI.Height);
-                                Profiler.Start("DetectionEye");
-                                Rect[] eyes = EyesCascade.DetectMultiScale(faceROI, EyesScaleFactor, 2, HaarDetectionType.ScaleImage, new Size(faceMinSize * EyesMinFactor), new Size(faceMinSize * EyesMaxFactor));
+                                eye.Scale(1 / eyeScale);
+                                EyeRect eyeRect = new EyeRect(faceRect, eye);
+                                faceRect.Add(eyeRect);
 
-                                foreach (Rect eye in eyes)
-                                {
-                                    eye.Scale(1 / eyeScale);
-                                    EyeRect eyeRect = new EyeRect(faceRect, eye);
-                                    faceRect.Add(eyeRect);
-
-                                    if (debug)
-                                        eyeRect.Draw(frame);
-                                }
-                                Profiler.End("DetectionEye");
+                                if (debug)
+                                    eyeRect.Draw(frame);
                             }
+                            Profiler.End("DetectionEye");
                         }
+                    }
+
+                    if (EyesDetectLandmark)
+                    {
+                        FaceLandmarkDetector.CalcEyes(faceRect);
                     }
 
                     FaceList.Add(faceRect);

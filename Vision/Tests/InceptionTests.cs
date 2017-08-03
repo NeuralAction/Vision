@@ -156,7 +156,7 @@ namespace Vision.Tests
             Profiler.Start("InferenceALL");
 
             Profiler.Start("InferenceDecodeImg");
-            Tensor img = Tools.VMatBgr2Tensor(mat, 224, 224, new long[] { 1, 224, 224, 3 });
+            Tensor img = Tools.VMatBgr2Tensor(mat, NormalizeMode.None, 224, 224, new long[] { 1, 224, 224, 3 });
             Profiler.End("InferenceDecodeImg");
 
             Profiler.Start("InferenceNormalizeImg");

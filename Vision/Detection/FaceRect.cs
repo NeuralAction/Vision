@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MathNet.Numerics.LinearAlgebra;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -116,6 +117,77 @@ namespace Vision.Detection
                     Profiler.End("FaceRectProject");
                 }
             }
+        }
+
+        public double[] SolveLookScreenRodrigues(Point scrPt, ScreenProperties properties, double unitPermm)
+        {
+            Point3D point3d = properties.ToCameraCoordinate(unitPermm, scrPt);
+            point3d = point3d - new Point3D(LandmarkTransformVector);
+
+            Vector<double> ptVec = CreateVector.Dense(point3d.ToArray());
+            ptVec = ptVec / ptVec.L2Norm();
+
+            Vector<double> originVec = CreateVector.Dense(new double[] { 0, 0, -1 });
+
+            var dotProduct = ptVec.DotProduct(originVec);
+            var crossProduct = Util.CrossProduct(ptVec, originVec);
+            crossProduct = crossProduct / crossProduct.L2Norm();
+
+            var theta = Math.Acos(dotProduct);
+            if (theta > Math.PI / 2)
+            {
+                theta = Math.PI - theta;
+                crossProduct = crossProduct * -1;
+            }
+            var rodVec = crossProduct * theta;
+
+            var rod = rodVec.ToArray();
+
+            return rod;
+        }
+
+        public Point3D SolveLookScreenVector(Point scrPt, ScreenProperties properties, double unitPermm)
+        {
+            Point3D point3d = properties.ToCameraCoordinate(unitPermm, scrPt);
+            point3d = point3d - new Point3D(LandmarkTransformVector);
+
+            Vector<double> ptVec = CreateVector.Dense(point3d.ToArray());
+            ptVec = ptVec / ptVec.L2Norm();
+
+            return new Point3D(ptVec.ToArray());
+        }
+
+        public Point SolveRayScreenRodrigues(double[] rod, ScreenProperties properties, double unitPermm)
+        {
+            double[,] rotMat;
+            Core.Cv.Rodrigues(rod, out rotMat);
+
+            var rotMatMat = CreateMatrix.DenseOfArray(rotMat);
+            var tempVec = CreateVector.Dense(new double[] { 0, 0, -1 }) * rotMatMat;
+            var tempScale = LandmarkTransformVector[2] / tempVec[2];
+            tempVec = tempVec * tempScale;
+            tempVec = tempVec - CreateVector.DenseOfArray(LandmarkTransformVector);
+
+            var tempScr = properties.ToScreenCoordinate(Flandmark.UnitPerMM, new Point3D(tempVec.ToArray()));
+            tempScr.X = properties.PixelSize.Width - Util.FixZero(tempScr.X);
+            tempScr.Y = -Util.FixZero(tempScr.Y);
+
+            return tempScr;
+        }
+
+        public Point SolveRayScreenVector(Point3D vec, ScreenProperties properties, double unitPermm)
+        {
+            var tempVec = CreateVector.Dense(vec.ToArray());
+            tempVec = tempVec / tempVec.L2Norm();
+            var tempScale = LandmarkTransformVector[2] / tempVec[2];
+            tempVec = tempVec * tempScale;
+            tempVec = tempVec - CreateVector.DenseOfArray(LandmarkTransformVector);
+
+            var tempScr = properties.ToScreenCoordinate(Flandmark.UnitPerMM, new Point3D(tempVec.ToArray()));
+            tempScr.X = properties.PixelSize.Width - Util.FixZero(tempScr.X);
+            tempScr.Y = -Util.FixZero(tempScr.Y);
+
+            return tempScr;
         }
 
         public VMat ROI(VMat frame)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -86,6 +87,7 @@ namespace Vision.Cv
             return (256 * N);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static UInt32 GetIndex(UInt32 row, UInt32 col, UInt32 numRows)
         {
             return col * numRows + row;
