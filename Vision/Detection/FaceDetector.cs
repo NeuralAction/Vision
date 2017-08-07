@@ -10,7 +10,7 @@ namespace Vision.Detection
     public class FaceDetector : IDisposable
     {
         public double FaceScaleFactor { get; set; } = 1.2;
-        public double FaceMinFactor { get; set; } = 0.15;
+        public double FaceMinFactor { get; set; } = 0.1;
         public double FaceMaxFactor { get; set; } = 1;
         public int MaxSize { get; set; } = 180;
         

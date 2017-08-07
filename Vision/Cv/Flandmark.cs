@@ -87,15 +87,15 @@ namespace Vision.Cv
                 return new List<Point3D>()
                 {
                     //nose
-                    new Point3D(0, 0, 0),
+                    new Point3D(0, 170, 0),
                     //lefteye left
-                    new Point3D(-225, -170, 135),
+                    new Point3D(-225, 0, 135),
                     //righteye right
-                    new Point3D(225, -170, 135),
+                    new Point3D(225, 0, 135),
                     //mouth left
-                    new Point3D(-150, 150, 125),
+                    new Point3D(-150, 320, 125),
                     //mouth right
-                    new Point3D(150, 150, 125),
+                    new Point3D(150, 320, 125),
                 };
             }
         }

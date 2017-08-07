@@ -51,61 +51,87 @@ namespace EyeGazeGen
                 {
                     model.WriteModelText(stream);
                 }
+                var xmlloader = new FaceDetectorXmlLoader();
 
-                FaceDetector detector = new FaceDetector(new FaceDetectorXmlLoader())
+                List<FaceDetector> detectors = new List<FaceDetector>();
+                for (int i = 0; i < Environment.ProcessorCount; i++)
                 {
-                    MaxSize = 480,
-                    MaxFaceSize = 420,
-                    EyesScaleFactor = 1.05,
-                    FaceScaleFactor = 1.05,
-                    EyesMinFactor = 0.1,
-                    EyesMaxFactor = 1,
-                    EyesDetectCascade = true,
-                    EyesDetectLandmark = true,
-                    FaceMaxFactor = 1,
-                    FaceMinFactor = 0.15,
-                    Interpolation = Interpolation.Cubic,
-                    LandmarkDetect = true,
-                    LandmarkSolve = true,
-                    ScreenProperties = new ScreenProperties()
+                    detectors.Add(new FaceDetector(xmlloader)
                     {
-                        Origin = model.ScreenOrigin,
-                        PixelSize = model.ScreenPixelSize,
-                        Size = model.ScreenSize
-                    },
-                    SmoothLandmarks = false,
-                    SmoothVectors = true
-                };
+                        MaxSize = 400,
+                        MaxFaceSize = 400,
+                        EyesScaleFactor = 1.1,
+                        FaceScaleFactor = 1.1,
+                        EyesMinFactor = 0.1,
+                        EyesMaxFactor = 0.8,
+                        EyesDetectCascade = true,
+                        EyesDetectLandmark = true,
+                        FaceMaxFactor = 0.957,
+                        FaceMinFactor = 0.15,
+                        Interpolation = Interpolation.Cubic,
+                        LandmarkDetect = true,
+                        LandmarkSolve = true,
+                        ScreenProperties = new ScreenProperties()
+                        {
+                            Origin = model.ScreenOrigin,
+                            PixelSize = model.ScreenPixelSize,
+                            Size = model.ScreenSize
+                        },
+                        SmoothLandmarks = false,
+                        SmoothVectors = true
+                    });
+                }
+
+                object countLocker = new object();
                 int count = 0;
 
-                foreach (EyeGazeModelElement ele in model.Elements)
+                Parallel.ForEach(model.Elements, new ParallelOptions() { MaxDegreeOfParallelism = Environment.ProcessorCount }, (ele) =>
                 {
-                    count++;
+                    int detectorInd;
+                    FaceDetector detector;
+                    lock (countLocker)
+                    {
+                        count++;
+                        detectorInd = count % Environment.ProcessorCount;
+                        detector = detectors[detectorInd];
+                    }
+
                     using (VMat frame = Core.Cv.ImgRead(ele.File))
                     {
-                        FaceRect[] faces = detector.Detect(frame);
-                        if (faces != null && faces.Length > 0)
+                        if (frame != null && !frame.IsEmpty)
                         {
-                            foreach (var face in faces)
+                            try
                             {
-                                if (Math.Abs(face.LandmarkTransformVector[2]) < 7500 && face.LeftEye != null)
+                                FaceRect[] faces = detector.Detect(frame);
+                                if (faces != null && faces.Length > 0)
                                 {
-                                    using (VMat eyeROI = face.LeftEye.RoiCropByPercent(frame))
+                                    foreach (var face in faces)
                                     {
-                                        var rod = face.SolveLookScreenVector(ele.Point, detector.ScreenProperties, Flandmark.UnitPerMM).ToArray();
-                                        
-                                        FileNode eyeFile = dir.GetFile($"{ele.Index},{rod[0]},{rod[1]},{rod[2]}.jpg");
+                                        if (Math.Abs(face.LandmarkTransformVector[2]) < 7500 && face.LeftEye != null)
+                                        {
+                                            using (VMat eyeROI = face.LeftEye.RoiCropByPercent(frame))
+                                            {
+                                                var rod = face.SolveLookScreenVector(ele.Point, detector.ScreenProperties, Flandmark.UnitPerMM).ToArray();
 
-                                        Core.Cv.ImgWrite(eyeFile, eyeROI, 92);
+                                                FileNode eyeFile = dir.GetFile($"{ele.Index},{rod[0]},{rod[1]},{rod[2]}.jpg");
+
+                                                Core.Cv.ImgWrite(eyeFile, eyeROI, 92);
+                                            }
+                                        }
                                     }
                                 }
+                            }
+                            catch(Exception ex)
+                            {
+                                Logger.Error(ex.ToString());
                             }
                         }
                     }
                     Logger.Log($"Extracted [{count}/{model.Elements.Count}]");
-                }
+                });
 
-                detector.Dispose();
+                foreach(var d in detectors)
+                    d.Dispose();
             }
             else
             {

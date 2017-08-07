@@ -42,7 +42,16 @@ namespace Vision.Detection
 
         public Point ToScreenCoordinate(double unitPerMM, Point3D pt)
         {
-            return new Point((pt.X / unitPerMM - Origin.X) / Size.Width * PixelSize.Width, (pt.Y / unitPerMM - Origin.Y) / Size.Height * PixelSize.Height);
+            double mmX = pt.X / unitPerMM;
+            double mmY = pt.Y / unitPerMM;
+            mmX = mmX - Origin.X;
+            mmY = mmY - Origin.Y;
+            mmX = mmX / Size.Width;
+            mmY = mmY / Size.Height;
+            mmX = mmX * PixelSize.Width;
+            mmY = mmY * PixelSize.Height;
+
+            return new Point(mmX, mmY);
         }
     }
 }

@@ -91,6 +91,7 @@ namespace Vision.Detection
                     Profiler.Start("FaceRectProject");
                     List<Point3D> nose_end_point3D = new List<Point3D>()
                     {
+                        new Point3D(0,0,0),
                         new Point3D(450,0,0),
                         new Point3D(0,450,0),
                         new Point3D(0,0,450),
@@ -105,10 +106,10 @@ namespace Vision.Detection
                     double[,] jacobia;
                     Core.Cv.ProjectPoints(nose_end_point3D, rv, tv, cm, dc, out nose_end_point2D, out jacobia);
 
-                    Point start_nose = Landmarks[Flandmark.LandmarkNose];
-                    Core.Cv.DrawLine(frame, start_nose, nose_end_point2D[0], Scalar.BgrRed, 2);
-                    Core.Cv.DrawLine(frame, start_nose, nose_end_point2D[1], Scalar.BgrGreen, 2);
-                    Core.Cv.DrawLine(frame, start_nose, nose_end_point2D[2], Scalar.BgrBlue, 2);
+                    Point start_origin = nose_end_point2D[0];
+                    Core.Cv.DrawLine(frame, start_origin, nose_end_point2D[1], Scalar.BgrRed, 2);
+                    Core.Cv.DrawLine(frame, start_origin, nose_end_point2D[2], Scalar.BgrGreen, 2);
+                    Core.Cv.DrawLine(frame, start_origin, nose_end_point2D[3], Scalar.BgrBlue, 2);
 
                     string msgTv = $"tv:{tv[0].ToString("0.0").PadRight(5)},{tv[1].ToString("0.0").PadRight(5)},{tv[2].ToString("0.0").PadRight(5)}";
                     string msgRv = $"rv:{rv[0].ToString("0.0").PadRight(5)},{rv[1].ToString("0.0").PadRight(5)},{rv[2].ToString("0.0").PadRight(5)}";
@@ -121,11 +122,7 @@ namespace Vision.Detection
 
         public double[] SolveLookScreenRodrigues(Point scrPt, ScreenProperties properties, double unitPermm)
         {
-            Point3D point3d = properties.ToCameraCoordinate(unitPermm, scrPt);
-            point3d = point3d - new Point3D(LandmarkTransformVector);
-
-            Vector<double> ptVec = CreateVector.Dense(point3d.ToArray());
-            ptVec = ptVec / ptVec.L2Norm();
+            Vector<double> ptVec = CreateVector.Dense(SolveLookScreenVector(scrPt, properties, unitPermm).ToArray());
 
             Vector<double> originVec = CreateVector.Dense(new double[] { 0, 0, -1 });
 
@@ -164,28 +161,25 @@ namespace Vision.Detection
 
             var rotMatMat = CreateMatrix.DenseOfArray(rotMat);
             var tempVec = CreateVector.Dense(new double[] { 0, 0, -1 }) * rotMatMat;
-            var tempScale = LandmarkTransformVector[2] / tempVec[2];
-            tempVec = tempVec * tempScale;
-            tempVec = tempVec - CreateVector.DenseOfArray(LandmarkTransformVector);
 
-            var tempScr = properties.ToScreenCoordinate(Flandmark.UnitPerMM, new Point3D(tempVec.ToArray()));
-            tempScr.X = properties.PixelSize.Width - Util.FixZero(tempScr.X);
-            tempScr.Y = -Util.FixZero(tempScr.Y);
-
-            return tempScr;
+            return SolveRayScreenVector(new Point3D(tempVec.ToArray()), properties, unitPermm);
         }
 
         public Point SolveRayScreenVector(Point3D vec, ScreenProperties properties, double unitPermm)
         {
             var tempVec = CreateVector.Dense(vec.ToArray());
-            tempVec = tempVec / tempVec.L2Norm();
-            var tempScale = LandmarkTransformVector[2] / tempVec[2];
+            var tempScale = Math.Abs(LandmarkTransformVector[2] / tempVec[2]);
             tempVec = tempVec * tempScale;
-            tempVec = tempVec - CreateVector.DenseOfArray(LandmarkTransformVector);
+            tempVec = tempVec + CreateVector.DenseOfArray(LandmarkTransformVector);
+
+            if (tempVec[2] > 0.001)
+                throw new ArgumentException("vector cannot be solve xD");
 
             var tempScr = properties.ToScreenCoordinate(Flandmark.UnitPerMM, new Point3D(tempVec.ToArray()));
-            tempScr.X = properties.PixelSize.Width - Util.FixZero(tempScr.X);
-            tempScr.Y = -Util.FixZero(tempScr.Y);
+            //tempScr.X = properties.PixelSize.Width - Util.FixZero(tempScr.X);
+            //tempScr.Y = -Util.FixZero(tempScr.Y);
+            tempScr.X = Util.FixZero(tempScr.X);
+            tempScr.Y = Util.FixZero(tempScr.Y);
 
             return tempScr;
         }

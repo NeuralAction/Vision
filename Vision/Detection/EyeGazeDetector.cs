@@ -9,6 +9,15 @@ using Vision.Tensorflow;
 
 namespace Vision.Detection
 {
+    public enum EyeDirection
+    {
+        Up = 0,
+        Down = 1,
+        Left = 2,
+        Right = 3,
+        None = -1
+    }
+
     public class EyeGazeDetector : IDisposable
     {
         public readonly static ManifestResource ModelResourceCpu = new ManifestResource("Vision.Detection", "frozen_cpu.pb");
@@ -16,8 +25,14 @@ namespace Vision.Detection
         public static object ModelLocker = new object();
         public static Graph ModelGraph;
 
+        public int ImageSize { get; set; } = 80;
         public double AngleMul { get; set; } = 1;
-        public double Sensitive { get; set; } = 2;
+        public bool UseModification { get; set; } = false;
+        public double SensitiveX { get; set; } = 2;
+        public double OffsetX { get; set; } = 0.1;
+        public double SensitiveY { get; set; } = 2;
+        public double OffsetY { get; set; } = -0.05;
+        public EyeDirection Direction { get; set; } = EyeDirection.None;
 
         Session sess;
 
@@ -68,23 +83,25 @@ namespace Vision.Detection
                 {
                     if (!mat.IsEmpty)
                     {
-                        mat.Resize(new Size(120, 120), 0, 0, Interpolation.NearestNeighbor);
+                        mat.Resize(new Size(ImageSize, ImageSize), 0, 0, Interpolation.NearestNeighbor);
                         
                         if (imgbuffer == null)
-                            imgbuffer = new float[120 * 120 * 3];
-                        imgTensor = Tools.VMatBgr2Tensor(mat, NormalizeMode.ZeroMean, -1, -1, new long[] { 1, 120, 120, 3 }, imgbuffer);
+                            imgbuffer = new float[ImageSize * ImageSize * 3];
+                        imgTensor = Tools.VMatBgr2Tensor(mat, NormalizeMode.ZeroMean, -1, -1, new long[] { 1, ImageSize, ImageSize, 3 }, imgbuffer);
                         Tensor[] fetch = sess.Run(new string[] { "output" },
-                            new Dictionary<string, Tensor>() { { "input_image", imgTensor }, { "phase_train", new Tensor(true) }, { "keep_prob", new Tensor(1.0f) } });
+                            new Dictionary<string, Tensor>() { { "input_image", imgTensor }, { "phase_train", new Tensor(false) }, { "keep_prob", new Tensor(1.0f) } });
                         //new Dictionary<string, Tensor>() { { "input_image", imgTensor }, { "keep_prob", new Tensor(1.0f) } });
 
                         Tensor result = fetch[0];
                         float[,] output = (float[,])result.GetValue();
-                        var x = output[0, 0] / AngleMul * Sensitive;
-                        var y = output[0, 1] / AngleMul * Sensitive;
-                        Vector<double> vec = CreateVector.Dense(new double[] { x, y, 1 });
-                        vec = vec * -1;
-                        vec = vec / vec.L2Norm();
-                        Logger.Log(vec.ToString());
+                        var x = output[0, 0] / AngleMul * -1;
+                        var y = output[0, 1] / AngleMul * -1;
+                        if (UseModification)
+                        {
+                            x = (x + OffsetX) * SensitiveX;
+                            y = (y + OffsetY) * SensitiveY;
+                        }
+                        Vector<double> vec = CreateVector.Dense(new double[] { x, y, -1 });
                         pt = eye.Parent.SolveRayScreenVector(new Point3D(vec.ToArray()), properties, Flandmark.UnitPerMM);
 
                         foreach(Tensor t in fetch)

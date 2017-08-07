@@ -263,15 +263,18 @@ namespace Vision.Tests
                         //A*Cinv = B*C*Cinv
                         //A*Cinv = B
                         //이었지만, 역시 정확도가 참 좋지않은 결과로 신경망을 믿도록 합니다
-                        
+                        //가랏 MPIGaze
+
                         //Slove Unit Test
 
-                        var scrPt = new Point(1920, 1080);
+                        var scrPt = new Point(960, 0);
 
                         var rod = face.SolveLookScreenRodrigues(scrPt, Detector.ScreenProperties, Flandmark.UnitPerMM);
                         var vec = face.SolveLookScreenVector(scrPt, Detector.ScreenProperties, Flandmark.UnitPerMM);
                         var point = face.SolveRayScreenRodrigues(rod, Detector.ScreenProperties, Flandmark.UnitPerMM);
                         var vecPt = face.SolveRayScreenVector(vec, Detector.ScreenProperties, Flandmark.UnitPerMM);
+
+                        //Logger.Log($"theta:{Core.Cv.RodriguesTheta(rod)} vec:{vec}");
 
                         if (Point.EucludianDistance(point, scrPt) > 0.01)
                         {
@@ -281,12 +284,28 @@ namespace Vision.Tests
                         {
                             Logger.Error(this, $"SolveLook/RayScreen Vector Test Fails / target: {scrPt}, result: {vecPt}");
                         }
-                        
-                        var tempPt = face.SolveRayScreenVector(new Point3D(0.02, 0.02, -1), Detector.ScreenProperties, Flandmark.UnitPerMM);
-                        tempPt.X = Util.Clamp(tempPt.X, 0, ScreenProperties.PixelSize.Width);
-                        tempPt.Y = Util.Clamp(tempPt.Y, 0, ScreenProperties.PixelSize.Height);
-                        tempPt = LayoutHelper.ResizePoint(tempPt, ScreenProperties.PixelSize, mat.Size, Stretch.Uniform);
-                        Core.Cv.DrawCircle(mat, tempPt, 4, Scalar.BgrCyan, -1);
+
+                        List<Point3D> rays = new List<Point3D>()
+                        {
+                            new Point3D(0, 0, -1),
+                            new Point3D(0.1, 0, -1),
+                            new Point3D(0, 0.1, -1),
+                            new Point3D(-0.1, 0, -1),
+                            new Point3D(0, -0.1, -1),
+                            new Point3D(0.05, 0, -1),
+                            new Point3D(0, 0.05, -1),
+                            new Point3D(-0.05, 0, -1),
+                            new Point3D(0, -0.05, -1),
+                        };
+
+                        foreach(var ray in rays)
+                        {
+                            var tempPt = face.SolveRayScreenVector(ray, Detector.ScreenProperties, Flandmark.UnitPerMM);
+                            tempPt.X = Util.Clamp(tempPt.X, 0, ScreenProperties.PixelSize.Width);
+                            tempPt.Y = Util.Clamp(tempPt.Y, 0, ScreenProperties.PixelSize.Height);
+                            tempPt = LayoutHelper.ResizePoint(tempPt, ScreenProperties.PixelSize, mat.Size, Stretch.Uniform);
+                            Core.Cv.DrawCircle(mat, tempPt, 4, Scalar.BgrCyan, -1);
+                        }
                     }
 
                     if (frameMax > 300)
