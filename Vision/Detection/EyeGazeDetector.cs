@@ -25,7 +25,7 @@ namespace Vision.Detection
         public static object ModelLocker = new object();
         public static Graph ModelGraph;
 
-        public int ImageSize { get; set; } = 80;
+        public int ImageSize { get; set; } = 160;
         public double AngleMul { get; set; } = 1;
         public bool UseModification { get; set; } = false;
         public double SensitiveX { get; set; } = 2;

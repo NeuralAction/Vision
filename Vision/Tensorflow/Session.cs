@@ -140,7 +140,7 @@ namespace Vision.Tensorflow
 
         public void SetAsDefault()
         {
-            Tf.Graph = this;
+            TF.Graph = this;
         }
 
         public void Dispose()

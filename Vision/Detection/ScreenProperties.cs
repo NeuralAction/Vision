@@ -35,6 +35,16 @@ namespace Vision.Detection
             PixelSize = pixelSize;
         }
 
+        public static ScreenProperties CreatePixelScreen(Size pixelSize, double dpi = 96)
+        {
+            return new ScreenProperties()
+            {
+                PixelSize = pixelSize,
+                Size = new Size(pixelSize.Width / dpi * 25, pixelSize.Height / dpi * 25),
+                Origin = new Point3D(-(pixelSize.Width / dpi * 25) / 2, 0, 0)
+            };
+        }
+
         public Point3D ToCameraCoordinate(double unitPerMM, Point pt)
         {
             return new Point3D((pt.X / PixelSize.Width * Size.Width + Origin.X) * unitPerMM, (pt.Y / PixelSize.Height * Size.Height + Origin.Y) * unitPerMM, Origin.Z * unitPerMM);

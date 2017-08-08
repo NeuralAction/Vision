@@ -33,7 +33,7 @@ namespace Vision.Tests
         public bool GazeSmooth { get; set; } = false;
         public FaceDetector Detector { get; set; }
         public EyeGazeDetector GazeDetector { get; set; }
-        public ScreenProperties ScreenProperties { get => Detector.ScreenProperties; set => Detector.ScreenProperties = value; }
+        public ScreenProperties ScreenProperties { get; set; }
 
         public event EventHandler<FaceDetectedArgs> Detected;
 
@@ -195,7 +195,7 @@ namespace Vision.Tests
             if (rect.Length > 0 && DetectGaze)
             {
                 Profiler.Start("GazeALL");
-                Point info = GazeDetector.Detect(rect[0], mat, Detector.ScreenProperties);
+                Point info = GazeDetector.Detect(rect[0], mat, ScreenProperties);
                 if (info != null)
                 {
                     Logger.Log(info.ToString());
@@ -269,10 +269,10 @@ namespace Vision.Tests
 
                         var scrPt = new Point(960, 0);
 
-                        var rod = face.SolveLookScreenRodrigues(scrPt, Detector.ScreenProperties, Flandmark.UnitPerMM);
-                        var vec = face.SolveLookScreenVector(scrPt, Detector.ScreenProperties, Flandmark.UnitPerMM);
-                        var point = face.SolveRayScreenRodrigues(rod, Detector.ScreenProperties, Flandmark.UnitPerMM);
-                        var vecPt = face.SolveRayScreenVector(vec, Detector.ScreenProperties, Flandmark.UnitPerMM);
+                        var rod = face.SolveLookScreenRodrigues(scrPt, ScreenProperties, Flandmark.UnitPerMM);
+                        var vec = face.SolveLookScreenVector(scrPt, ScreenProperties, Flandmark.UnitPerMM);
+                        var point = face.SolveRayScreenRodrigues(rod, ScreenProperties, Flandmark.UnitPerMM);
+                        var vecPt = face.SolveRayScreenVector(vec, ScreenProperties, Flandmark.UnitPerMM);
 
                         //Logger.Log($"theta:{Core.Cv.RodriguesTheta(rod)} vec:{vec}");
 
@@ -300,7 +300,7 @@ namespace Vision.Tests
 
                         foreach(var ray in rays)
                         {
-                            var tempPt = face.SolveRayScreenVector(ray, Detector.ScreenProperties, Flandmark.UnitPerMM);
+                            var tempPt = face.SolveRayScreenVector(ray, ScreenProperties, Flandmark.UnitPerMM);
                             tempPt.X = Util.Clamp(tempPt.X, 0, ScreenProperties.PixelSize.Width);
                             tempPt.Y = Util.Clamp(tempPt.Y, 0, ScreenProperties.PixelSize.Height);
                             tempPt = LayoutHelper.ResizePoint(tempPt, ScreenProperties.PixelSize, mat.Size, Stretch.Uniform);

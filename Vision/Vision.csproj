@@ -61,6 +61,7 @@
     <Compile Include="Cv\MatType.cs" />
     <Compile Include="Cv\RotationMatrixTransform.cs" />
     <Compile Include="Detection\EyeGazeDetector.cs" />
+    <Compile Include="Detection\EyeGazeTracker.cs" />
     <Compile Include="Detection\FaceDetectorXmlLoader.cs" />
     <Compile Include="Cv\ColorConversion.cs" />
     <Compile Include="Cv\Cv.cs" />
@@ -88,7 +89,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Tensorflow\Session.cs" />
-    <Compile Include="Tensorflow\Tf.cs" />
+    <Compile Include="Tensorflow\TF.cs" />
     <Compile Include="Tensorflow\Util.cs" />
     <Compile Include="Tests\FaceDetection.cs" />
     <Compile Include="Tests\ImageProcTests.cs" />

@@ -30,8 +30,6 @@ namespace Vision.Detection
         
         public Interpolation Interpolation { get; set; } = Interpolation.NearestNeighbor;
 
-        public ScreenProperties ScreenProperties { get; set; }
-
         CascadeClassifier FaceCascade;
         CascadeClassifier EyesCascade;
         FaceLandmarkDetector Landmark;
