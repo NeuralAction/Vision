@@ -7,7 +7,7 @@ using Vision.Cv;
 
 namespace Vision.Detection
 {
-    public class EyeGazeTracker : IDisposable
+    public class EyeGazeService : IDisposable
     {
         public event EventHandler<Point> GazeTracked;
         public event EventHandler<FaceRect[]> FaceTracked;
@@ -20,7 +20,7 @@ namespace Vision.Detection
 
         Capture Capture;
 
-        public EyeGazeTracker(FaceDetectorXmlLoader loader, ScreenProperties screen)
+        public EyeGazeService(FaceDetectorXmlLoader loader, ScreenProperties screen)
         {
             GazeDetector = new EyeGazeDetector()
             {
@@ -49,12 +49,12 @@ namespace Vision.Detection
             ScreenProperties = screen;
         }
 
-        public EyeGazeTracker(Size pixelSize, double dpi) : this(new FaceDetectorXmlLoader(), ScreenProperties.CreatePixelScreen(pixelSize, dpi))
+        public EyeGazeService(Size pixelSize, double dpi) : this(new FaceDetectorXmlLoader(), ScreenProperties.CreatePixelScreen(pixelSize, dpi))
         {
 
         }
 
-        public EyeGazeTracker() : this(new FaceDetectorXmlLoader(), ScreenProperties.CreatePixelScreen(new Size(1920,1080)))
+        public EyeGazeService() : this(new FaceDetectorXmlLoader(), ScreenProperties.CreatePixelScreen(new Size(1920,1080)))
         {
 
         }
@@ -79,6 +79,8 @@ namespace Vision.Detection
         private void Capture_FrameReady(object sender, FrameArgs e)
         {
             var faceRect = FaceDetector.Detect(e.VMat);
+
+            if(e.VMat != null && e.v)
 
             FrameCaptured?.Invoke(this, e);
         }

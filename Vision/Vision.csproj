@@ -61,7 +61,7 @@
     <Compile Include="Cv\MatType.cs" />
     <Compile Include="Cv\RotationMatrixTransform.cs" />
     <Compile Include="Detection\EyeGazeDetector.cs" />
-    <Compile Include="Detection\EyeGazeTracker.cs" />
+    <Compile Include="Detection\EyeGazeService.cs" />
     <Compile Include="Detection\FaceDetectorXmlLoader.cs" />
     <Compile Include="Cv\ColorConversion.cs" />
     <Compile Include="Cv\Cv.cs" />
