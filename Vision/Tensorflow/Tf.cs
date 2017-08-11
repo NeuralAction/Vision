@@ -7,11 +7,11 @@ using TensorFlow;
 
 namespace Vision.Tensorflow
 {
-    public static class Tf
+    public static class TF
     {
         public static Graph Graph;
 
-        static Tf()
+        static TF()
         {
             Graph = new Graph();
         }

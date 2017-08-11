@@ -16,13 +16,16 @@ namespace Vision.Detection
         public EyeGazeDetector GazeDetector { get; set; }
         public FaceDetector FaceDetector { get; set; }
         public ScreenProperties ScreenProperties { get; set; }
-        public bool Show { get; set; } = false;
 
         Capture Capture;
+        Task FaceTask;
+        Task GazeTask;
 
         public EyeGazeService(FaceDetectorXmlLoader loader, ScreenProperties screen)
         {
-            GazeDetector = new EyeGazeDetector()
+            ScreenProperties = screen;
+
+            GazeDetector = new EyeGazeDetector(ScreenProperties)
             {
                 UseModification = true
             };
@@ -37,7 +40,7 @@ namespace Vision.Detection
                 FaceMaxFactor = 1,
                 FaceMinFactor = 0.15,
                 FaceScaleFactor = 1.2,
-                Interpolation = Cv.Interpolation.Cubic,
+                Interpolation = Interpolation.Cubic,
                 LandmarkDetect = true,
                 LandmarkSolve = true,
                 MaxFaceSize = 320,
@@ -45,8 +48,6 @@ namespace Vision.Detection
                 SmoothLandmarks = true,
                 SmoothVectors = true
             };
-
-            ScreenProperties = screen;
         }
 
         public EyeGazeService(Size pixelSize, double dpi) : this(new FaceDetectorXmlLoader(), ScreenProperties.CreatePixelScreen(pixelSize, dpi))
@@ -80,9 +81,54 @@ namespace Vision.Detection
         {
             var faceRect = FaceDetector.Detect(e.VMat);
 
-            if(e.VMat != null && e.v)
+            if(e.VMat != null && !e.VMat.IsEmpty)
+            {
+                var cloned = e.VMat.Clone();
+                StartFace(cloned);
+            }
 
             FrameCaptured?.Invoke(this, e);
+        }
+        
+        private void StartFace(VMat mat)
+        {
+            if(FaceTask != null)
+            {
+                FaceTask.Wait();
+            }
+
+            FaceTask = new Task(() =>
+            {
+                var result = FaceDetector.Detect(mat);
+
+                StartGaze(result, mat);
+                FaceTracked?.Invoke(this, result);
+            });
+
+            FaceTask.Start();
+        }
+
+        private void StartGaze(FaceRect[] face, VMat frame)
+        {
+            if(GazeTask != null)
+            {
+                GazeTask.Wait();
+            }
+
+            GazeTask = new Task(() =>
+            {
+                if(face != null && face.Length > 0 && face[0].LeftEye != null)
+                {
+                    var targetEye = face[0].LeftEye;
+                    var result = GazeDetector.Detect(targetEye, frame);
+
+                    GazeTracked?.Invoke(this, result);
+                }
+
+                frame.Dispose();
+            });
+
+            GazeTask.Start();
         }
 
         public void Stop()
@@ -102,6 +148,18 @@ namespace Vision.Detection
                 Capture.Stop();
                 Capture.Dispose();
                 Capture = null;
+            }
+
+            if (FaceTask != null)
+            {
+                FaceTask.Wait();
+                FaceTask = null;
+            }
+
+            if (GazeTask != null)
+            {
+                GazeTask.Wait();
+                GazeTask = null;
             }
 
             if (GazeDetector != null)

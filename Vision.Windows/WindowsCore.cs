@@ -9,6 +9,11 @@ namespace Vision.Windows
 {
     public class WindowsCore : Core
     {
+        public static void Init()
+        {
+            Init(new WindowsCore());
+        }
+
         public override void Initialize()
         {
             InitLogger(new Logger.WriteMethodDelegate(Console.Write));

@@ -28,6 +28,11 @@ namespace Vision.Android
             img = imshowView;
         }
 
+        public static void Init(Context context, Activity activity, ImageView imgView = null)
+        {
+            Core.Init(new AndroidCore(context, activity, imgView));
+        }
+
         public override void Initialize()
         {
             InitLogger(new Logger.WriteMethodDelegate((s) => Log.Info("Vision.Android", s)));

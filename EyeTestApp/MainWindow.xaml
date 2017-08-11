@@ -6,12 +6,66 @@
         xmlns:local="clr-namespace:EyeTestApp"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525" WindowStyle="None" Background="Transparent" AllowsTransparency="True">
+    <Window.Resources>
+        <Storyboard x:Key="PanalOn">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)" Storyboard.TargetName="Grid_Panal">
+                <EasingDoubleKeyFrame KeyTime="0" Value="{Binding ElementName=Grid_Panal, Path=Opacity}"/>
+                <SplineDoubleKeyFrame KeyTime="0:0:0.2" Value="1" KeySpline="0,0,0.3,1"/>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+        <Storyboard x:Key="PanalOff">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)" Storyboard.TargetName="Grid_Panal">
+                <SplineDoubleKeyFrame KeyTime="0" Value="{Binding ElementName=Grid_Panal, Path=Opacity}"/>
+                <SplineDoubleKeyFrame KeySpline="0.7,0,1,1" KeyTime="0:0:0.2" Value="0.2"/>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+    </Window.Resources>
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+            <BeginStoryboard x:Name="PanalOff_BeginStoryboard" Storyboard="{StaticResource PanalOff}"/>
+        </EventTrigger>
+        <EventTrigger RoutedEvent="UIElement.MouseEnter" SourceName="Grid_Panal">
+            <BeginStoryboard x:Name="PanalOn_BeginStoryboard" Storyboard="{StaticResource PanalOn}"/>
+        </EventTrigger>
+        <EventTrigger RoutedEvent="UIElement.MouseLeave" SourceName="Grid_Panal">
+            <BeginStoryboard x:Name="PanalOff_BeginStoryboard1" Storyboard="{StaticResource PanalOff}"/>
+        </EventTrigger>
+    </Window.Triggers>
     <Grid>
         <Canvas x:Name="Canvas">
             <Grid ClipToBounds="False" x:Name="Cursor">
-                <Ellipse Width="48" Height="48" StrokeThickness="4" Stroke="White" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="-100"/>
+                <Ellipse Width="48" Height="48" StrokeThickness="5" Stroke="White" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="-100"/>
                 <Ellipse Fill="White" Width="6" Height="6" Margin="-100"/>
+                <Grid.Effect>
+                    <DropShadowEffect BlurRadius="0" ShadowDepth="5" Direction="270" Opacity="0.66"/>
+                </Grid.Effect>
+                <Grid.CacheMode>
+                    <BitmapCache/>
+                </Grid.CacheMode>
             </Grid>
         </Canvas>
+        <Grid x:Name="Grid_Panal">
+            <StackPanel MinWidth="180" Background="White" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,50,82">
+                <Grid Margin="10,2">
+                    <TextBlock Text="Camera" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                    <TextBox Text="0" Width="50" HorizontalAlignment="Right" Height="24" VerticalContentAlignment="Center" x:Name="Tb_Camera"/>
+                </Grid>
+                <Grid Margin="10,2" Height="24">
+                    <TextBlock Text="Head Use Smooth" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                    <CheckBox IsChecked="True" HorizontalAlignment="Right" VerticalAlignment="Center" x:Name="Cb_Head_Smooth" Checked="Cb_Head_Smooth_Checked" Unchecked="Cb_Head_Smooth_Unchecked"/>
+                </Grid>
+                <Grid Margin="10,2" Height="24">
+                    <TextBlock Text="Gaze Use Smooth" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                    <CheckBox IsChecked="True" HorizontalAlignment="Right" VerticalAlignment="Center" x:Name="Cb_Gaze_Smooth" Checked="Cb_Gaze_Smooth_Checked" Unchecked="Cb_Gaze_Smooth_Unchecked"/>
+                </Grid>
+                <Button Margin="10,2" Content="Start" Height="24" x:Name="Bt_Start" Click="Bt_Start_Click"/>
+                <StackPanel.Effect>
+                    <DropShadowEffect Direction="270" ShadowDepth="5" BlurRadius="24"/>
+                </StackPanel.Effect>
+                <StackPanel.CacheMode>
+                    <BitmapCache/>
+                </StackPanel.CacheMode>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>

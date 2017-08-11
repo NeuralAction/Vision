@@ -13,5 +13,9 @@ namespace EyeTestApp
     /// </summary>
     public partial class App : Application
     {
+        public App()
+        {
+            Vision.Windows.WindowsCore.Init();
+        }
     }
 }

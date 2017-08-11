@@ -63,7 +63,7 @@ namespace AndroidTests
 
             ImageView img = FindViewById<ImageView>(Resource.Id.imageView1);
 
-            Core.Init(new AndroidCore(this, this, img));
+            AndroidCore.Init(this, this, img);
 
             detectorXml = new FaceDetectorXmlLoader();
             flandModel = new FlandmarkModelLoader();

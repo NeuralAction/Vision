@@ -56,7 +56,7 @@ namespace Vision.Tests
             Logger.Log(this, "Press E to Exit");
 
             Detector = new FaceDetector(faceXml, eyeXml);
-            GazeDetector = new EyeGazeDetector();
+            GazeDetector = new EyeGazeDetector(ScreenProperties);
             ScreenProperties = new ScreenProperties()
             {
                 Origin = new Point3D(-205, 0, 0),
@@ -195,7 +195,7 @@ namespace Vision.Tests
             if (rect.Length > 0 && DetectGaze)
             {
                 Profiler.Start("GazeALL");
-                Point info = GazeDetector.Detect(rect[0], mat, ScreenProperties);
+                Point info = GazeDetector.Detect(rect[0], mat);
                 if (info != null)
                 {
                     Logger.Log(info.ToString());

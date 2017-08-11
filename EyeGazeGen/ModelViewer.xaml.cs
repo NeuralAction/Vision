@@ -25,6 +25,7 @@ namespace EyeGazeGen
     public partial class ModelViewer : Window
     {
         EyeGazeModel model;
+        ScreenProperties ScreenProperties;
         public ModelViewer(Window wnd, EyeGazeModel model)
         {
             this.model = model;
@@ -71,16 +72,17 @@ namespace EyeGazeGen
                         Interpolation = Interpolation.Cubic,
                         LandmarkDetect = true,
                         LandmarkSolve = true,
-                        ScreenProperties = new ScreenProperties()
-                        {
-                            Origin = model.ScreenOrigin,
-                            PixelSize = model.ScreenPixelSize,
-                            Size = model.ScreenSize
-                        },
                         SmoothLandmarks = false,
                         SmoothVectors = true
                     });
                 }
+
+                ScreenProperties = new ScreenProperties()
+                {
+                    Origin = model.ScreenOrigin,
+                    PixelSize = model.ScreenPixelSize,
+                    Size = model.ScreenSize
+                };
 
                 object countLocker = new object();
                 int count = 0;
@@ -111,7 +113,7 @@ namespace EyeGazeGen
                                         {
                                             using (VMat eyeROI = face.LeftEye.RoiCropByPercent(frame))
                                             {
-                                                var rod = face.SolveLookScreenVector(ele.Point, detector.ScreenProperties, Flandmark.UnitPerMM).ToArray();
+                                                var rod = face.SolveLookScreenVector(ele.Point, ScreenProperties, Flandmark.UnitPerMM).ToArray();
 
                                                 FileNode eyeFile = dir.GetFile($"{ele.Index},{rod[0]},{rod[1]},{rod[2]}.jpg");
 

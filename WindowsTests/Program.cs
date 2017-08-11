@@ -35,7 +35,7 @@ namespace WindowsTests
         [STAThread]
         static void Main(string[] args)
         {
-            Core.Init(new Vision.Windows.WindowsCore());
+            Vision.Windows.WindowsCore.Init();
 
             Program prg = new Program();
             prg.Run();

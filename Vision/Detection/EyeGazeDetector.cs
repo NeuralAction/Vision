@@ -25,30 +25,53 @@ namespace Vision.Detection
         public static object ModelLocker = new object();
         public static Graph ModelGraph;
 
-        public int ImageSize { get; set; } = 160;
+        static EyeGazeDetector()
+        {
+            Logger.Log("EyeGazeDetector", "Start model load");
+
+            ModelGraph = new Graph();
+            ModelGraph.ImportPb(Storage.LoadResource(ModelResourceGpu, true));
+
+            Logger.Log("EyeGazeDetector", "Finished model load");
+        }
+
+        public int ImageSize { get; set; } = 60;
         public double AngleMul { get; set; } = 1;
+
+        public bool ClipToBound { get; set; } = false;
+
+        public bool UseSmoothing { get; set; } = false;
+
         public bool UseModification { get; set; } = false;
         public double SensitiveX { get; set; } = 2;
         public double OffsetX { get; set; } = 0.1;
         public double SensitiveY { get; set; } = 2;
         public double OffsetY { get; set; } = -0.05;
-        public EyeDirection Direction { get; set; } = EyeDirection.None;
+
+        public ScreenProperties ScreenProperties { get; set; }
 
         Session sess;
+        Tensor imgTensor;
+        float[] imgbuffer;
+        PointKalmanFilter kalman = new PointKalmanFilter();
 
-        public EyeGazeDetector()
+        public EyeGazeDetector(ScreenProperties screen)
         {
-            Logger.Log(this, "Start model load");
-            if(ModelGraph == null)
+            if (screen == null)
+                throw new ArgumentNullException("screen properites");
+
+            ScreenProperties = screen;
+
+            if (ModelGraph == null)
             {
-                ModelGraph = new Graph();
-                ModelGraph.ImportPb(Storage.LoadResource(ModelResourceGpu, true));
+                Logger.Error(this, "Erroed load model");
+
+                throw new Exception();
             }
             sess = new Session(ModelGraph);
-            Logger.Log(this, "Finished model load");
         }
 
-        public Point Detect(FaceRect face, VMat frame, ScreenProperties properties)
+        public Point Detect(FaceRect face, VMat frame)
         {
             EyeRect lefteye = face.LeftEye;
 
@@ -58,12 +81,17 @@ namespace Vision.Detection
             if (lefteye == null)
                 return null;
 
-            return Detect(lefteye, frame, properties);
+            var result = InternalDetect(lefteye, frame, ScreenProperties);
+            return result;
         }
 
-        float[] imgbuffer;
-        Tensor imgTensor;
-        public Point Detect(EyeRect eye, VMat frame, ScreenProperties properties)
+        public Point Detect(EyeRect eye, VMat frame)
+        {
+            var result = InternalDetect(eye, frame, ScreenProperties);
+            return result;
+        }
+
+        private Point InternalDetect(EyeRect eye, VMat frame, ScreenProperties properties)
         {
             if (eye == null)
                 throw new ArgumentNullException("eye");
@@ -83,14 +111,13 @@ namespace Vision.Detection
                 {
                     if (!mat.IsEmpty)
                     {
-                        mat.Resize(new Size(ImageSize, ImageSize), 0, 0, Interpolation.NearestNeighbor);
-                        
+                        mat.Resize(new Size(ImageSize, ImageSize), 0, 0, Interpolation.Cubic);
+
                         if (imgbuffer == null)
                             imgbuffer = new float[ImageSize * ImageSize * 3];
                         imgTensor = Tools.VMatBgr2Tensor(mat, NormalizeMode.ZeroMean, -1, -1, new long[] { 1, ImageSize, ImageSize, 3 }, imgbuffer);
                         Tensor[] fetch = sess.Run(new string[] { "output" },
                             new Dictionary<string, Tensor>() { { "input_image", imgTensor }, { "phase_train", new Tensor(false) }, { "keep_prob", new Tensor(1.0f) } });
-                        //new Dictionary<string, Tensor>() { { "input_image", imgTensor }, { "keep_prob", new Tensor(1.0f) } });
 
                         Tensor result = fetch[0];
                         float[,] output = (float[,])result.GetValue();
@@ -104,31 +131,48 @@ namespace Vision.Detection
                         Vector<double> vec = CreateVector.Dense(new double[] { x, y, -1 });
                         pt = eye.Parent.SolveRayScreenVector(new Point3D(vec.ToArray()), properties, Flandmark.UnitPerMM);
 
-                        foreach(Tensor t in fetch)
-                            t.Dispose();
-
-                        fetch = null;
-                        result = null;
-
                         try
                         {
+                            foreach (Tensor t in fetch)
+                                t.Dispose();
+
                             imgTensor.Dispose();
                         }
                         catch (Exception ex)
                         {
-                            Logger.Error(this, ex);
+                            Logger.Error(this, "Error while disposing tensors\n" + ex.ToString());
                         }
                     }
                 }
             }
-            
+
+            if (ClipToBound)
+            {
+                pt.X = Util.Clamp(pt.X, 0, ScreenProperties.PixelSize.Width);
+                pt.Y = Util.Clamp(pt.Y, 0, ScreenProperties.PixelSize.Height);
+            }
+
+            if (UseSmoothing)
+            {
+                pt = kalman.Calculate(pt);
+            }
+
             Profiler.End("GazeDetect");
             return pt;
         }
 
         public void Dispose()
         {
-            sess.Dispose();
+            if (imgbuffer != null)
+            {
+                imgbuffer = null;
+            }
+
+            if (sess != null)
+            {
+                sess.Dispose();
+                sess = null;
+            }
         }
     }
 }

@@ -13,6 +13,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
+using Vision;
+using Vision.Detection;
+
 namespace EyeTestApp
 {
     /// <summary>
@@ -20,9 +23,159 @@ namespace EyeTestApp
     /// </summary>
     public partial class MainWindow : Window
     {
+        EyeGazeService service;
+        bool _started = false;
+        bool Started
+        {
+            get => _started;
+            set
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    if (value)
+                    {
+                        Bt_Start.Content = "Stop";
+                    }
+                    else
+                    {
+                        Bt_Start.Content = "Start";
+                    }
+                });
+                _started = value;
+            }
+        }
+        object StateLocker = new object();
+
         public MainWindow()
         {
             InitializeComponent();
+
+            WindowState = WindowState.Maximized;
+            Topmost = true;
+        }
+
+        public void LazyStart(int camera, bool faceSmooth, bool gazeSmooth)
+        {
+            Task t = new Task(() =>
+            {
+                lock (StateLocker)
+                {
+                    if (Started)
+                    {
+                        if(service != null)
+                        {
+                            service.Dispose();
+                        }
+                    }
+
+                    service = new EyeGazeService();
+                    service.GazeDetector.ClipToBound = true;
+                    service.GazeDetector.UseSmoothing = gazeSmooth;
+                    service.FaceDetector.SmoothLandmarks = faceSmooth;
+                    service.FaceDetector.SmoothVectors = faceSmooth;
+                    service.GazeTracked += Service_GazeTracked;
+                    service.Start(camera);
+
+                    Started = true;
+                }
+            });
+
+            t.Start();
+        }
+
+        public void LazyStop()
+        {
+            Task t = new Task(() => 
+            {
+                lock (StateLocker)
+                {
+                    if (Started)
+                    {
+                        if(service != null)
+                        {
+                            service.Dispose();
+                            service = null;
+                        }
+
+                        Started = false;
+                    }
+                }
+            });
+
+            t.Start();
+        }
+
+        private void Service_GazeTracked(object sender, Vision.Point e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                var width = ActualWidth;
+                var height = ActualHeight;
+
+                var left = e.X / service.ScreenProperties.PixelSize.Width * width;
+                var top = e.Y / service.ScreenProperties.PixelSize.Height * height;
+
+                Canvas.SetLeft(Cursor, left);
+                Canvas.SetTop(Cursor, top);
+            });
+        }
+
+        private void Cb_Gaze_Smooth_Checked(object sender, RoutedEventArgs e)
+        {
+            if(service != null)
+            {
+                service.GazeDetector.UseSmoothing = true;
+            }
+        }
+
+        private void Cb_Gaze_Smooth_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (service != null)
+            {
+                service.GazeDetector.UseSmoothing = false;
+            }
+        }
+
+        private void Cb_Head_Smooth_Checked(object sender, RoutedEventArgs e)
+        {
+            if (service != null)
+            {
+                service.FaceDetector.SmoothLandmarks = true;
+                service.FaceDetector.SmoothVectors = true;
+            }
+        }
+
+        private void Cb_Head_Smooth_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (service != null)
+            {
+                service.FaceDetector.SmoothLandmarks = false;
+                service.FaceDetector.SmoothVectors = false;
+            }
+        }
+
+        private void Bt_Start_Click(object sender, RoutedEventArgs e)
+        {
+            int index = -1;
+
+            try
+            {
+                index = Convert.ToInt32(Tb_Camera.Text);
+            }
+            catch
+            {
+                MessageBox.Show("Invalid Camera Index");
+                return;
+            }
+
+            if (Started)
+            {
+                LazyStop();
+            }
+            else
+            {
+                LazyStart(index, (bool)Cb_Head_Smooth.IsChecked, (bool)Cb_Gaze_Smooth.IsChecked);
+            }
         }
     }
 }
