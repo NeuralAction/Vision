@@ -37,7 +37,7 @@
                 <Ellipse Width="48" Height="48" StrokeThickness="5" Stroke="White" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="-100"/>
                 <Ellipse Fill="White" Width="6" Height="6" Margin="-100"/>
                 <Grid.Effect>
-                    <DropShadowEffect BlurRadius="0" ShadowDepth="5" Direction="270" Opacity="0.66"/>
+                    <DropShadowEffect BlurRadius="0" ShadowDepth="5" Direction="270" Opacity="0.33"/>
                 </Grid.Effect>
                 <Grid.CacheMode>
                     <BitmapCache/>

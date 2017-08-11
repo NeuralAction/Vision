@@ -60,6 +60,12 @@ namespace EyeTestApp
             {
                 lock (StateLocker)
                 {
+                    Dispatcher.Invoke(() =>
+                    {
+                        Bt_Start.IsEnabled = false;
+                        Bt_Start.Content = "Waiting Camera";
+                    });
+
                     if (Started)
                     {
                         if(service != null)
@@ -74,8 +80,13 @@ namespace EyeTestApp
                     service.FaceDetector.SmoothLandmarks = faceSmooth;
                     service.FaceDetector.SmoothVectors = faceSmooth;
                     service.GazeTracked += Service_GazeTracked;
+                    service.FaceTracked += Service_FaceTracked;
                     service.Start(camera);
 
+                    Dispatcher.Invoke(() =>
+                    {
+                        Bt_Start.IsEnabled = true;
+                    });
                     Started = true;
                 }
             });
@@ -91,11 +102,22 @@ namespace EyeTestApp
                 {
                     if (Started)
                     {
-                        if(service != null)
+                        Dispatcher.Invoke(() =>
+                        {
+                            Bt_Start.IsEnabled = false;
+                            Bt_Start.Content = "Closing Camera";
+                        });
+
+                        if (service != null)
                         {
                             service.Dispose();
                             service = null;
                         }
+
+                        Dispatcher.Invoke(() =>
+                        {
+                            Bt_Start.IsEnabled = true;
+                        });
 
                         Started = false;
                     }
@@ -105,10 +127,23 @@ namespace EyeTestApp
             t.Start();
         }
 
+        private void Service_FaceTracked(object sender, FaceRect[] e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if(e == null || e.Length < 1 || e[0].LeftEye == null)
+                {
+                    Cursor.Opacity = 0.33;
+                }
+            });
+        }
+        
         private void Service_GazeTracked(object sender, Vision.Point e)
         {
             Dispatcher.Invoke(() =>
             {
+                Cursor.Opacity = 1;
+
                 var width = ActualWidth;
                 var height = ActualHeight;
 

@@ -123,5 +123,11 @@
       <Name>Vision</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\TensorFlowSharp\GitIgnoredDatas\windows\cpu\libtensorflow.dll">
+      <Link>libtensorflow.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
