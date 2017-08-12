@@ -43,8 +43,8 @@ namespace Vision.Detection
         public bool UseSmoothing { get; set; } = false;
 
         public bool UseModification { get; set; } = true;
-        public double SensitiveX { get; set; } = 1.6;
-        public double OffsetX { get; set; } = 0.0;
+        public double SensitiveX { get; set; } = 1.85;
+        public double OffsetX { get; set; } = 0.02;
         public double SensitiveY { get; set; } = 2;
         public double OffsetY { get; set; } = -0.06;
 
