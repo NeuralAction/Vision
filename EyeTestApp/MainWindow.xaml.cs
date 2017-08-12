@@ -129,29 +129,30 @@ namespace EyeTestApp
 
         private void Service_FaceTracked(object sender, FaceRect[] e)
         {
-            Dispatcher.Invoke(() =>
-            {
-                if(e == null || e.Length < 1 || e[0].LeftEye == null)
-                {
-                    Cursor.Opacity = 0.33;
-                }
-            });
+
         }
         
         private void Service_GazeTracked(object sender, Vision.Point e)
         {
             Dispatcher.Invoke(() =>
             {
-                Cursor.Opacity = 1;
+                if (e != null)
+                {
+                    Cursor.Opacity = 1;
 
-                var width = ActualWidth;
-                var height = ActualHeight;
+                    var width = ActualWidth;
+                    var height = ActualHeight;
 
-                var left = e.X / service.ScreenProperties.PixelSize.Width * width;
-                var top = e.Y / service.ScreenProperties.PixelSize.Height * height;
+                    var left = e.X / service.ScreenProperties.PixelSize.Width * width;
+                    var top = e.Y / service.ScreenProperties.PixelSize.Height * height;
 
-                Canvas.SetLeft(Cursor, left);
-                Canvas.SetTop(Cursor, top);
+                    Canvas.SetLeft(Cursor, left);
+                    Canvas.SetTop(Cursor, top);
+                }
+                else
+                {
+                    Cursor.Opacity = 0.33;
+                }
             });
         }
 

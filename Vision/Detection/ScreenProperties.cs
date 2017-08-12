@@ -35,6 +35,11 @@ namespace Vision.Detection
             PixelSize = pixelSize;
         }
 
+        public static ScreenProperties CreatePixelScreen(double width, double height, double dpi = 96)
+        {
+            return CreatePixelScreen(new Size(width, height), dpi);
+        }
+
         public static ScreenProperties CreatePixelScreen(Size pixelSize, double dpi = 96)
         {
             return new ScreenProperties()

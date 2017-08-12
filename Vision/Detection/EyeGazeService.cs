@@ -25,10 +25,7 @@ namespace Vision.Detection
         {
             ScreenProperties = screen;
 
-            GazeDetector = new EyeGazeDetector(ScreenProperties)
-            {
-                UseModification = true
-            };
+            GazeDetector = new EyeGazeDetector(ScreenProperties);
 
             FaceDetector = new FaceDetector(loader)
             {
@@ -50,7 +47,12 @@ namespace Vision.Detection
             };
         }
 
-        public EyeGazeService(Size pixelSize, double dpi) : this(new FaceDetectorXmlLoader(), ScreenProperties.CreatePixelScreen(pixelSize, dpi))
+        public EyeGazeService(ScreenProperties screen): this(new FaceDetectorXmlLoader(), screen)
+        {
+
+        }
+
+        public EyeGazeService(Size pixelSize, double dpi) : this(ScreenProperties.CreatePixelScreen(pixelSize, dpi))
         {
 
         }
@@ -100,6 +102,8 @@ namespace Vision.Detection
             FaceTask = new Task(() =>
             {
                 var result = FaceDetector.Detect(mat);
+                if (result != null && result.Length < 1)
+                    result = null;
 
                 StartGaze(result, mat);
                 FaceTracked?.Invoke(this, result);
@@ -117,14 +121,14 @@ namespace Vision.Detection
 
             GazeTask = new Task(() =>
             {
+                Point result = null;
                 if(face != null && face.Length > 0 && face[0].LeftEye != null)
                 {
                     var targetEye = face[0].LeftEye;
-                    var result = GazeDetector.Detect(targetEye, frame);
-
-                    GazeTracked?.Invoke(this, result);
+                    result = GazeDetector.Detect(targetEye, frame);
                 }
 
+                GazeTracked?.Invoke(this, result);
                 frame.Dispose();
             });
 

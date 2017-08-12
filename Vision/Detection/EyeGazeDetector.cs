@@ -42,11 +42,11 @@ namespace Vision.Detection
 
         public bool UseSmoothing { get; set; } = false;
 
-        public bool UseModification { get; set; } = false;
-        public double SensitiveX { get; set; } = 1.65;
-        public double OffsetX { get; set; } = 0.05;
-        public double SensitiveY { get; set; } = 1.9;
-        public double OffsetY { get; set; } = -0.12;
+        public bool UseModification { get; set; } = true;
+        public double SensitiveX { get; set; } = 1.85;
+        public double OffsetX { get; set; } = 0.1;
+        public double SensitiveY { get; set; } = 2;
+        public double OffsetY { get; set; } = -0.06;
 
         public ScreenProperties ScreenProperties { get; set; }
 
