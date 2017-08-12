@@ -55,14 +55,14 @@ namespace Vision.Tests
         {
             Logger.Log(this, "Press E to Exit");
 
-            Detector = new FaceDetector(faceXml, eyeXml);
-            GazeDetector = new EyeGazeDetector(ScreenProperties);
             ScreenProperties = new ScreenProperties()
             {
                 Origin = new Point3D(-205, 0, 0),
                 PixelSize = new Size(1920, 1080),
                 Size = new Size(410, 285)
             };
+            Detector = new FaceDetector(faceXml, eyeXml);
+            GazeDetector = new EyeGazeDetector(ScreenProperties);
         }
 
         public FaceDetection(string filePath, string faceXml, string eyeXml, FileNode flandmarkModel) : this(faceXml, eyeXml, flandmarkModel)
