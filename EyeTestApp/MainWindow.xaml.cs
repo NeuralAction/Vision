@@ -50,6 +50,11 @@ namespace EyeTestApp
         {
             InitializeComponent();
 
+            Tb_SesitiveX.Text = EyeGazeDetector.DefaultSensitiveX.ToString();
+            Tb_SesitiveY.Text = EyeGazeDetector.DefaultSensitiveY.ToString();
+            Tb_OffsetX.Text = EyeGazeDetector.DefaultOffsetX.ToString();
+            Tb_OffsetY.Text = EyeGazeDetector.DefaultOffsetY.ToString();
+
             WindowState = WindowState.Maximized;
             Topmost = true;
         }
@@ -81,6 +86,8 @@ namespace EyeTestApp
                     service.FaceDetector.SmoothVectors = faceSmooth;
                     service.GazeTracked += Service_GazeTracked;
                     service.FaceTracked += Service_FaceTracked;
+                    service.Clicked += Service_Clicked;
+                    service.Released += Service_Released;
                     service.Start(camera);
 
                     Dispatcher.Invoke(() =>
@@ -92,6 +99,24 @@ namespace EyeTestApp
             });
 
             t.Start();
+        }
+
+        private void Service_Released(object sender, Vision.Point e)
+        {
+            Dispatcher.Invoke(() => 
+            {
+                Grid_Cursor.Width = 55;
+                Grid_Cursor.Height = 55;
+            });
+        }
+
+        private void Service_Clicked(object sender, Vision.Point e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                Grid_Cursor.Width = 120;
+                Grid_Cursor.Height = 120;
+            });
         }
 
         public void LazyStop()
@@ -156,6 +181,8 @@ namespace EyeTestApp
             });
         }
 
+        #region UI
+
         private void Cb_Gaze_Smooth_Checked(object sender, RoutedEventArgs e)
         {
             if(service != null)
@@ -213,5 +240,83 @@ namespace EyeTestApp
                 LazyStart(index, (bool)Cb_Head_Smooth.IsChecked, (bool)Cb_Gaze_Smooth.IsChecked);
             }
         }
+
+        private void Cb_Gaze_Ex_Checked(object sender, RoutedEventArgs e)
+        {
+            if(service != null)
+            {
+                service.GazeDetector.UseBothEyes = true;
+            }
+        }
+
+        private void Cb_Gaze_Ex_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if(service != null)
+            {
+                service.GazeDetector.UseBothEyes = false;
+            }
+        }
+
+        private void Tb_SesitiveX_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if(service != null)
+            {
+                try
+                {
+                    service.GazeDetector.SensitiveX = Convert.ToDouble(Tb_SesitiveX.Text);
+                }
+                catch
+                {
+
+                }
+            }
+        }
+
+        private void Tb_SesitiveY_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (service != null)
+            {
+                try
+                {
+                    service.GazeDetector.SensitiveY = Convert.ToDouble(Tb_SesitiveY.Text);
+                }
+                catch
+                {
+
+                }
+            }
+        }
+
+        private void Tb_OffsetX_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (service != null)
+            {
+                try
+                {
+                    service.GazeDetector.OffsetX = Convert.ToDouble(Tb_OffsetX.Text);
+                }
+                catch
+                {
+
+                }
+            }
+        }
+
+        private void Tb_OffsetY_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (service != null)
+            {
+                try
+                {
+                    service.GazeDetector.OffsetY = Convert.ToDouble(Tb_OffsetY.Text);
+                }
+                catch
+                {
+
+                }
+            }
+        }
+
+        #endregion UI
     }
 }

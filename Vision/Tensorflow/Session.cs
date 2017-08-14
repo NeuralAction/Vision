@@ -23,7 +23,7 @@ namespace Vision.Tensorflow
 
         public Session(Graph graph)
         {
-            Graph = graph;
+            Graph = graph ?? throw new ArgumentNullException("graph");
             sess = new TFSession(graph.graph);
         }
         

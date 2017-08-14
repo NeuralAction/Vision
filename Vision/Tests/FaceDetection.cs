@@ -33,6 +33,7 @@ namespace Vision.Tests
         public bool GazeSmooth { get; set; } = false;
         public FaceDetector Detector { get; set; }
         public EyeGazeDetector GazeDetector { get; set; }
+        public EyeOpenDetector OpenDetector { get; set; }
         public ScreenProperties ScreenProperties { get; set; }
 
         public event EventHandler<FaceDetectedArgs> Detected;
@@ -63,6 +64,7 @@ namespace Vision.Tests
             };
             Detector = new FaceDetector(faceXml, eyeXml);
             GazeDetector = new EyeGazeDetector(ScreenProperties);
+            OpenDetector = new EyeOpenDetector();
         }
 
         public FaceDetection(string filePath, string faceXml, string eyeXml, FileNode flandmarkModel) : this(faceXml, eyeXml, flandmarkModel)
@@ -116,8 +118,8 @@ namespace Vision.Tests
                     Profiler.Start("DetectionALL");
 
                     Profiler.Start("DetectionFaceTaskStart");
-                    e.VMatDispose = false;
-                    VMat cloned = mat;
+                    e.VMatDispose = true;
+                    VMat cloned = mat.Clone();
                     FaceDetectionTask = new Task(() =>
                     {
                         FaceDetectProc(cloned);
@@ -214,6 +216,16 @@ namespace Vision.Tests
                     Logger.Log("FaceDectection.GazeDetected", info.ToString());
                 }
                 Profiler.End("GazeALL");
+
+                Profiler.Start("OpenALL");
+                foreach (var face in rect)
+                {
+                    if (face.LeftEye != null)
+                        OpenDetector.Detect(face.LeftEye, mat);
+                    if (face.RightEye != null)
+                        OpenDetector.Detect(face.RightEye, mat);
+                }
+                Profiler.End("OpenALL");
             }
 
             lock (renderLock)
@@ -263,7 +275,6 @@ namespace Vision.Tests
                         //A*Cinv = B*C*Cinv
                         //A*Cinv = B
                         //이었지만, 역시 정확도가 참 좋지않은 결과로 신경망을 믿도록 합니다
-                        //가랏 MPIGaze
 
                         //Slove Unit Test
 

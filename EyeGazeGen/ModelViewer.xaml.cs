@@ -41,10 +41,19 @@ namespace EyeGazeGen
 
         private void Bt_Create_EyesModel_Click(object sender, RoutedEventArgs e)
         {
-            DirectoryNode dir = model.Directory.GetDirectory($"[{DateTime.Now.ToString()}] EyesSubModule");
+            var dir = model.Directory.GetDirectory($"[{DateTime.Now.ToString()}] EyesSubModule");
             Storage.FixPathChars(dir);
             if (!dir.IsExist)
                 dir.Create();
+
+            var dirLeft = dir.GetDirectory("left");
+            if (!dirLeft.IsExist)
+                dirLeft.Create();
+
+            var dirRight = dir.GetDirectory("right");
+            if (!dirRight.IsExist)
+                dirRight.Create();
+
             if (dir != null)
             {
                 FileNode text = dir.NewFile("model.txt");
@@ -109,16 +118,19 @@ namespace EyeGazeGen
                                 {
                                     foreach (var face in faces)
                                     {
-                                        if (Math.Abs(face.LandmarkTransformVector[2]) < 7500 && face.LeftEye != null)
+                                        if (Math.Abs(face.LandmarkTransformVector[2]) < 7500 && face.LeftEye != null && face.RightEye != null)
                                         {
+                                            var rod = face.SolveLookScreenVector(ele.Point, ScreenProperties, Flandmark.UnitPerMM).ToArray();
+
+                                            var filename = $"{ele.Index},{rod[0]},{rod[1]},{rod[2]}.jpg";
+                                            FileNode eyeFileLeft = dirLeft.GetFile(filename);
+                                            FileNode eyeFileRight = dirRight.GetFile(filename);
+
                                             using (VMat eyeROI = face.LeftEye.RoiCropByPercent(frame))
-                                            {
-                                                var rod = face.SolveLookScreenVector(ele.Point, ScreenProperties, Flandmark.UnitPerMM).ToArray();
+                                                Core.Cv.ImgWrite(eyeFileLeft, eyeROI, 92);
 
-                                                FileNode eyeFile = dir.GetFile($"{ele.Index},{rod[0]},{rod[1]},{rod[2]}.jpg");
-
-                                                Core.Cv.ImgWrite(eyeFile, eyeROI, 92);
-                                            }
+                                            using (VMat eyeROI = face.RightEye.RoiCropByPercent(frame))
+                                                Core.Cv.ImgWrite(eyeFileRight, eyeROI, 92);
                                         }
                                     }
                                 }

@@ -7,15 +7,45 @@ using Vision.Cv;
 
 namespace Vision.Detection
 {
+    public enum ClickEyes
+    {
+        LeftEye = 0,
+        RightEye = 1,
+        Both = 2
+    }
+
+    public class EyeWinkArgs : EventArgs
+    {
+        public Point Point { get; set; }
+        public ClickEyes ClickEyes { get; set; }
+
+        public EyeWinkArgs(Point pt, ClickEyes eye)
+        {
+            Point = pt;
+            ClickEyes = eye;
+        }
+    }
+
     public class EyeGazeService : IDisposable
     {
         public event EventHandler<Point> GazeTracked;
         public event EventHandler<FaceRect[]> FaceTracked;
         public event EventHandler<FrameArgs> FrameCaptured;
 
+        public event EventHandler<EyeWinkArgs> Winked;
+        public event EventHandler<EyeWinkArgs> Winking;
+        public event EventHandler<EyeWinkArgs> UnWinked;
+
+        public event EventHandler<Point> Clicked;
+        public event EventHandler<Point> Clicking;
+        public event EventHandler<Point> Released;
+
         public EyeGazeDetector GazeDetector { get; set; }
+        public EyeOpenDetector OpenDetector { get; set; }
         public FaceDetector FaceDetector { get; set; }
         public ScreenProperties ScreenProperties { get; set; }
+        public bool IsLeftClicking { get; set; } = false;
+        public bool IsRightClicking { get; set; } = false;
 
         Capture Capture;
         Task FaceTask;
@@ -45,6 +75,8 @@ namespace Vision.Detection
                 SmoothLandmarks = true,
                 SmoothVectors = true
             };
+
+            OpenDetector = new EyeOpenDetector();
         }
 
         public EyeGazeService(ScreenProperties screen): this(new FaceDetectorXmlLoader(), screen)
@@ -85,8 +117,8 @@ namespace Vision.Detection
 
             if(e.VMat != null && !e.VMat.IsEmpty)
             {
-                var cloned = e.VMat.Clone();
-                StartFace(cloned);
+                e.VMatDispose = false;
+                StartFace(e.VMat);
             }
 
             FrameCaptured?.Invoke(this, e);
@@ -122,14 +154,87 @@ namespace Vision.Detection
             GazeTask = new Task(() =>
             {
                 Point result = null;
-                if(face != null && face.Length > 0 && face[0].LeftEye != null)
+                bool leftClicked = false, rightClicked = false;
+                if(face != null && face.Length > 0)
                 {
-                    var targetEye = face[0].LeftEye;
-                    result = GazeDetector.Detect(targetEye, frame);
+                    var target = face[0];
+
+                    if(target.LeftEye != null)
+                    {
+                        var data = OpenDetector.Detect(target.LeftEye, frame);
+                        if(data.Percent > 0.6)
+                            leftClicked = !data.IsOpen;
+                    }
+
+                    if(target.RightEye != null)
+                    {
+                        var data = OpenDetector.Detect(target.RightEye, frame);
+                        if (data.Percent > 0.6)
+                            rightClicked = !data.IsOpen;
+                    }
+
+                    if(target.LeftEye != null && target.RightEye != null)
+                        result = GazeDetector.Detect(face[0], frame);
                 }
 
                 GazeTracked?.Invoke(this, result);
+
+                if(IsLeftClicking != leftClicked && IsRightClicking != rightClicked)
+                {
+                    if (leftClicked && rightClicked)
+                        Winked?.Invoke(this, new EyeWinkArgs(result, ClickEyes.Both));
+                    else if (!leftClicked && !rightClicked)
+                        UnWinked?.Invoke(this, new EyeWinkArgs(result, ClickEyes.Both));
+                }
+                
+                if(IsLeftClicking != leftClicked)
+                {
+                    if (leftClicked)
+                        Winked?.Invoke(this, new EyeWinkArgs(result, ClickEyes.LeftEye));
+                    else
+                        UnWinked?.Invoke(this, new EyeWinkArgs(result, ClickEyes.LeftEye));
+                }
+
+                if (IsRightClicking != rightClicked)
+                {
+                    if (rightClicked)
+                        Winked?.Invoke(this, new EyeWinkArgs(result, ClickEyes.RightEye));
+                    else
+                        Winked?.Invoke(this, new EyeWinkArgs(result, ClickEyes.RightEye));
+                }
+
+                bool preClicking = IsLeftClicking || IsRightClicking;
+                bool newClicking = leftClicked || rightClicked;
+
+                if(preClicking != newClicking)
+                {
+                    if (newClicking)
+                        Clicked?.Invoke(this, result);
+                    else
+                        Released?.Invoke(this, result);
+                }
+
+                if (newClicking)
+                    Clicking?.Invoke(this, result);
+
+                IsLeftClicking = leftClicked;
+                IsRightClicking = rightClicked;
+
+                if (IsLeftClicking || IsRightClicking)
+                {
+                    ClickEyes clickEye = ClickEyes.Both;
+                    if (IsLeftClicking)
+                        clickEye = ClickEyes.LeftEye;
+                    if (IsRightClicking)
+                        clickEye = ClickEyes.RightEye;
+                    if (IsLeftClicking && IsRightClicking)
+                        clickEye = ClickEyes.Both;
+
+                    Winking?.Invoke(this, new EyeWinkArgs(result, clickEye));
+                }
+
                 frame.Dispose();
+                frame = null;
             });
 
             GazeTask.Start();
@@ -176,6 +281,12 @@ namespace Vision.Detection
             {
                 FaceDetector.Dispose();
                 FaceDetector = null;
+            }
+
+            if(OpenDetector != null)
+            {
+                OpenDetector.Dispose();
+                OpenDetector = null;
             }
         }
     }

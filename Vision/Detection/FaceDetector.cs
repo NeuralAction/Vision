@@ -47,6 +47,11 @@ namespace Vision.Detection
         {
 
         }
+
+        public FaceDetector() : this(new FaceDetectorXmlLoader())
+        {
+
+        }
         
         public FaceRect[] Detect(VMat frame, bool debug = false)
         {

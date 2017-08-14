@@ -20,130 +20,103 @@ namespace Vision.Detection
 
     public class EyeGazeDetector : IDisposable
     {
-        public readonly static ManifestResource ModelResourceCpu = new ManifestResource("Vision.Detection", "frozen_cpu.pb");
-        public readonly static ManifestResource ModelResourceGpu = new ManifestResource("Vision.Detection", "frozen_gpu.pb");
+        public const int ImageSize = 60;
+        public const int ImageSizeEx = 60;
+        public const double AngleMul = 1;
+        public const double DefaultSensitiveX = 1.85;
+        public const double DefaultSensitiveY = 2;
+        public const double DefaultOffsetX = 0.02;
+        public const double DefaultOffsetY = -0.12;
+
+        public readonly static ManifestResource ModelResourceExtend = new ManifestResource("Vision.Detection", "frozen_gazeEx.pb");
+        public readonly static ManifestResource ModelResourceSingle = new ManifestResource("Vision.Detection", "frozen_gaze.pb");
+
         public static object ModelLocker = new object();
-        public static Graph ModelGraph;
+        public static Graph ModelGraphSingle;
+        public static Graph ModelGraphExtend;
 
         static EyeGazeDetector()
         {
             Logger.Log("EyeGazeDetector", "Start model load");
 
-            ModelGraph = new Graph();
-            ModelGraph.ImportPb(Storage.LoadResource(ModelResourceGpu, true));
+            ModelGraphSingle = new Graph();
+            ModelGraphSingle.ImportPb(Storage.LoadResource(ModelResourceSingle, true));
+
+            ModelGraphExtend = new Graph();
+            ModelGraphExtend.ImportPb(Storage.LoadResource(ModelResourceExtend, true));
 
             Logger.Log("EyeGazeDetector", "Finished model load");
         }
 
-        public int ImageSize { get; set; } = 60;
-        public double AngleMul { get; set; } = 1;
-
         public bool ClipToBound { get; set; } = false;
-
+        public bool UseBothEyes { get; set; } = true;
         public bool UseSmoothing { get; set; } = false;
 
         public bool UseModification { get; set; } = true;
-        public double SensitiveX { get; set; } = 1.85;
-        public double OffsetX { get; set; } = 0.02;
-        public double SensitiveY { get; set; } = 2;
-        public double OffsetY { get; set; } = -0.06;
+        public double SensitiveX { get; set; } = DefaultSensitiveX;
+        public double OffsetX { get; set; } = DefaultOffsetX;
+        public double SensitiveY { get; set; } = DefaultSensitiveY;
+        public double OffsetY { get; set; } = DefaultOffsetY;
 
         public ScreenProperties ScreenProperties { get; set; }
 
         Session sess;
-        Tensor imgTensor;
-        float[] imgbuffer;
+        Session sessEx;
+        Tensor imgTensorLeft;
+        Tensor imgTensorRight;
         PointKalmanFilter kalman = new PointKalmanFilter();
+        float[] imgBufferLeft;
+        float[] imgBufferRight;
 
         public EyeGazeDetector(ScreenProperties screen)
         {
-            if (screen == null)
-                throw new ArgumentNullException("screen properites");
+            ScreenProperties = screen ?? throw new ArgumentNullException("screen properites");
 
-            ScreenProperties = screen;
-
-            if (ModelGraph == null)
-            {
-                Logger.Error(this, "Erroed load model");
-
-                throw new Exception();
-            }
-            sess = new Session(ModelGraph);
+            sess = new Session(ModelGraphSingle);
+            sessEx = new Session(ModelGraphExtend);
         }
 
         public Point Detect(FaceRect face, VMat frame)
         {
-            EyeRect lefteye = face.LeftEye;
+            var properties = ScreenProperties;
 
-            if (lefteye == null && face.Children.Count > 0)
-                lefteye = face.Children[0];
-
-            if (lefteye == null)
-                return null;
-
-            var result = InternalDetect(lefteye, frame, ScreenProperties);
-            return result;
-        }
-
-        public Point Detect(EyeRect eye, VMat frame)
-        {
-            var result = InternalDetect(eye, frame, ScreenProperties);
-            return result;
-        }
-
-        private Point InternalDetect(EyeRect eye, VMat frame, ScreenProperties properties)
-        {
-            if (eye == null)
+            if (face.LeftEye == null)
+                throw new ArgumentNullException("eye");
+            if (face.RightEye == null && UseBothEyes)
                 throw new ArgumentNullException("eye");
             if (frame == null || frame.IsEmpty)
                 throw new ArgumentNullException("frame");
             if (properties == null)
                 throw new ArgumentNullException("properties");
-            if (eye.Parent == null)
-                throw new ArgumentNullException("eye.parent");
 
             Profiler.Start("GazeDetect");
 
             Point pt = new Point(0, 0);
             lock (ModelLocker)
             {
-                using (VMat mat = eye.RoiCropByPercent(frame))
+                Point result;
+                if (UseBothEyes)
                 {
-                    if (!mat.IsEmpty)
-                    {
-                        mat.Resize(new Size(ImageSize, ImageSize), 0, 0, Interpolation.Cubic);
-
-                        if (imgbuffer == null)
-                            imgbuffer = new float[ImageSize * ImageSize * 3];
-                        imgTensor = Tools.VMatBgr2Tensor(mat, NormalizeMode.ZeroMean, -1, -1, new long[] { 1, ImageSize, ImageSize, 3 }, imgbuffer);
-                        Tensor[] fetch = sess.Run(new string[] { "output" },
-                            new Dictionary<string, Tensor>() { { "input_image", imgTensor }, { "phase_train", new Tensor(false) }, { "keep_prob", new Tensor(1.0f) } });
-
-                        Tensor result = fetch[0];
-                        float[,] output = (float[,])result.GetValue();
-                        var x = output[0, 0] / AngleMul * -1;
-                        var y = output[0, 1] / AngleMul * -1;
-                        if (UseModification)
-                        {
-                            x = (x + OffsetX) * SensitiveX;
-                            y = (y + OffsetY) * SensitiveY;
-                        }
-                        Vector<double> vec = CreateVector.Dense(new double[] { x, y, -1 });
-                        pt = eye.Parent.SolveRayScreenVector(new Point3D(vec.ToArray()), properties, Flandmark.UnitPerMM);
-
-                        try
-                        {
-                            foreach (Tensor t in fetch)
-                                t.Dispose();
-
-                            imgTensor.Dispose();
-                        }
-                        catch (Exception ex)
-                        {
-                            Logger.Error(this, "Error while disposing tensors\n" + ex.ToString());
-                        }
-                    }
+                    using (VMat left = face.LeftEye.RoiCropByPercent(frame))
+                    using (VMat right = face.RightEye.RoiCropByPercent(frame))
+                        result = DetectBothEyes(left, right);
                 }
+                else
+                {
+                    using (VMat left = face.LeftEye.RoiCropByPercent(frame))
+                        result = DetectLeftEyes(left);
+                }
+
+                var x = result.X / AngleMul * -1;
+                var y = result.Y / AngleMul * -1;
+                if (UseModification)
+                {
+                    x = (x + OffsetX) * SensitiveX;
+                    y = (y + OffsetY) * SensitiveY;
+                }
+
+                Vector<double> vec = CreateVector.Dense(new double[] { x, y, -1 });
+                pt = face.SolveRayScreenVector(new Point3D(vec.ToArray()), properties, Flandmark.UnitPerMM);
             }
 
             if (ClipToBound)
@@ -161,17 +134,95 @@ namespace Vision.Detection
             return pt;
         }
 
+        private Point DetectBothEyes(VMat left, VMat right)
+        {
+            left.Resize(new Size(ImageSizeEx, ImageSizeEx), 0, 0, Interpolation.Cubic);
+            right.Resize(new Size(ImageSizeEx, ImageSizeEx), 0, 0, Interpolation.Cubic);
+
+            if (imgBufferLeft == null)
+                imgBufferLeft = new float[ImageSizeEx * ImageSizeEx * 3];
+            if (imgBufferRight == null)
+                imgBufferRight = new float[ImageSizeEx * ImageSizeEx * 3];
+
+            imgTensorLeft = Tools.VMatBgr2Tensor(left, NormalizeMode.ZeroMean, -1, -1, new long[] { 1, ImageSizeEx, ImageSizeEx, 3 }, imgBufferLeft);
+            imgTensorRight = Tools.VMatBgr2Tensor(right, NormalizeMode.ZeroMean, -1, -1, new long[] { 1, ImageSizeEx, ImageSizeEx, 3 }, imgBufferRight);
+
+            Tensor[] fetch = sessEx.Run(new[] { "output" },
+                new Dictionary<string, Tensor>() { { "input_image", imgTensorLeft }, { "input_image_r", imgTensorRight }, { "phase_train", new Tensor(false) }, { "keep_prob", new Tensor(1.0f) } });
+
+            var result = fetch[0];
+            float[,] output = (float[,])result.GetValue();
+
+            try
+            {
+                foreach (Tensor t in fetch)
+                    t.Dispose();
+                fetch = null;
+                imgTensorLeft.Dispose();
+                imgTensorLeft = null;
+                imgTensorRight.Dispose();
+                imgTensorRight = null;
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(this, ex);
+                throw;
+            }
+
+            return new Point(output[0, 0], output[0, 1]);
+        }
+
+        private Point DetectLeftEyes(VMat mat)
+        {
+            mat.Resize(new Size(ImageSize, ImageSize), 0, 0, Interpolation.Cubic);
+
+            if (imgBufferLeft == null)
+                imgBufferLeft = new float[ImageSize * ImageSize * 3];
+            imgTensorLeft = Tools.VMatBgr2Tensor(mat, NormalizeMode.ZeroMean, -1, -1, new long[] { 1, ImageSize, ImageSize, 3 }, imgBufferLeft);
+            Tensor[] fetch = sess.Run(new [] { "output" },
+                new Dictionary<string, Tensor>() { { "input_image", imgTensorLeft }, { "phase_train", new Tensor(false) }, { "keep_prob", new Tensor(1.0f) } });
+
+            Tensor result = fetch[0];
+            float[,] output = (float[,])result.GetValue();
+
+            try
+            {
+                foreach (Tensor t in fetch)
+                    t.Dispose();
+                fetch = null;
+                imgTensorLeft.Dispose();
+                imgTensorLeft = null;
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(this, "Error while disposing tensors\n" + ex.ToString());
+            }
+
+            return new Point(output[0, 0], output[0, 1]);
+        }
+
         public void Dispose()
         {
-            if (imgbuffer != null)
+            if (imgBufferLeft != null)
             {
-                imgbuffer = null;
+                imgBufferLeft = null;
+            }
+
+            if(imgBufferRight != null)
+            {
+                imgBufferRight = null;
             }
 
             if (sess != null)
             {
                 sess.Dispose();
                 sess = null;
+            }
+
+            if(sessEx != null)
+            {
+                sessEx.Dispose();
+                sessEx = null;
             }
         }
     }

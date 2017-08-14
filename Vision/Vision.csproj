@@ -62,6 +62,7 @@
     <Compile Include="Cv\RotationMatrixTransform.cs" />
     <Compile Include="Detection\EyeGazeDetector.cs" />
     <Compile Include="Detection\EyeGazeService.cs" />
+    <Compile Include="Detection\EyeOpenDetector.cs" />
     <Compile Include="Detection\FaceDetectorXmlLoader.cs" />
     <Compile Include="Cv\ColorConversion.cs" />
     <Compile Include="Cv\Cv.cs" />
@@ -139,9 +140,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Detection\frozen_cpu.pb" />
-    <EmbeddedResource Include="Detection\frozen_gpu.pb" />
+    <EmbeddedResource Include="Detection\frozen_gaze.pb" />
     <EmbeddedResource Include="Cv\flandmark_model.dat" />
+    <EmbeddedResource Include="Detection\frozen_open.pb" />
+    <EmbeddedResource Include="Detection\frozen_gazeEx.pb" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

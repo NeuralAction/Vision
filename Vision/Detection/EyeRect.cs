@@ -20,6 +20,8 @@ namespace Vision.Detection
             }
         }
 
+        public EyeOpenData OpenData { get; set; }
+
         public EyeRect(FaceRect parent, Rect rect) : base(rect)
         {
             Parent = parent;
@@ -37,6 +39,23 @@ namespace Vision.Detection
 
             Core.Cv.DrawCircle(frame, center, radius, Scalar.BgrRed, thickness, LineType.Link4, 0);
             Core.Cv.DrawCircle(frame, center, 2, Scalar.BgrYellow, 4, LineType.Link4, 0);
+
+            if(OpenData != null)
+            {
+                string text;
+                Scalar color;
+                if (OpenData.IsOpen)
+                {
+                    text = $"Open ({(OpenData.Percent*100).ToString("0.0")}%)";
+                    color = Scalar.BgrRed;
+                }
+                else
+                {
+                    text = $"Close ({(OpenData.Percent * 100).ToString("0.0")}%)";
+                    color = Scalar.BgrBlue;
+                }
+                frame.DrawText(Point.X + Parent.X, Point.Y + Parent.Y - 20, text, color);
+            }
         }
 
         public VMat ROI(VMat frame)

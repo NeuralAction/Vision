@@ -37,7 +37,7 @@ namespace MPIGazeAnnotaionReader
                         {
                             if (br)
                                 break;
-                            d.ImShow();
+                            d.ImShow(false);
                             int sleep = 500;
                             if (skip)
                                 sleep = 1;
@@ -73,14 +73,16 @@ namespace MPIGazeAnnotaionReader
                         if (startInd > -1 && startInd < reader.Datas.Count)
                         {
                             DirectoryInfo di = new DirectoryInfo(System.IO.Path.Combine(Environment.CurrentDirectory, "save"));
+                            DirectoryInfo diRight = new DirectoryInfo(Path.Combine(di.FullName, "right"));
+                            DirectoryInfo diLeft = new DirectoryInfo(Path.Combine(di.FullName, "left"));
                             if (!di.Exists)
-                            {
                                 di.Create();
-                            }
                             else
-                            {
                                 Console.WriteLine("already did");
-                            }
+                            if (!diRight.Exists)
+                                diRight.Create();
+                            if (!diLeft.Exists)
+                                diLeft.Create();
 
                             List<CascadeClassifier> cascades = new List<CascadeClassifier>();
                             for (int i = 0; i < Environment.ProcessorCount; i++)
@@ -103,7 +105,15 @@ namespace MPIGazeAnnotaionReader
                                     d = reader.Datas[id];
                                 }
 
-                                d.Save(di, filter);
+                                using (Mat frame = Cv2.ImRead(d.File.FullName))
+                                {
+                                    var rects = filter.DetectMultiScale(frame, 1.2, 3, HaarDetectionType.ScaleImage, new Size(30, 30), new Size(308, 308));
+                                    if (d.GetEye(rects, true) != null && d.GetEye(rects, false) != null)
+                                    {
+                                        d.Save(diLeft, true, frame, rects);
+                                        d.Save(diRight, false, frame, rects);
+                                    }
+                                }
 
                                 Console.WriteLine($"Extracted({id})[{count}/{reader.Datas.Count - startInd}] {d}");
                             });
@@ -111,9 +121,6 @@ namespace MPIGazeAnnotaionReader
                         break;
                 }
             }
-
-            Console.ReadLine();
-            return;
         }
     }
 
@@ -240,40 +247,34 @@ namespace MPIGazeAnnotaionReader
             LookVector = LookVector.AsUnitVector();
         }
 
-        public void Save(DirectoryInfo di, CascadeClassifier EyeCascade = null)
+        public void Save(DirectoryInfo di, bool useleft, Mat frame, Rect[] eyes)
         {
-            if (EyeCascade == null)
-                EyeCascade = NoteData.EyeCascade;
-
             var img = Path.Combine(di.FullName, $"{ID},{LookVector.X},{LookVector.Y},{LookVector.Z}.jpg");
-            using (Mat frame = Cv2.ImRead(File.FullName))
+            if (frame != null && !frame.Empty())
             {
-                if (frame != null && !frame.Empty())
+                try
                 {
-                    try
+                    var rects = eyes;
+                    if (rects != null)
                     {
-                        var rects = EyeCascade.DetectMultiScale(frame, 1.2, 3, HaarDetectionType.ScaleImage, new Size(30, 30), new Size(308, 308));
-                        if (rects != null)
+                        var left = GetEye(rects, useleft);
+                        if (left != null)
                         {
-                            var left = GetLeftEye(rects);
-                            if (left != null)
+                            using (Mat eye = new Mat(frame, (Rect)left))
                             {
-                                using (Mat eye = new Mat(frame, (Rect)left))
-                                {
-                                    Cv2.ImWrite(img, eye, new ImageEncodingParam(ImwriteFlags.JpegChromaQuality, 92));
-                                }
+                                Cv2.ImWrite(img, eye, new ImageEncodingParam(ImwriteFlags.JpegChromaQuality, 92));
                             }
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.ToString());
-                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
                 }
             }
         }
 
-        public Rect? GetLeftEye(Rect[] Eyes)
+        public Rect? GetEye(Rect[] Eyes, bool left)
         {
             List<Point> lefts = new List<Point>();
             List<Point> rights = new List<Point>();
@@ -285,12 +286,18 @@ namespace MPIGazeAnnotaionReader
             var avgLeft = CalcPointAvg(lefts.ToArray());
             var avgRight = CalcPointAvg(rights.ToArray());
 
+            Point useAvg = null;
+            if (left)
+                useAvg = avgLeft;
+            else
+                useAvg = avgRight;
+
             foreach (var r in Eyes)
             {
-                if(HasPoint(r, avgLeft))
+                if(HasPoint(r, useAvg))
                 {
                     var width = Point.EucliudLength(avgRight, avgLeft) * 0.8;
-                    var center = avgLeft;
+                    var center = useAvg;
 
                     return new Rect((int)(center.X - width / 2), (int)(center.Y - width / 2), (int)width, (int)width);
                 }
@@ -299,7 +306,7 @@ namespace MPIGazeAnnotaionReader
             return null;
         }
 
-        public void ImShow()
+        public void ImShow(bool useleft)
         {
             using (Mat img = Cv2.ImRead(File.FullName))
             {
@@ -317,7 +324,7 @@ namespace MPIGazeAnnotaionReader
                     Cv2.Circle(img, new OpenCvSharp.Point(pt.X, pt.Y), 2, Scalar.Red, -1);
                 }
 
-                var left = GetLeftEye(r);
+                var left = GetEye(r, useleft);
                 if(left != null)
                 {
                     Cv2.Rectangle(img, (Rect)left, Scalar.Lime, 2);

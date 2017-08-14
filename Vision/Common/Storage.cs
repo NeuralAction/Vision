@@ -14,8 +14,10 @@ namespace Vision
         private static Storage Current;
 
         public static DirectoryNode Root => new DirectoryNode("/");
+        
         public static string AbsoluteRoot => Current.GetAbsoluteRoot();
         public static char[] InvalidPathChars => Current.GetInvalidPathChars();
+        public static string[] SupportedImageExtensions = new string[] { ".jpg", ".jpeg", ".png", ".bmp" };
 
         public static void Init(Storage storage)
         {
@@ -119,11 +121,10 @@ namespace Vision
             }
             return true;
         }
-        
-        public static StorageNode FixPathChars(StorageNode node)
+
+        public static void FixPathChars(StorageNode node)
         {
             node.Path = FixPathChars(node.Path);
-            return node;
         }
 
         public static string FixPathChars(string path)
@@ -203,6 +204,21 @@ namespace Vision
             Current.InternalUnZip(zipfile, outputdir);
         }
         protected abstract void InternalUnZip(FileNode zipfile, DirectoryNode outputdir);
+
+        public static bool IsImage(FileNode node)
+        {
+            return IsImage(node.AbosolutePath);
+        }
+
+        public static bool IsImage(string path)
+        {
+            foreach (var ext in SupportedImageExtensions)
+            {
+                if (path.ToLower().EndsWith(ext))
+                    return true;
+            }
+            return false;
+        }
     }
 
     public abstract class StorageNode

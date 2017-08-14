@@ -34,8 +34,10 @@
     <Grid>
         <Canvas x:Name="Canvas">
             <Grid ClipToBounds="False" x:Name="Cursor">
-                <Ellipse Width="55" Height="55" StrokeThickness="6" Stroke="White" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="-100"/>
-                <Ellipse Fill="White" Width="7" Height="7" Margin="-100"/>
+                <Grid x:Name="Grid_Cursor" Width="55" Height="55" Margin="-100">
+                    <Ellipse StrokeThickness="6" Stroke="White"/>
+                    <Ellipse Fill="White" Width="7" Height="7"/>
+                </Grid>
                 <Grid.Effect>
                     <DropShadowEffect BlurRadius="0" ShadowDepth="5" Direction="270" Opacity="0.33"/>
                 </Grid.Effect>
@@ -45,7 +47,7 @@
             </Grid>
         </Canvas>
         <Grid x:Name="Grid_Panal">
-            <StackPanel MinWidth="180" Background="White" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,50,82">
+            <StackPanel MinWidth="240" Background="White" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,50,82">
                 <Grid Margin="10,2">
                     <TextBlock Text="Camera" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                     <TextBox Text="0" Width="50" HorizontalAlignment="Right" Height="24" VerticalContentAlignment="Center" x:Name="Tb_Camera"/>
@@ -57,6 +59,28 @@
                 <Grid Margin="10,2" Height="24">
                     <TextBlock Text="Gaze Use Smooth" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                     <CheckBox IsChecked="True" HorizontalAlignment="Right" VerticalAlignment="Center" x:Name="Cb_Gaze_Smooth" Checked="Cb_Gaze_Smooth_Checked" Unchecked="Cb_Gaze_Smooth_Unchecked"/>
+                </Grid>
+                <Grid Margin="10,2" Height="24">
+                    <TextBlock Text="Gaze Use Extend Model" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                    <CheckBox IsChecked="True" HorizontalAlignment="Right" VerticalAlignment="Center" x:Name="Cb_Gaze_Ex" Checked="Cb_Gaze_Ex_Checked" Unchecked="Cb_Gaze_Ex_Unchecked"/>
+                </Grid>
+                <Grid Margin="10,2" Height="24">
+                    <TextBlock Text="Gaze Sensitive" VerticalAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <TextBlock Text="X" Margin="5,0" VerticalAlignment="Center"/>
+                        <TextBox Text="1.85" Width="50" Height="24" VerticalContentAlignment="Center" x:Name="Tb_SesitiveX" TextChanged="Tb_SesitiveX_TextChanged"/>
+                        <TextBlock Text="Y" Margin="5,0" VerticalAlignment="Center"/>
+                        <TextBox Text="2.0" Width="50" Height="24" VerticalContentAlignment="Center" x:Name="Tb_SesitiveY" TextChanged="Tb_SesitiveY_TextChanged"/>
+                    </StackPanel>
+                </Grid>
+                <Grid Margin="10,2" Height="24">
+                    <TextBlock Text="Gaze Offset" VerticalAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <TextBlock Text="X" Margin="5,0" VerticalAlignment="Center"/>
+                        <TextBox Text="0.02" Width="50" Height="24" VerticalContentAlignment="Center" x:Name="Tb_OffsetX" TextChanged="Tb_OffsetX_TextChanged"/>
+                        <TextBlock Text="Y" Margin="5,0" VerticalAlignment="Center"/>
+                        <TextBox Text="-0.06" Width="50" Height="24" VerticalContentAlignment="Center" x:Name="Tb_OffsetY" TextChanged="Tb_OffsetY_TextChanged"/>
+                    </StackPanel>
                 </Grid>
                 <Button Margin="10,2" Content="Start" Height="24" x:Name="Bt_Start" Click="Bt_Start_Click"/>
                 <StackPanel.Effect>
