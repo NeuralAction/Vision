@@ -80,14 +80,17 @@ namespace Vision.Detection
         {
             var properties = ScreenProperties;
 
-            if (face.LeftEye == null)
-                throw new ArgumentNullException("eye");
-            if (face.RightEye == null && UseBothEyes)
-                throw new ArgumentNullException("eye");
+            if (face == null)
+                throw new ArgumentNullException("face");
             if (frame == null || frame.IsEmpty)
                 throw new ArgumentNullException("frame");
             if (properties == null)
                 throw new ArgumentNullException("properties");
+
+            if (face.LeftEye == null)
+                return null;
+            if (UseBothEyes && face.RightEye == null)
+                return null;
 
             Profiler.Start("GazeDetect");
 

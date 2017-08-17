@@ -131,7 +131,7 @@ namespace Vision.Detection
                 FaceTask.Wait();
             }
 
-            FaceTask = new Task(() =>
+            FaceTask = Task.Factory.StartNew(() =>
             {
                 var result = FaceDetector.Detect(mat);
                 if (result != null && result.Length < 1)
@@ -140,8 +140,6 @@ namespace Vision.Detection
                 StartGaze(result, mat);
                 FaceTracked?.Invoke(this, result);
             });
-
-            FaceTask.Start();
         }
 
         private void StartGaze(FaceRect[] face, VMat frame)
@@ -151,7 +149,7 @@ namespace Vision.Detection
                 GazeTask.Wait();
             }
 
-            GazeTask = new Task(() =>
+            GazeTask = Task.Factory.StartNew(() =>
             {
                 Point result = null;
                 bool leftClicked = false, rightClicked = false;
@@ -236,8 +234,6 @@ namespace Vision.Detection
                 frame.Dispose();
                 frame = null;
             });
-
-            GazeTask.Start();
         }
 
         public void Stop()

@@ -115,7 +115,7 @@ namespace Vision.Android
             float temp;
             using (Mat m = new Mat())
             {
-                InnerMat.ConvertTo(m, CvType.Cv64fc3);
+                InnerMat.ConvertTo(m, CvType.Cv32fc3);
                 m.Get(0, 0, f);
 
                 for (int y = 0; y < height * width; y++)

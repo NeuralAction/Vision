@@ -24,6 +24,7 @@ namespace AndroidTests
         int index = 1;
 
         FaceDetection detection;
+        ScreenProperties screen = ScreenProperties.CreatePixelScreen(new Vision.Size(1080, 1920), 375);
         InceptionTests inception;
 
         FaceDetectorXmlLoader detectorXml;
@@ -40,25 +41,12 @@ namespace AndroidTests
             {
                 button.Text = string.Format("{0} clicks!", count++);
 
-                if(detection != null)
-                {
-                    detection.Dispose();
-                    detection = null;
-                }
-
-                if(inception != null)
-                {
-                    inception.Dispose();
-                    inception = null;
-                }
+                DisposeDetector();
 
                 index++;
                 index %= 2;
-                detection = new FaceDetection(index, detectorXml, flandModel);
-                detection.Start();
 
-                //inception = new InceptionTests(index);
-                //inception.Start();
+                Start();
             };
 
             ImageView img = FindViewById<ImageView>(Resource.Id.imageView1);
@@ -68,7 +56,35 @@ namespace AndroidTests
             detectorXml = new FaceDetectorXmlLoader();
             flandModel = new FlandmarkModelLoader();
 
+            Start();
+        }
+
+        private void DisposeDetector()
+        {
+            if (detection != null)
+            {
+                detection.Dispose();
+                detection = null;
+            }
+
+            if (inception != null)
+            {
+                inception.Dispose();
+                inception = null;
+            }
+        }
+
+        private void Start()
+        {
             detection = new FaceDetection(index, detectorXml, flandModel);
+            detection.ScreenProperties = screen;
+            detection.DetectGaze = true;
+            detection.Detector.SmoothVectors = true;
+            detection.Detector.SmoothLandmarks = true;
+            detection.Detector.EyesDetectCascade = true;
+            detection.Detector.LandmarkDetect = true;
+            detection.Detector.LandmarkSolve = true;
+            detection.Detector.EyesDetectLandmark = true;
             detection.Start();
 
             //inception = new InceptionTests(index);

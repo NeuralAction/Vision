@@ -113,18 +113,17 @@ namespace Vision.Tests
 
             if (mat != null && !mat.IsEmpty)
             {
-                if (FaceDetectionTask == null)
+                if (FaceDetectionTask == null || FaceDetectionTask.IsFaulted || FaceDetectionTask.IsCanceled)
                 {
                     Profiler.Start("DetectionALL");
 
                     Profiler.Start("DetectionFaceTaskStart");
                     e.VMatDispose = true;
                     VMat cloned = mat.Clone();
-                    FaceDetectionTask = new Task(() =>
+                    FaceDetectionTask = Task.Factory.StartNew(() =>
                     {
                         FaceDetectProc(cloned);
                     });
-                    FaceDetectionTask.Start();
                     Profiler.End("DetectionFaceTaskStart");
                 }
 
@@ -180,11 +179,10 @@ namespace Vision.Tests
                 GazeDetectionTask.Wait();
             }
             
-            GazeDetectionTask = new Task(() => 
+            GazeDetectionTask = Task.Factory.StartNew(() => 
             {
                 GazeDetectProc(mat, rect);
             });
-            GazeDetectionTask.Start();
             Profiler.End("DetectionGazeTaskStart");
 
             Profiler.End("DetectionFace");

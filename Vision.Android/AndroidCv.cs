@@ -105,7 +105,7 @@ namespace Vision.Android
             OpenCV.Core.Core.Transpose((Mat)input.Object, (Mat)output.Object);
         }
 
-        public override void ImgShow(string name, VMat img)
+        protected override void InternalImgShow(string name, VMat img)
         {
             if(imageView != null)
             {
@@ -356,8 +356,10 @@ namespace Vision.Android
             using (var mjac = new OpenCV.Core.Mat(3, 9, MatType.CV_64FC1))
             {
                 OpenCV.Calib3d.Calib3d.Rodrigues(mvec, mmat, mjac);
-                var mmat_array = mmat.Get(0, 0);
-                var mjac_array = mjac.Get(0, 0);
+                var mmat_array = new double[9];
+                mmat.Get(0, 0, mmat_array);
+                var mjac_array = new double[27];
+                mjac.Get(0, 0, mjac_array);
 
                 matrix = Converter.ToMatrixArray(3, 3, mmat_array);
                 jacobian = Converter.ToMatrixArray(3, 9, mjac_array);
@@ -371,8 +373,10 @@ namespace Vision.Android
             using (var mjac = new OpenCV.Core.Mat(3, 9, MatType.CV_64FC1))
             {
                 OpenCV.Calib3d.Calib3d.Rodrigues(mmat, mvec, mjac);
-                var mvec_array = mvec.Get(0, 0);
-                var mjac_array = mjac.Get(0, 0);
+                var mvec_array = new double[3];
+                mvec.Get(0, 0, mvec_array);
+                var mjac_array = new double[27];
+                mjac.Get(0, 0, mjac_array);
 
                 vector = mvec_array;
                 jacobian = Converter.ToMatrixArray(3, 9, mjac_array);

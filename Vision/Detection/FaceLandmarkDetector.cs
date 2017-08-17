@@ -22,14 +22,14 @@ namespace Vision.Detection
 
     public class FaceLandmarkDetector
     {
-        public Interpolation Interpolation { get => detector.Inter; set => detector.Inter = value; }
+        public Interpolation Interpolation { get => Detector.Inter; set => Detector.Inter = value; }
         public List<Point3D> ModelPoints { get; set; }
 
-        Flandmark detector;
+        public Flandmark Detector { get; set; }
 
         public FaceLandmarkDetector(FileNode node)
         {
-            detector = new Flandmark(node);
+            Detector = new Flandmark(node);
             ModelPoints = Flandmark.DefaultModel;
         }
 
@@ -50,7 +50,7 @@ namespace Vision.Detection
                 margin = new int[] { 10, 10 };
             }
 
-            var pt = detector.Detect(mat, new int[] { (int)face.X, (int)face.Y, (int)(face.X + face.Width), (int)(face.Y + face.Height) }, margin);
+            var pt = Detector.Detect(mat, new int[] { (int)face.X, (int)face.Y, (int)(face.X + face.Width), (int)(face.Y + face.Height) }, margin);
             face.Landmarks = pt;
 
             if(calcEyes)

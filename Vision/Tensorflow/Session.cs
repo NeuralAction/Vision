@@ -15,16 +15,23 @@ namespace Vision.Tensorflow
 
         public Graph Graph { get; set; }
 
-        public Session()
+        public Session() : this(new Graph())
         {
-            Graph = new Graph();
-            sess = new TFSession(Graph.graph);
+
         }
 
         public Session(Graph graph)
         {
             Graph = graph ?? throw new ArgumentNullException("graph");
-            sess = new TFSession(graph.graph);
+            try
+            {
+                sess = new TFSession(Graph.graph);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(this, ex);
+                throw ex;
+            }
         }
         
         public Tensor Run(Output output)
@@ -125,7 +132,14 @@ namespace Vision.Tensorflow
 
         public Graph()
         {
-            graph = new TFGraph();
+            try
+            {
+                graph = new TFGraph();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(this, ex);
+            }
         }
 
         public void ImportPb(Stream stream, string prefix="")
