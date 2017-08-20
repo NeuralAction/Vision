@@ -10,6 +10,7 @@ namespace Vision
     public static class Profiler
     {
         public static bool IsDebug = true;
+        public static bool ReportOn = true;
         public static Stopwatch Stopwatch;
         public static event EventHandler<Dictionary<string, ProfilerData>> Reported;
         public static double ReportWait = 1000;
@@ -107,7 +108,7 @@ namespace Vision
         static StringBuilder sb = new StringBuilder();
         private static void Report()
         {
-            if(GetCurrent() - lastMs > ReportWait)
+            if(ReportOn && GetCurrent() - lastMs > ReportWait)
             {
                 lastMs = GetCurrent();
 

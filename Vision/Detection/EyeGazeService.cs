@@ -152,6 +152,7 @@ namespace Vision.Detection
             GazeTask = Task.Factory.StartNew(() =>
             {
                 Point result = null;
+                bool preLeftClick = IsLeftClicking, preRightClicking = IsRightClicking;
                 bool leftClicked = false, rightClicked = false;
                 if(face != null && face.Length > 0)
                 {
@@ -175,9 +176,12 @@ namespace Vision.Detection
                         result = GazeDetector.Detect(face[0], frame);
                 }
 
+                IsLeftClicking = leftClicked;
+                IsRightClicking = rightClicked;
+
                 GazeTracked?.Invoke(this, result);
 
-                if(IsLeftClicking != leftClicked && IsRightClicking != rightClicked)
+                if(preLeftClick != leftClicked && preRightClicking != rightClicked)
                 {
                     if (leftClicked && rightClicked)
                         Winked?.Invoke(this, new EyeWinkArgs(result, ClickEyes.Both));
@@ -185,7 +189,7 @@ namespace Vision.Detection
                         UnWinked?.Invoke(this, new EyeWinkArgs(result, ClickEyes.Both));
                 }
                 
-                if(IsLeftClicking != leftClicked)
+                if(preLeftClick != leftClicked)
                 {
                     if (leftClicked)
                         Winked?.Invoke(this, new EyeWinkArgs(result, ClickEyes.LeftEye));
@@ -193,7 +197,7 @@ namespace Vision.Detection
                         UnWinked?.Invoke(this, new EyeWinkArgs(result, ClickEyes.LeftEye));
                 }
 
-                if (IsRightClicking != rightClicked)
+                if (preRightClicking != rightClicked)
                 {
                     if (rightClicked)
                         Winked?.Invoke(this, new EyeWinkArgs(result, ClickEyes.RightEye));
@@ -201,7 +205,7 @@ namespace Vision.Detection
                         Winked?.Invoke(this, new EyeWinkArgs(result, ClickEyes.RightEye));
                 }
 
-                bool preClicking = IsLeftClicking || IsRightClicking;
+                bool preClicking = preLeftClick || preRightClicking;
                 bool newClicking = leftClicked || rightClicked;
 
                 if(preClicking != newClicking)
@@ -214,9 +218,6 @@ namespace Vision.Detection
 
                 if (newClicking)
                     Clicking?.Invoke(this, result);
-
-                IsLeftClicking = leftClicked;
-                IsRightClicking = rightClicked;
 
                 if (IsLeftClicking || IsRightClicking)
                 {

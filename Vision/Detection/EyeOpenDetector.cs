@@ -77,7 +77,6 @@ namespace Vision.Detection
                     isOpen = true;
                     percent = result[0,1];
                 }
-                Logger.Log(this, $"{result[0,0]}, {result[0,1]} ");
 
                 foreach (var t in fetch)
                     t.Dispose();
