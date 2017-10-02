@@ -241,22 +241,6 @@ namespace EyeTestApp
             }
         }
 
-        private void Cb_Gaze_Ex_Checked(object sender, RoutedEventArgs e)
-        {
-            if(service != null)
-            {
-                service.GazeDetector.UseBothEyes = true;
-            }
-        }
-
-        private void Cb_Gaze_Ex_Unchecked(object sender, RoutedEventArgs e)
-        {
-            if(service != null)
-            {
-                service.GazeDetector.UseBothEyes = false;
-            }
-        }
-
         private void Tb_SesitiveX_TextChanged(object sender, TextChangedEventArgs e)
         {
             if(service != null)
@@ -317,6 +301,11 @@ namespace EyeTestApp
             }
         }
 
+        private void Cb_Model_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if(service != null)
+                service.GazeDetector.DetectMode = (EyeGazeDetectMode)Cb_Model.SelectedIndex;
+        }
         #endregion UI
     }
 }

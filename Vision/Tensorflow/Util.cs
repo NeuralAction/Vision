@@ -1,4 +1,5 @@
 ﻿using MathNet.Numerics.LinearAlgebra;
+using MathNet.Numerics.Statistics;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -26,14 +27,19 @@ namespace Vision.Tensorflow
         None = -1,
 
         /// <summary>
-        /// Normalize into Zero mean. Use -1 ~ 1 values
+        /// Normalize into -1 to 1. Use -1 ~ 1 values
         /// </summary>
         ZeroMean = 0,
 
         /// <summary>
         /// Normalize into Zero to One. Use 0 ~ 1 values
         /// </summary>
-        ZeroOne = 1
+        ZeroOne = 1,
+
+        /// <summary>
+        /// Noramlize into Zero mean, (Array - Array.Avg()) / Array.Std()
+        /// </summary>
+        CenterZero = 2,
     }
 
     public static class Tools
@@ -61,6 +67,12 @@ namespace Vision.Tensorflow
                     case NormalizeMode.ZeroOne:
                         imgBuf = imgBuf / 255.0f;
                         break;
+                    case NormalizeMode.CenterZero:
+                        //imgBuf = imgBuf / 127.5f;
+                        imgBuf = (imgBuf - imgBuf.Average()) / (float)Statistics.StandardDeviation(imgBuf);
+                        break;
+                    default:
+                        throw new NotImplementedException("unknown one");
                 }
 
                 buffer = imgBuf.ToArray();

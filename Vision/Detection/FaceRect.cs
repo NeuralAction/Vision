@@ -45,9 +45,11 @@ namespace Vision.Detection
         public double[,] LandmarkCameraMatrix { get; set; }
         public double[] LandmarkDistCoeffs { get; set; }
 
-        public FaceRect(Rect rect) : base(rect.Rectangle)
-        {
+        public FaceSmoother Smoother { get; set; }
 
+        public FaceRect(Rect rect, FaceSmoother smoother) : base(rect.Rectangle)
+        {
+            Smoother = smoother;
         }
 
         public void Add(EyeRect rect)

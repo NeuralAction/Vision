@@ -84,9 +84,9 @@ namespace Vision
         }
         protected abstract FileNode[] InternalGetFiles(DirectoryNode node);
 
-        public static FileNode CreateFile(string path)
+        public static FileNode CreateFile(string path, bool isAbsolute = false)
         {
-            return Current.InternalCreateFile(new FileNode(path));
+            return Current.InternalCreateFile(new FileNode(path, isAbsolute));
         }
         public static FileNode CreateFile(FileNode node)
         {
@@ -94,9 +94,9 @@ namespace Vision
         }
         protected abstract FileNode InternalCreateFile(FileNode path);
 
-        public static DirectoryNode NewDirectory(string path)
+        public static DirectoryNode CreateDirectory(string path, bool isAbsolute = false)
         {
-            return Current.InternalCreateDirectory(new DirectoryNode(path));
+            return Current.InternalCreateDirectory(new DirectoryNode(path, isAbsolute));
         }
         public static DirectoryNode CreateDirectory(DirectoryNode node)
         {
@@ -129,10 +129,21 @@ namespace Vision
 
         public static string FixPathChars(string path)
         {
-            char[] invalid = InvalidPathChars;
             StringBuilder builder = new StringBuilder();
-            foreach(char s in path)
+            char[] invalid = InvalidPathChars;
+            int start = 0;
+
+            if(path.Length > 1 && path[1] == ':')
             {
+                builder.Append(path[0]);
+                builder.Append(path[1]);
+
+                start = 2;
+            }
+
+            for (int i = start; i < path.Length; i++)
+            {
+                char s = path[i];
                 if (invalid.Contains(s))
                     builder.Append('-');
                 else
@@ -223,12 +234,16 @@ namespace Vision
 
     public abstract class StorageNode
     {
+        public bool IsAbsolute { get; set; }
         public string Path { get; set; }
         public string AbosolutePath
         {
             get
             {
-                return Storage.GetAbsolutePath(Path);
+                if (IsAbsolute)
+                    return Path;
+                else
+                    return Storage.GetAbsolutePath(Path);
             }
         }
 
@@ -258,8 +273,9 @@ namespace Vision
 
         }
 
-        public FileNode(string path)
+        public FileNode(string path, bool isAbsolute = false)
         {
+            IsAbsolute = isAbsolute;
             Path = path;
         }
 
@@ -358,8 +374,9 @@ namespace Vision
 
         }
 
-        public DirectoryNode(string path)
+        public DirectoryNode(string path, bool isAbsolute = false)
         {
+            IsAbsolute = isAbsolute;
             Path = path;
         }
 
@@ -370,12 +387,12 @@ namespace Vision
 
         public FileNode GetFile(string name)
         {
-            return new FileNode(Storage.PathCombine(Path, name));
+            return new FileNode(Storage.PathCombine(Path, name), IsAbsolute);
         }
 
         public DirectoryNode GetDirectory(string name)
         {
-            return new DirectoryNode(Storage.PathCombine(Path, name));
+            return new DirectoryNode(Storage.PathCombine(Path, name), IsAbsolute);
         }
 
         public FileNode[] GetFiles()
@@ -390,26 +407,26 @@ namespace Vision
 
         public FileNode NewFile(string filename)
         {
-            string newpath = Storage.PathCombine(Path, filename);
+            var newnode = new FileNode(Storage.PathCombine(Path, filename), IsAbsolute);
 
-            if (new FileNode(newpath).IsExist)
+            if (newnode.IsExist)
             {
                 return null;
             }
 
-            return Storage.CreateFile(newpath);
+            return Storage.CreateFile(newnode);
         }
 
         public DirectoryNode NewDirectory(string directoryName)
         {
-            string newpath = Storage.PathCombine(Path, directoryName);
+            var newnode = new DirectoryNode(Storage.PathCombine(Path, directoryName), IsAbsolute);
 
-            if (new FileNode(newpath).IsExist)
+            if (newnode.IsExist)
             {
                 return null;
             }
 
-            return Storage.NewDirectory(newpath);
+            return Storage.CreateDirectory(newnode);
         }
     }
 }

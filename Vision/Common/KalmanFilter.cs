@@ -75,6 +75,11 @@ namespace Vision
     {
         KalmanFilter[] filters;
 
+        public ArrayKalmanFilter()
+        {
+
+        }
+
         public ArrayKalmanFilter(int length)
         {
             filters = new KalmanFilter[length];
@@ -84,6 +89,15 @@ namespace Vision
 
         public double[] Calculate(double[] array)
         {
+            if (filters == null)
+            {
+                filters = new KalmanFilter[array.Length];
+                for (int i = 0; i < filters.Length; i++)
+                {
+                    filters[i] = new KalmanFilter();
+                }
+            }
+
             if (array.Length != filters.Length)
                 throw new ArgumentOutOfRangeException();
 

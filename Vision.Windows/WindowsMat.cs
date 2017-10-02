@@ -116,6 +116,7 @@ namespace Vision.Windows
                     for (int x = 0; x < width; x++)
                     {
                         Vec3b color = indexer[y, x];
+                        //Bgr2Rgb
                         f[i] = (float)color.Item2;
                         i++;
                         f[i] = (float)color.Item1;

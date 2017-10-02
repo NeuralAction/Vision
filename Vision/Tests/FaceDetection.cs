@@ -219,9 +219,16 @@ namespace Vision.Tests
                 foreach (var face in rect)
                 {
                     if (face.LeftEye != null)
+                    {
                         OpenDetector.Detect(face.LeftEye, mat);
+                        face.Smoother.SmoothLeftEye(face.LeftEye);
+                    }
+
                     if (face.RightEye != null)
+                    {
                         OpenDetector.Detect(face.RightEye, mat);
+                        face.Smoother.SmoothRightEye(face.RightEye);
+                    }
                 }
                 Profiler.End("OpenALL");
             }
@@ -266,16 +273,7 @@ namespace Vision.Tests
 
                     if (face != null && face.Landmarks != null && face.LandmarkTransformVector != null)
                     {
-                        //얼굴>화면 = 회전 A
-                        //눈회전 = 회전 B
-                        //얼굴회전 = 회전 C
-                        //A = B*C
-                        //A*Cinv = B*C*Cinv
-                        //A*Cinv = B
-                        //이었지만, 역시 정확도가 참 좋지않은 결과로 신경망을 믿도록 합니다
-
                         //Slove Unit Test
-
                         var scrPt = new Point(960, 0);
 
                         var rod = face.SolveLookScreenRodrigues(scrPt, ScreenProperties, Flandmark.UnitPerMM);

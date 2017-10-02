@@ -10,13 +10,44 @@ namespace Vision.Detection
 {
     public class EyeOpenData
     {
-        public bool IsOpen { get; set; }
-        public double Percent { get; set; }
+        public bool IsOpen { get; private set; }
+        public double Percent { get; private set; }
 
-        public EyeOpenData(bool isopened, double percent)
+        private double _close = 0;
+        public double Close
         {
-            IsOpen = isopened;
-            Percent = percent;
+            get => _close;
+            set
+            {
+                _close = value;
+                Update();
+            }
+        }
+
+        private double _open = 0;
+        public double Open
+        {
+            get => _open;
+            set
+            {
+                _open = value;
+                Update();
+            }
+        }
+
+        public EyeOpenData(double openPercent, double closePercent)
+        {
+            Close = closePercent;
+            Open = openPercent;
+        }
+
+        private void Update()
+        {
+            IsOpen = _open > _close;
+            if (IsOpen)
+                Percent = _open;
+            else
+                Percent = _close;
         }
     }
 
@@ -65,18 +96,6 @@ namespace Vision.Detection
                 
                 var fetch = sess.Run(new[] { "output" }, new Dictionary<string, Tensor>() { { "input_image", imgTensor }, { "phase_train", new Tensor(false) }, { "keep_prob", new Tensor(1.0f) } });
                 var result = (float[,])fetch[0].GetValue();
-                bool isOpen = false;
-                float percent;
-                if(result[0,0] > result[0,1])
-                {
-                    isOpen = false;
-                    percent = result[0,0];
-                }
-                else
-                {
-                    isOpen = true;
-                    percent = result[0,1];
-                }
 
                 foreach (var t in fetch)
                     t.Dispose();
@@ -85,7 +104,7 @@ namespace Vision.Detection
                 imgTensor.Dispose();
                 imgTensor = null;
 
-                var data = new EyeOpenData(isOpen, percent);
+                var data = new EyeOpenData(result[0,1], result[0,0]);
                 eye.OpenData = data;
                 return data;
             }

@@ -61,8 +61,12 @@
                     <CheckBox IsChecked="True" HorizontalAlignment="Right" VerticalAlignment="Center" x:Name="Cb_Gaze_Smooth" Checked="Cb_Gaze_Smooth_Checked" Unchecked="Cb_Gaze_Smooth_Unchecked"/>
                 </Grid>
                 <Grid Margin="10,2" Height="24">
-                    <TextBlock Text="Gaze Use Extend Model" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                    <CheckBox IsChecked="True" HorizontalAlignment="Right" VerticalAlignment="Center" x:Name="Cb_Gaze_Ex" Checked="Cb_Gaze_Ex_Checked" Unchecked="Cb_Gaze_Ex_Unchecked"/>
+                    <TextBlock Text="Gaze Model" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                    <ComboBox x:Name="Cb_Model" SelectedIndex="2" HorizontalAlignment="Right" Width="90" SelectionChanged="Cb_Model_SelectionChanged">
+                        <ComboBoxItem Content="Left Only"/>
+                        <ComboBoxItem Content="Use Both"/>
+                        <ComboBoxItem Content="Use Face"/>
+                    </ComboBox>
                 </Grid>
                 <Grid Margin="10,2" Height="24">
                     <TextBlock Text="Gaze Sensitive" VerticalAlignment="Center"/>

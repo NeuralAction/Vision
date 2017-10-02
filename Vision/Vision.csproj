@@ -144,6 +144,7 @@
     <EmbeddedResource Include="Cv\flandmark_model.dat" />
     <EmbeddedResource Include="Detection\frozen_open.pb" />
     <EmbeddedResource Include="Detection\frozen_gazeEx.pb" />
+    <EmbeddedResource Include="Detection\frozen_gazeFace.pb" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

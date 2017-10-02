@@ -50,9 +50,21 @@ namespace EyeGazeGen
             if (!dirLeft.IsExist)
                 dirLeft.Create();
 
+            var dirLeft2 = dir.GetDirectory("left2");
+            if (!dirLeft2.IsExist)
+                dirLeft2.Create();
+
             var dirRight = dir.GetDirectory("right");
             if (!dirRight.IsExist)
                 dirRight.Create();
+
+            var dirRight2 = dir.GetDirectory("right2");
+            if (!dirRight2.IsExist)
+                dirRight2.Create();
+
+            var dirFace = dir.GetDirectory("face");
+            if (!dirFace.IsExist)
+                dirFace.Create();
 
             if (dir != null)
             {
@@ -124,13 +136,25 @@ namespace EyeGazeGen
 
                                             var filename = $"{ele.Index},{rod[0]},{rod[1]},{rod[2]}.jpg";
                                             FileNode eyeFileLeft = dirLeft.GetFile(filename);
+                                            FileNode eyeFileLeft2 = dirLeft2.GetFile(filename);
                                             FileNode eyeFileRight = dirRight.GetFile(filename);
+                                            FileNode eyeFileRight2 = dirRight2.GetFile(filename);
+                                            FileNode eyeFileFace = dirFace.GetFile(filename);
 
-                                            using (VMat eyeROI = face.LeftEye.RoiCropByPercent(frame))
-                                                Core.Cv.ImgWrite(eyeFileLeft, eyeROI, 92);
+                                            using (VMat roi = face.LeftEye.RoiCropByPercent(frame, 0.25))
+                                                Core.Cv.ImgWrite(eyeFileLeft, roi, 92);
 
-                                            using (VMat eyeROI = face.RightEye.RoiCropByPercent(frame))
-                                                Core.Cv.ImgWrite(eyeFileRight, eyeROI, 92);
+                                            using (VMat roi = face.LeftEye.RoiCropByPercent(frame, 0.5))
+                                                Core.Cv.ImgWrite(eyeFileLeft2, roi, 92);
+
+                                            using (VMat roi = face.RightEye.RoiCropByPercent(frame, 0.25))
+                                                Core.Cv.ImgWrite(eyeFileRight, roi, 92);
+
+                                            using (VMat roi = face.RightEye.RoiCropByPercent(frame, 0.5))
+                                                Core.Cv.ImgWrite(eyeFileRight2, roi, 92);
+
+                                            using (VMat roi = face.ROI(frame))
+                                                Core.Cv.ImgWrite(eyeFileFace, roi, 92);
                                         }
                                     }
                                 }

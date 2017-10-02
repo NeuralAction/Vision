@@ -22,6 +22,7 @@
             <TextBlock Margin="10,0,10,5" Text="ESC Key: Stop" Opacity="0.66"/>
             <TextBlock Text="Models" Margin="10,5"/>
             <ListBox Height="80" Margin="10,5" x:Name="Lst_Library" MouseDoubleClick="Lst_Library_MouseDoubleClick" />
+            <Button Content="Open" x:Name="Bt_Open" Margin="10,5" Click="Bt_Open_Click"/>
         </StackPanel>
         <StackPanel x:Name="panel_rec" HorizontalAlignment="Center" VerticalAlignment="Center" Width="240" Visibility="Hidden" IsEnabled="False">
             <Button x:Name="Bt_Stop" Opacity="0.4" Content="Stop" FontSize="20" Height="80" Background="#18000000" Visibility="Visible" Click="Bt_Stop_Click"/>

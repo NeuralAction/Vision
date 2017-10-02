@@ -44,8 +44,9 @@ namespace Vision.Detection
         public EyeOpenDetector OpenDetector { get; set; }
         public FaceDetector FaceDetector { get; set; }
         public ScreenProperties ScreenProperties { get; set; }
-        public bool IsLeftClicking { get; set; } = false;
-        public bool IsRightClicking { get; set; } = false;
+        public bool SmoothOpen { get; set; } = true;
+        public bool IsLeftClicking { get; protected set; } = false;
+        public bool IsRightClicking { get; protected set; } = false;
 
         Capture Capture;
         Task FaceTask;
@@ -160,14 +161,20 @@ namespace Vision.Detection
 
                     if(target.LeftEye != null)
                     {
-                        var data = OpenDetector.Detect(target.LeftEye, frame);
+                        OpenDetector.Detect(target.LeftEye, frame);
+                        if(SmoothOpen)
+                            target.Smoother.SmoothLeftEye(target.LeftEye);
+                        var data = target.LeftEye.OpenData;
                         if(data.Percent > 0.6)
                             leftClicked = !data.IsOpen;
                     }
 
                     if(target.RightEye != null)
                     {
-                        var data = OpenDetector.Detect(target.RightEye, frame);
+                        OpenDetector.Detect(target.RightEye, frame);
+                        if(SmoothOpen)
+                            target.Smoother.SmoothRightEye(target.RightEye);
+                        var data = target.RightEye.OpenData;
                         if (data.Percent > 0.6)
                             rightClicked = !data.IsOpen;
                     }

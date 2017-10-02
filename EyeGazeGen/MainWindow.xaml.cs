@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -270,6 +271,19 @@ namespace EyeGazeGen
             }
         }
 
+        dynamic fbd = new System.Windows.Forms.FolderBrowserDialog();
+
+        private void Bt_Open_Click(object sender, RoutedEventArgs e)
+        {
+            if(fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                EyeGazeModel model = new EyeGazeModel(new DirectoryNode(fbd.SelectedPath, true));
+
+                ModelViewer viewer = new ModelViewer(this, model);
+                viewer.Show();
+            }
+        }
+
         private void UpdateLib()
         {
             List<string> libs = new List<string>();
@@ -290,5 +304,7 @@ namespace EyeGazeGen
         }
 
         #endregion Lib
+
+
     }
 }

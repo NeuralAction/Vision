@@ -80,7 +80,8 @@ namespace Vision.Detection
 
                 Profiler.Start("DetectionFace");
                 double frameMinSize = Math.Min(frame_gray.Width, frame_gray.Height);
-                Rect[] faces = FaceCascade.DetectMultiScale(frame_gray, FaceScaleFactor, 2, HaarDetectionType.ScaleImage, new Size(frameMinSize * FaceMinFactor), new Size(frameMinSize * FaceMaxFactor));
+                Rect[] cascadeResult = FaceCascade.DetectMultiScale(frame_gray, FaceScaleFactor, 2, HaarDetectionType.ScaleImage, new Size(frameMinSize * FaceMinFactor), new Size(frameMinSize * FaceMaxFactor));
+                var faces = from i in cascadeResult orderby i.X orderby i.Y select i;
                 List<FaceRect> FaceList = new List<FaceRect>();
                 Profiler.End("DetectionFace");
                 
@@ -92,7 +93,7 @@ namespace Vision.Detection
                         Smoother.Add(new FaceSmoother());
                     FaceSmoother smoothCurrent = Smoother[index];
 
-                    FaceRect faceRect = new FaceRect(face);
+                    FaceRect faceRect = new FaceRect(face, smoothCurrent);
                     faceRect.Scale(1 / scaleFactor);
 
                     if (debug)
@@ -179,6 +180,8 @@ namespace Vision.Detection
 
     public class FaceSmoother
     {
+        public const double TranslateLimit = 5000;
+
         PointKalmanFilter[] LandmarkFilter;
         ArrayKalmanFilter TranslateFilter;
 
@@ -204,10 +207,9 @@ namespace Vision.Detection
             }
         }
 
-        private double translateLimit = 5000;
         public void SmoothVector(FaceRect face)
         {
-            if(face.LandmarkTransformVector!=null && face.LandmarkRotationVector != null)
+            if(face.LandmarkTransformVector != null && face.LandmarkRotationVector != null)
             {
                 if(face.LandmarkTransformVector[2] < 0)
                 {
@@ -217,9 +219,9 @@ namespace Vision.Detection
                 double min = face.LandmarkTransformVector.Min();
                 double max = face.LandmarkTransformVector.Max();
                 double absMax = Math.Max(Math.Abs(min), Math.Abs(max));
-                if(absMax > translateLimit)
+                if(absMax > TranslateLimit)
                 {
-                    ArrayMul(face.LandmarkTransformVector, translateLimit/absMax);
+                    ArrayMul(face.LandmarkTransformVector, TranslateLimit/absMax);
                     face.LandmarkTransformVector = TranslateFilter.Clone().Calculate(face.LandmarkTransformVector);
                 }
                 else
@@ -229,9 +231,29 @@ namespace Vision.Detection
             }
         }
 
+        ArrayKalmanFilter leftKalman = new ArrayKalmanFilter(2);
+        ArrayKalmanFilter rightKalman = new ArrayKalmanFilter(2);
+
+        public void SmoothLeftEye(EyeRect rect)
+        {
+            SmoothEye(rect, leftKalman);
+        }
+
+        public void SmoothRightEye(EyeRect rect)
+        {
+            SmoothEye(rect, rightKalman);
+        }
+
+        private void SmoothEye(EyeRect rect, ArrayKalmanFilter kalman)
+        {
+            var result = kalman.Calculate(new double[] { rect.OpenData.Open, rect.OpenData.Close });
+            rect.OpenData.Open = Math.Max(0, Math.Min(1, result[0]));
+            rect.OpenData.Close = Math.Max(0, Math.Min(1, result[1]));
+        }
+
         private void ArrayMul(double[] array, double right)
         {
-            for(int i=0; i<array.Length; i++)
+            for(int i=0; i < array.Length; i++)
             {
                 array[i] *= right;
             }

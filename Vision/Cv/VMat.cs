@@ -245,6 +245,11 @@ namespace Vision.Cv
         public abstract T At<T>(int d1, int d2) where T : struct;
         public abstract void CopyTo(VMat dist);
         public abstract void CopyTo(VMat dist, VMat mask);
+        /// <summary>
+        /// return RGB float Array. Bgr2Rgb internally
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <returns></returns>
         public abstract float[] GetArray(float[] buffer = null);
         public abstract VMat Clone();
         public abstract void Dispose();
