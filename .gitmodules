@@ -1,3 +1,6 @@
 [submodule "TensorFlowSharp"]
 	path = TensorFlowSharp
 	url = https://github.com/gmlwns2000/TensorFlowSharp
+[submodule "SharpFace"]
+	path = SharpFace
+	url = https://github.com/Kawaian/SharpFace.git
