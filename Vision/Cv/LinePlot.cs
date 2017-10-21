@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenCvSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -43,7 +44,7 @@ namespace Vision.Cv
             }
         }
 
-        public void Draw(VMat target)
+        public void Draw(Mat target)
         {
             if (target == null)
                 throw new ArgumentNullException();
@@ -51,10 +52,10 @@ namespace Vision.Cv
             target.DrawRectangle(new Rect(Point, Size), Background, -1);
             target.DrawRectangle(new Rect(Point, Size), Foreground, 1);
 
-            Core.Cv.DrawText(target, Name, Point + new Point(5, 20), FontFace.HersheyPlain, 1, Foreground, 1, LineType.AntiAlias);
+            Core.Cv.DrawText(target, Name, Point + new Point(5, 20), HersheyFonts.HersheyPlain, 1, Foreground, 1, LineTypes.AntiAlias);
             var text = Max.ToString();
-            Core.Cv.DrawText(target, text, Point + new Point(Size.Width - 5 - text.Length * 10, 15), FontFace.HersheyPlain, 0.75, Foreground, 1, LineType.AntiAlias);
-            Core.Cv.DrawText(target, Min.ToString(), Point + new Point(Size.Width - 5 - text.Length * 10, Size.Height - 5), FontFace.HersheyPlain, 0.75, Foreground, 1, LineType.AntiAlias);
+            Core.Cv.DrawText(target, text, Point + new Point(Size.Width - 5 - text.Length * 10, 15), HersheyFonts.HersheyPlain, 0.75, Foreground, 1, LineTypes.AntiAlias);
+            Core.Cv.DrawText(target, Min.ToString(), Point + new Point(Size.Width - 5 - text.Length * 10, Size.Height - 5), HersheyFonts.HersheyPlain, 0.75, Foreground, 1, LineTypes.AntiAlias);
 
             Point pt = new Point(0, Size.Height / 2);
             int index = 0;
@@ -62,7 +63,7 @@ namespace Vision.Cv
             {
                 var value = Math.Max(Min, Math.Min(val, Max));
                 var pt2 = new Point(index * Size.Width / Length, Size.Height - Size.Height * ((value - Min) / (Max - Min)));
-                target.DrawLine(Point + pt, Point + pt2, Foreground, 1, LineType.AntiAlias);
+                target.DrawLine(Point + pt, Point + pt2, Foreground, 1, LineTypes.AntiAlias);
                 pt = pt2;
                 index++;
             }
@@ -109,7 +110,7 @@ namespace Vision.Cv
             PlotZ.Step(pt.Z);
         }
 
-        public void Draw(VMat frame)
+        public void Draw(Mat frame)
         {
             PlotX.Draw(frame);
             PlotY.Draw(frame);

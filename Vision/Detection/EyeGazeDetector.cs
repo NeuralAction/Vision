@@ -1,4 +1,5 @@
 ﻿using MathNet.Numerics.LinearAlgebra;
+using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -77,7 +78,7 @@ namespace Vision.Detection
 
         public ScreenProperties ScreenProperties { get; set; }
 
-        public EyeGazeDetectMode DetectMode { get; set; } = EyeGazeDetectMode.Face;
+        public EyeGazeDetectMode DetectMode { get; set; } = EyeGazeDetectMode.Both;
 
         Session sess;
         Session sessEx;
@@ -96,7 +97,7 @@ namespace Vision.Detection
             sessFace = new Session(ModelGraphFace);
         }
 
-        public Point Detect(FaceRect face, VMat frame)
+        public Point Detect(FaceRect face, Mat frame)
         {
             var properties = ScreenProperties;
 
@@ -131,18 +132,18 @@ namespace Vision.Detection
                 switch (DetectMode)
                 {
                     case EyeGazeDetectMode.LeftOnly:
-                        using (VMat left = face.LeftEye.RoiCropByPercent(frame))
+                        using (Mat left = face.LeftEye.RoiCropByPercent(frame))
                             result = DetectLeftEyes(left);
                         break;
                     case EyeGazeDetectMode.Both:
-                        using (VMat left = face.LeftEye.RoiCropByPercent(frame))
-                        using (VMat right = face.RightEye.RoiCropByPercent(frame))
+                        using (Mat left = face.LeftEye.RoiCropByPercent(frame))
+                        using (Mat right = face.RightEye.RoiCropByPercent(frame))
                             result = DetectBothEyes(left, right);
                         break;
                     case EyeGazeDetectMode.Face:
-                        using (VMat left = face.LeftEye.RoiCropByPercent(frame, .5))
-                        using (VMat right = face.RightEye.RoiCropByPercent(frame, .5))
-                        using (VMat faceRoi = face.ROI(frame))
+                        using (Mat left = face.LeftEye.RoiCropByPercent(frame, .5))
+                        using (Mat right = face.RightEye.RoiCropByPercent(frame, .5))
+                        using (Mat faceRoi = face.ROI(frame))
                             result = DetectFace(faceRoi, left, right);
                         break;
                     default:
@@ -174,7 +175,7 @@ namespace Vision.Detection
             return pt;
         }
 
-        private Point DetectFace(VMat face, VMat left, VMat right)
+        private Point DetectFace(Mat face, Mat left, Mat right)
         {
             var imgSize = new Size(ImageSizeFace, ImageSizeFace);
             var imgSizeFace = new Size(FaceSizeFace, FaceSizeFace);
@@ -191,9 +192,9 @@ namespace Vision.Detection
             if (imgBufferFace == null || imgBufferFace.Length != bufferFace)
                 imgBufferFace = new float[bufferFace];
 
-            var imgTensorLeft = Tools.VMatBgr2Tensor(left, NormalizeMode.CenterZero, -1, -1, new long[] { 1, ImageSizeFace, ImageSizeFace, 3 }, imgBufferLeft);
-            var imgTensorRight = Tools.VMatBgr2Tensor(right, NormalizeMode.CenterZero, -1, -1, new long[] { 1, ImageSizeFace, ImageSizeFace, 3 }, imgBufferRight);
-            var imgTensorFace = Tools.VMatBgr2Tensor(face, NormalizeMode.CenterZero, -1, -1, new long[] { 1, FaceSizeFace, FaceSizeFace, 3 }, imgBufferFace);
+            var imgTensorLeft = Tools.MatBgr2Tensor(left, NormalizeMode.CenterZero, -1, -1, new long[] { 1, ImageSizeFace, ImageSizeFace, 3 }, imgBufferLeft);
+            var imgTensorRight = Tools.MatBgr2Tensor(right, NormalizeMode.CenterZero, -1, -1, new long[] { 1, ImageSizeFace, ImageSizeFace, 3 }, imgBufferRight);
+            var imgTensorFace = Tools.MatBgr2Tensor(face, NormalizeMode.CenterZero, -1, -1, new long[] { 1, FaceSizeFace, FaceSizeFace, 3 }, imgBufferFace);
 
             Tensor[] fetch = sessFace.Run(new[] { "output" },
                 new Dictionary<string, Tensor>() { { "input_image", imgTensorLeft }, { "input_image_r", imgTensorRight }, { "input_image_f", imgTensorFace }, { "phase_train", new Tensor(false) }, { "keep_prob", new Tensor(0.0f) } });
@@ -222,11 +223,11 @@ namespace Vision.Detection
             return new Point(output[0, 0], output[0, 1]);
         }
 
-        private Point DetectBothEyes(VMat left, VMat right)
+        private Point DetectBothEyes(Mat left, Mat right)
         {
             var imgSize = new Size(ImageSizeEx, ImageSizeEx);
-            left.Resize(imgSize, 0, 0, Interpolation.Cubic);
-            right.Resize(imgSize, 0, 0, Interpolation.Cubic);
+            left.Resize(imgSize, 0, 0, InterpolationFlags.Cubic);
+            right.Resize(imgSize, 0, 0, InterpolationFlags.Cubic);
 
             var bufferSize = ImageSizeEx * ImageSizeEx * 3;
             if (imgBufferLeft == null || imgBufferLeft.Length != bufferSize)
@@ -234,8 +235,8 @@ namespace Vision.Detection
             if (imgBufferRight == null || imgBufferRight.Length != bufferSize)
                 imgBufferRight = new float[bufferSize];
 
-            var imgTensorLeft = Tools.VMatBgr2Tensor(left, NormalizeMode.ZeroMean, -1, -1, new long[] { 1, ImageSizeEx, ImageSizeEx, 3 }, imgBufferLeft);
-            var imgTensorRight = Tools.VMatBgr2Tensor(right, NormalizeMode.ZeroMean, -1, -1, new long[] { 1, ImageSizeEx, ImageSizeEx, 3 }, imgBufferRight);
+            var imgTensorLeft = Tools.MatBgr2Tensor(left, NormalizeMode.ZeroMean, -1, -1, new long[] { 1, ImageSizeEx, ImageSizeEx, 3 }, imgBufferLeft);
+            var imgTensorRight = Tools.MatBgr2Tensor(right, NormalizeMode.ZeroMean, -1, -1, new long[] { 1, ImageSizeEx, ImageSizeEx, 3 }, imgBufferRight);
 
             Tensor[] fetch = sessEx.Run(new[] { "output" },
                 new Dictionary<string, Tensor>() { { "input_image", imgTensorLeft }, { "input_image_r", imgTensorRight }, { "phase_train", new Tensor(false) }, { "keep_prob", new Tensor(1.0f) } });
@@ -262,14 +263,14 @@ namespace Vision.Detection
             return new Point(output[0, 0], output[0, 1]);
         }
 
-        private Point DetectLeftEyes(VMat mat)
+        private Point DetectLeftEyes(Mat mat)
         {
-            mat.Resize(new Size(ImageSize, ImageSize), 0, 0, Interpolation.Cubic);
+            mat.Resize(new Size(ImageSize, ImageSize), 0, 0, InterpolationFlags.Cubic);
 
             var bufferSize = ImageSize * ImageSize * 3;
             if (imgBufferLeft == null || imgBufferLeft.Length != bufferSize)
                 imgBufferLeft = new float[bufferSize];
-            var imgTensorLeft = Tools.VMatBgr2Tensor(mat, NormalizeMode.ZeroMean, -1, -1, new long[] { 1, ImageSize, ImageSize, 3 }, imgBufferLeft);
+            var imgTensorLeft = Tools.MatBgr2Tensor(mat, NormalizeMode.ZeroMean, -1, -1, new long[] { 1, ImageSize, ImageSize, 3 }, imgBufferLeft);
             Tensor[] fetch = sess.Run(new [] { "output" },
                 new Dictionary<string, Tensor>() { { "input_image", imgTensorLeft }, { "phase_train", new Tensor(false) }, { "keep_prob", new Tensor(1.0f) } });
 

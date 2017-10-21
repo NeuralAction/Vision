@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenCvSharp;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -25,7 +26,6 @@ namespace Vision.Tests
 
             using (Capture capture = Capture.New(path))
             {
-
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
                 long lastMs = 0;
@@ -36,7 +36,7 @@ namespace Vision.Tests
 
                     if (capture.IsOpened)
                     {
-                        using (VMat mat = capture.QueryFrame())
+                        using (Mat mat = capture.QueryFrame())
                         {
                             if (mat != null && !mat.IsEmpty)
                             {

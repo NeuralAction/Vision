@@ -6,12 +6,10 @@ using System.Threading.Tasks;
 
 namespace Vision.Cv
 {
-    public enum LineType
+    public enum OldFlipMode
     {
-        Link4 = 4,
-
-        Link8 = 8,
-
-        AntiAlias = 16
+        XY = -1,
+        X = 0,
+        Y = 1
     }
 }

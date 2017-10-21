@@ -54,17 +54,17 @@ namespace Vision.Tests
                     break;
             }
 
-            if (!e.VMat.IsEmpty)
+            if (!e.Mat.IsEmpty)
             {
                 if (fclahe)
                 {
                     vclip = Math.Max(1, vclip);
-                    e.VMat.NormalizeRGB(e.VMat, vclip);
+                    e.Mat.NormalizeRGB(e.Mat, vclip);
                 }
                 if (fgray)
-                    e.VMat.ConvertColor(ColorConversion.BgrToGray);
+                    e.Mat.ConvertColor(OpenCvSharp.ColorConversionCodes.BGR2GRAY);
 
-                Core.Cv.ImgShow("imgproc", e.VMat);
+                Core.Cv.ImgShow("imgproc", e.Mat);
             }
         }
     }

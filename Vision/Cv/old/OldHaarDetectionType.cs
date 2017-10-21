@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Vision.Cv
 {
-    public enum HaarDetectionType
+    public enum OldHaarDetectionType
     {
         Zero = 0,
 

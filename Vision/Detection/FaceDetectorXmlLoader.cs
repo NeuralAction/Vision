@@ -21,11 +21,11 @@ namespace Vision.Detection
 
         public FaceDetectorXmlLoader(ManifestResource FaceResource, ManifestResource EyesResource)
         {
-            FaceXmlPath = Storage.LoadResource(Cv.CascadeClassifier.DefaultFaceXmlName, true).AbosolutePath;
-            EyeXmlPath = Storage.LoadResource(Cv.CascadeClassifier.DefaultEyesXmlName, true).AbosolutePath;
+            FaceXmlPath = Storage.LoadResource(Cv.CascadeClassifierData.DefaultFaceXmlName, true).AbosolutePath;
+            EyeXmlPath = Storage.LoadResource(Cv.CascadeClassifierData.DefaultEyesXmlName, true).AbosolutePath;
         }
 
-        public FaceDetectorXmlLoader() : this(Cv.CascadeClassifier.DefaultFaceXmlName, Cv.CascadeClassifier.DefaultEyesXmlName)
+        public FaceDetectorXmlLoader() : this(Cv.CascadeClassifierData.DefaultFaceXmlName, Cv.CascadeClassifierData.DefaultEyesXmlName)
         {
 
         }

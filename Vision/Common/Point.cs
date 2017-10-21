@@ -46,6 +46,21 @@ namespace Vision
         {
             return $"({X}, {Y})";
         }
+
+        public OpenCvSharp.Point ToCvPoint()
+        {
+            return new OpenCvSharp.Point(X, Y);
+        }
+
+        public static explicit operator OpenCvSharp.Point(Point t)
+        {
+            return t.ToCvPoint();
+        }
+
+        public static implicit operator Point(OpenCvSharp.Point t)
+        {
+            return new Point(t.X, t.Y);
+        }
     }
 
     public class Point3D

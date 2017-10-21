@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenCvSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -29,43 +30,10 @@ namespace Vision.Cv
         protected abstract bool GetUseOptimized();
         protected abstract void SetUseOptimized(bool b);
 
-        //Initializer
-        internal protected abstract VMat CreateMat();
-        internal protected abstract VMat CreateMat(Size size);
-        internal protected abstract VMat CreateMat(Size size, MatType type);
-        internal protected abstract VMat CreateMat(Size size, MatType type, Array buffer);
-        internal protected abstract VMat CreateMat(VMat mat, Rect rect);
-
-        internal protected abstract CLAHE CreateCLAHE(double clip, Size gridSize);
-
-        internal protected abstract CascadeClassifier CreateCascadeClassifier(string filePath);
-
         internal protected abstract Capture CreateCapture(int index);
         internal protected abstract Capture CreateCapture(string filePath);
-        
-        //Draw
-        public abstract void DrawCircle(VMat img, Point center, double radius, Scalar color, double thickness = 1, LineType lineType = LineType.Link8, int shift = 0);
-        public abstract void DrawEllipse(VMat img, Point center, Size axes, double angle, double startAngle, double endAngle, Scalar color, double thickness = 1, LineType lineType = LineType.Link8, int shift = 0);
-        public abstract void DrawLine(VMat img, Point start, Point end, Scalar color, int thickness = 1, LineType lineType = LineType.Link8, int shift = 0);
-        public abstract void DrawText(VMat img, string text, Point org, FontFace fontFace, double fontScale, Scalar color, int thickness = 1, LineType lineType = LineType.Link8, bool bottomLeftOrigin = false);
-        public abstract void DrawRectangle(VMat img, Rect rect, Scalar color, int thickness = 1, LineType lineType = LineType.Link8, int shift = 0);
 
-        //ImgProc
-        public abstract void WarpPerspective(VMat src, VMat dst, VMat transform, Size dsize, Interpolation flags = Interpolation.Linear, BorderTypes borderMode = BorderTypes.Constant, Scalar borderValue = null);
-        public abstract void ConvertColor(VMat src, VMat output, ColorConversion convertMode);
-        public abstract void EqualizeHistogram(VMat input, VMat output);
-        public abstract void Canny(VMat Input, VMat output, double thresold1, double thresold2, int apertureSize = 3, bool L2gradient = false);
-
-        //Matrix
-        public abstract VMat Mul(VMat left, VMat right);
-        public abstract void Mul(VMat output, VMat left, VMat right);
-        public abstract VMat Inv(VMat input);
-        public abstract void Inv(VMat input, VMat output);
-        public abstract VMat Transpose(VMat input);
-        public abstract void Transpose(VMat input, VMat output);
-        public abstract void Resize(VMat input, VMat dist, Size size, double fx = 0, double fy = 0, Interpolation inter = Interpolation.Linear);
-
-        //GlobalFunc
+        //Global Functions
         internal static void Init(Cv Context)
         {
             if (_context == null)
@@ -81,8 +49,9 @@ namespace Vision.Cv
                 Logger.Error("Cv", "Context is already created");
             }
         }
-        protected abstract void InternalImgShow(string name, VMat img);
-        public void ImgShow(string name, VMat img)
+
+        protected abstract void InternalImgShow(string name, Mat img);
+        public void ImgShow(string name, Mat img)
         {
             try
             {
@@ -99,24 +68,25 @@ namespace Vision.Cv
 
             InternalImgShow(name, img);
         }
-        protected abstract VMat InternalImgRead(string path);
-        public VMat ImgRead(FileNode node)
+
+        protected abstract Mat InternalImgRead(string path);
+        public Mat ImgRead(FileNode node)
         {
             return ImgRead(node.AbosolutePath);
         }
-        public VMat ImgRead(string path)
+        public Mat ImgRead(string path)
         {
             Logger.Log(this, "Image Read : " + path);
 
             return InternalImgRead(path);
         }
 
-        protected abstract void InternalImgWrite(string name, VMat img, int quality);
-        public void ImgWrite(FileNode node, VMat img, int quality = 80)
+        protected abstract void InternalImgWrite(string name, Mat img, int quality);
+        public void ImgWrite(FileNode node, Mat img, int quality = 80)
         {
             ImgWrite(node.AbosolutePath, img, quality);
         }
-        public void ImgWrite(string path, VMat img, int quality = 80)
+        public void ImgWrite(string path, Mat img, int quality = 80)
         {
             Logger.Log(this, "Image Write : " + path);
 
@@ -127,21 +97,100 @@ namespace Vision.Cv
         public abstract void CloseAllWindows();
         public abstract char WaitKey(int duration);
 
+        //Draw
+        public void DrawRectangle(Mat self, Rect rect, Scalar color, int thickness = 1, LineTypes lineType = LineTypes.Link8, int shift = 0)
+        {
+            Cv2.Rectangle(self, rect.ToCvRect(), color.ToCvScalar(), thickness, lineType, shift);
+        }
+
+        public void DrawCircle(Mat img, Point center, double radius, Scalar color, double thickness = 1, LineTypes lineType = LineTypes.Link8, int shift = 0)
+        {
+            Cv2.Circle(img,
+                new OpenCvSharp.Point(center.X, center.Y), (int)Math.Round(radius),
+                new OpenCvSharp.Scalar(color.Value1, color.Value2, color.Value3),
+                (int)Math.Round(thickness), lineType, shift);
+        }
+
+        public void DrawEllipse(Mat img, Point center, Size axes, double angle, double startAngle, double endAngle, Scalar color, double thickness = 1, LineTypes lineType = LineTypes.Link8, int shift = 0)
+        {
+            Cv2.Ellipse(img,
+                new OpenCvSharp.Point(center.X, center.Y),
+                new OpenCvSharp.Size(axes.Width, axes.Height),
+                angle, startAngle, endAngle,
+                new OpenCvSharp.Scalar(color.Value1, color.Value2, color.Value3),
+                (int)Math.Round(thickness), lineType, shift);
+        }
+
+        public void DrawText(Mat img, string text, Point org, HersheyFonts fontFace, double fontScale, Scalar color, int thickness = 1, LineTypes lineType = LineTypes.Link8, bool bottomLeftOrigin = false)
+        {
+            Cv2.PutText(img, text, new OpenCvSharp.Point(org.X, org.Y), fontFace, fontScale,
+                new OpenCvSharp.Scalar(color.Value1, color.Value2, color.Value3, color.Value4), thickness, lineType, bottomLeftOrigin);
+        }
+
+        public void DrawLine(Mat img, Point start, Point end, Scalar color, int thickness = 1, LineTypes lineType = LineTypes.Link8, int shift = 0)
+        {
+            Cv2.Line(img, start.ToCvPoint(), end.ToCvPoint(), color.ToCvScalar(), thickness, lineType, shift);
+        }
+
         //Math
-        public abstract void SolvePnP(List<Point3D> model_points, List<Point> image_point, double[,] cameraMatrix, double[] distCoeffs, out double[] rvec, out double[] tvec);
-        public abstract void ProjectPoints(List<Point3D> objectPoints, double[] rvec, double[] tvec, double[,] cameraMatrix, double[] distCoeffs, out Point[] imagePoints, out double[,] jacobian);
+        public void ProjectPoints(List<Point3D> objectPoints, double[] rvec, double[] tvec, double[,] cameraMatrix, double[] distCoeffs, out Point[] imagePoints, out double[,] jacobian)
+        {
+            List<Point3f> objpoints = new List<Point3f>(objectPoints.Count);
+            foreach (var pt in objectPoints)
+                objpoints.Add(new Point3f((float)pt.X, (float)pt.Y, (float)pt.Z));
+
+            Point2f[] point2D;
+            Cv2.ProjectPoints(objpoints, rvec, tvec, cameraMatrix, distCoeffs, out point2D, out jacobian);
+
+            imagePoints = new Point[point2D.Length];
+            for (int i = 0; i < point2D.Length; i++)
+                imagePoints[i] = new Point(point2D[i].X, point2D[i].Y);
+        }
+
+        public void SolvePnP(List<Point3D> model_points, List<Point> image_point, double[,] cameraMatrix, double[] distCoeffs, out double[] rvec, out double[] tvec)
+        {
+            List<Point3f> modelpoints = new List<Point3f>(model_points.Count);
+            foreach (var pt in model_points)
+                modelpoints.Add(new Point3f((float)pt.X, (float)pt.Y, (float)pt.Z));
+
+            List<Point2f> imagepoints = new List<Point2f>(image_point.Count);
+            foreach (var pt in image_point)
+                imagepoints.Add(new Point2f((float)pt.X, (float)pt.Y));
+
+            using (Mat rotation_vector = new Mat())
+            using (Mat translation_vector = new Mat())
+            {
+                Cv2.SolvePnP(InputArray.Create(modelpoints), InputArray.Create(imagepoints), InputArray.Create(cameraMatrix), InputArray.Create(distCoeffs), rotation_vector, translation_vector);
+
+                rvec = new double[3];
+                rotation_vector.GetArray(0, 0, rvec);
+                tvec = new double[3];
+                translation_vector.GetArray(0, 0, tvec);
+            }
+        }
+
         public void Rodrigues(double[] vector, out double[,] matrix)
         {
             double[,] jacobian;
             Rodrigues(vector, out matrix, out jacobian);
         }
-        public abstract void Rodrigues(double[] vector, out double[,] matrix, out double[,] jacobian);
+
+        public void Rodrigues(double[] vector, out double[,] matrix, out double[,] jacobian)
+        {
+            Cv2.Rodrigues(vector, out matrix, out jacobian);
+        }
+
         public void Rodrigues(double[,] matrix, out double[] vector)
         {
             double[,] jacobian;
             Rodrigues(matrix, out vector, out jacobian);
         }
-        public abstract void Rodrigues(double[,] matrix, out double[] vector, out double[,] jacobian);
+
+        public void Rodrigues(double[,] matrix, out double[] vector, out double[,] jacobian)
+        {
+            Cv2.Rodrigues(matrix, out vector, out jacobian);
+        }
+
         public double RodriguesTheta(double[] vector)
         {
             if (vector == null)
@@ -151,6 +200,7 @@ namespace Vision.Cv
 
             return Math.Sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
         }
+
         public double[] RodriguesVector(double[] vector)
         {
             if (vector == null)
@@ -161,6 +211,14 @@ namespace Vision.Cv
             double theta = RodriguesTheta(vector);
 
             return new double[] { vector[0] / theta, vector[1] / theta, vector[2] / theta };
+        }
+
+        public void WarpPerspective(Mat src, Mat dst, Mat transform, Size dsize, InterpolationFlags flags = InterpolationFlags.Linear, BorderTypes borderMode = BorderTypes.Constant, Scalar borderValue = null)
+        {
+            OpenCvSharp.Scalar? s = null;
+            if (borderValue != null)
+                s = borderValue.ToCvScalar();
+            Cv2.WarpPerspective(src, dst, transform, dsize.ToCvSize(), flags, borderMode, s);
         }
     }
 }

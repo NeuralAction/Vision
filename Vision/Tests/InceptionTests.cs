@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenCvSharp;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -118,31 +119,31 @@ namespace Vision.Tests
                 return;
             }
 
-            Update(e.VMat);
+            Update(e.Mat);
 
             if(inferences != null)
             {
                 for(int i=0; i<3; i++)
                 {
                     InferenceResult r = inferences[i];
-                    e.VMat.DrawText(0, 50 + 40 * i, $"Top {i + 1}: {resultTag[r.Id]} ({(r.Result*100).ToString("0.00")}%)", Scalar.BgrGreen);
+                    e.Mat.DrawText(0, 50 + 40 * i, $"Top {i + 1}: {resultTag[r.Id]} ({(r.Result*100).ToString("0.00")}%)", Scalar.BgrGreen);
                 }
             }
             else
             {
-                e.VMat.DrawText(0, 50, $"Result: Wait for inference...", Scalar.BgrGreen);
+                e.Mat.DrawText(0, 50, $"Result: Wait for inference...", Scalar.BgrGreen);
             }
-            e.VMat.DrawText(0, e.VMat.Height - 50, $"Inference FPS: {Profiler.Get("InferenceFPS")} ({Profiler.Get("InferenceALL").ToString("0")}ms)", Scalar.BgrGreen);
+            e.Mat.DrawText(0, e.Mat.Height - 50, $"Inference FPS: {Profiler.Get("InferenceFPS")} ({Profiler.Get("InferenceALL").ToString("0")}ms)", Scalar.BgrGreen);
 
-            Core.Cv.ImgShow("result", e.VMat);
+            Core.Cv.ImgShow("result", e.Mat);
         }
 
         Task inferenceTask;
-        private void Update(VMat mat)
+        private void Update(Mat mat)
         {
             if(inferenceTask==null || inferenceTask.IsCompleted)
             {
-                VMat cloned = mat.Clone();
+                Mat cloned = mat.Clone();
                 inferenceTask = new Task(() =>
                 {
                     Inference(cloned);
@@ -151,12 +152,12 @@ namespace Vision.Tests
             }
         }
 
-        private void Inference(VMat mat)
+        private void Inference(Mat mat)
         {
             Profiler.Start("InferenceALL");
 
             Profiler.Start("InferenceDecodeImg");
-            Tensor img = Tools.VMatBgr2Tensor(mat, NormalizeMode.None, 224, 224, new long[] { 1, 224, 224, 3 });
+            Tensor img = Tools.MatBgr2Tensor(mat, NormalizeMode.None, 224, 224, new long[] { 1, 224, 224, 3 });
             Profiler.End("InferenceDecodeImg");
 
             Profiler.Start("InferenceNormalizeImg");

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenCvSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -74,7 +75,7 @@ namespace Vision.Detection
             sess = new Session(Graph);
         }
 
-        public EyeOpenData Detect(EyeRect eye, VMat frame)
+        public EyeOpenData Detect(EyeRect eye, Mat frame)
         {
             if (eye == null)
                 throw new ArgumentNullException("eye");
@@ -85,14 +86,14 @@ namespace Vision.Detection
             if (frame.IsEmpty)
                 throw new ArgumentNullException("frame is empty");
 
-            using (VMat roi = eye.RoiCropByPercent(frame))
+            using (Mat roi = eye.RoiCropByPercent(frame))
             {
                 if (imgBuffer == null)
                     imgBuffer = new float[imgSize * imgSize * 3];
 
                 roi.Resize(new Size(imgSize, imgSize));
 
-                var imgTensor = Tools.VMatBgr2Tensor(roi, NormalizeMode.ZeroMean, -1, -1, new long[] { 1, imgSize, imgSize, 3 }, imgBuffer);
+                var imgTensor = Tools.MatBgr2Tensor(roi, NormalizeMode.ZeroMean, -1, -1, new long[] { 1, imgSize, imgSize, 3 }, imgBuffer);
                 
                 var fetch = sess.Run(new[] { "output" }, new Dictionary<string, Tensor>() { { "input_image", imgTensor }, { "phase_train", new Tensor(false) }, { "keep_prob", new Tensor(1.0f) } });
                 var result = (float[,])fetch[0].GetValue();

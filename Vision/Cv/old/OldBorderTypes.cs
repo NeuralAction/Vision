@@ -9,7 +9,7 @@ namespace Vision.Cv
     /// <summary>
     /// Type of the border to create around the copied source image rectangle
     /// </summary>
-    public enum BorderTypes
+    public enum OldBorderTypes
     {
         /// <summary>
         /// Border is filled with the fixed value, passed as last parameter of the function.

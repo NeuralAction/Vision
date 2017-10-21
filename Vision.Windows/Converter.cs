@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenCvSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,54 +10,24 @@ namespace Vision.Windows
 {
     public static class Converter
     {
-        public static System.Drawing.Bitmap ToBitmap(this VMat x)
+        public static System.Drawing.Bitmap ToBitmap(this Mat x)
         {
-            return VMatToBitmap(x);
+            return MatToBitmap(x);
         }
 
-        public static System.Windows.Media.Imaging.BitmapSource ToBitmapSource(this VMat x)
+        public static System.Windows.Media.Imaging.BitmapSource ToBitmapSource(this Mat x)
         {
-            return VMatToBitmapSource(x);
+            return MatToBitmapSource(x);
         }
 
-        public static OpenCvSharp.Size ToCvSize(this Size s)
+        public static System.Drawing.Bitmap MatToBitmap(Mat mat)
         {
-            return new OpenCvSharp.Size(s.Width, s.Height);
+            return OpenCvSharp.Windows.BitmapConverter.ToBitmap(mat);
         }
 
-        public static OpenCvSharp.Rect ToCvRect(this Rect r)
+        public static System.Windows.Media.Imaging.BitmapSource MatToBitmapSource(Mat mat)
         {
-            return new OpenCvSharp.Rect((int)r.X, (int)r.Y, (int)r.Width, (int)r.Height);
-        }
-
-        public static OpenCvSharp.Point ToCvPoint(this Point pt)
-        {
-            return new OpenCvSharp.Point(pt.X, pt.Y);
-        }
-
-        public static OpenCvSharp.Scalar ToCvScalar(this Scalar s)
-        {
-            return new OpenCvSharp.Scalar(s.Value1, s.Value2, s.Value3, s.Value4);
-        }
-
-        public static OpenCvSharp.Mat ToCvMat(this VMat v)
-        {
-            return (OpenCvSharp.Mat)v.Object;
-        }
-
-        public static VMat ToVMat(this OpenCvSharp.Mat v)
-        {
-            return new WindowsMat(v);
-        }
-
-        public static System.Drawing.Bitmap VMatToBitmap(VMat mat)
-        {
-            return OpenCvSharp.Extensions.BitmapConverter.ToBitmap((OpenCvSharp.Mat)mat.Object);
-        }
-
-        public static System.Windows.Media.Imaging.BitmapSource VMatToBitmapSource(VMat mat)
-        {
-            return OpenCvSharp.Extensions.BitmapSourceConverter.ToBitmapSource((OpenCvSharp.Mat)mat.Object);
+            return OpenCvSharp.Windows.BitmapSourceConverter.ToBitmapSource(mat);
         }
     }
 }

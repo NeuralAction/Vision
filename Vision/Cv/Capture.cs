@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenCvSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,7 +23,7 @@ namespace Vision.Cv
         public abstract event EventHandler<FrameArgs> FrameReady;
 
         public abstract void Dispose();
-        public abstract VMat QueryFrame();
+        public abstract Mat QueryFrame();
         public abstract bool CanQuery();
         public void Start()
         {
@@ -59,14 +60,14 @@ namespace Vision.Cv
 
     public class FrameArgs : EventArgs
     {
-        public VMat VMat { get; set; }
+        public Mat Mat { get; set; }
         public char LastKey { get; set; }
-        public bool VMatDispose { get; set; } = true;
+        public bool MatDispose { get; set; } = true;
         public bool Break { get; set; } = false;
 
-        public FrameArgs(VMat mat, char k = (char)0)
+        public FrameArgs(Mat mat, char k = (char)0)
         {
-            VMat = mat;
+            Mat = mat;
             LastKey = k;
         }
     }

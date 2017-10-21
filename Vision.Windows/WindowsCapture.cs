@@ -38,7 +38,7 @@ namespace Vision.Windows
         private Thread captureThread;
         private Stopwatch sw;
         private bool flip = false;
-        private Cv.FlipMode flipMode;
+        private FlipMode flipMode;
 
         private WindowsCapture()
         {
@@ -62,7 +62,7 @@ namespace Vision.Windows
             Logger.Log($"Capture Size: (w:{w},h:{h})  CaptureFormat:{InnerCapture.Get(CaptureProperty.FourCC)}");
 
             flip = true;
-            flipMode = Cv.FlipMode.Y;
+            flipMode = FlipMode.Y;
         }
 
         public WindowsCapture(string filepath) : this()
@@ -93,7 +93,7 @@ namespace Vision.Windows
             }
         }
 
-        public override VMat QueryFrame()
+        public override Mat QueryFrame()
         {
             if(InnerCapture == null)
             {
@@ -103,7 +103,7 @@ namespace Vision.Windows
             Mat frame = new Mat();
             if (CaptureRead(frame))
             {
-                return new WindowsMat(frame);
+                return frame;
             }
             else
             {
@@ -167,10 +167,10 @@ namespace Vision.Windows
                 Mat frame = new Mat();
                 if (CaptureRead(frame))
                 {
-                    FrameArgs arg = new FrameArgs(new WindowsMat(frame), lastkey);
+                    FrameArgs arg = new FrameArgs(frame, lastkey);
                     FrameReady?.Invoke(this, arg);
 
-                    if (arg.VMatDispose)
+                    if (arg.MatDispose)
                     {
                         frame.Dispose();
                         frame = null;

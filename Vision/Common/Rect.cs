@@ -141,12 +141,22 @@ namespace Vision
             return new Rectangle(_x, _y, _width, _height);
         }
 
+        public OpenCvSharp.Rect ToCvRect()
+        {
+            return new OpenCvSharp.Rect((int)_x, (int)_y, (int)_width, (int)_height);
+        }
+
         public void Scale(double scaleFactor)
         {
             _x *= scaleFactor;
             _y *= scaleFactor;
             _width *= scaleFactor;
             _height *= scaleFactor;
+        }
+
+        public static explicit operator OpenCvSharp.Rect(Rect r)
+        {
+            return r.ToCvRect();
         }
     }
 }

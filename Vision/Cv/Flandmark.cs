@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using OpenCvSharp;
 
 namespace Vision.Cv
 {
@@ -112,7 +113,7 @@ namespace Vision.Cv
 
         public FlandmarkModel Model;
 
-        public Interpolation Inter { get; set; } = Interpolation.NearestNeighbor;
+        public InterpolationFlags Inter { get; set; } = InterpolationFlags.Nearest;
         
         StringBuilder builder = new StringBuilder();
 
@@ -297,7 +298,7 @@ namespace Vision.Cv
             Model = tst;
         }
 
-        public Point[] Detect(VMat m, int[] boundBox, int[] margin = null)
+        public Point[] Detect(Mat m, int[] boundBox, int[] margin = null)
         {
             double[] landmarks;
 
@@ -350,7 +351,7 @@ namespace Vision.Cv
             return ret;
         }
 
-        private void flandmark_detect(ref VMat img, int[] bbox, ref FlandmarkModel model, out double[] landmarks, int[] bw_margin = null)
+        private void flandmark_detect(ref Mat img, int[] bbox, ref FlandmarkModel model, out double[] landmarks, int[] bw_margin = null)
         {
             landmarks = new double[model.Data.Options.M * 2];
             
@@ -378,7 +379,7 @@ namespace Vision.Cv
             }
         }
 
-        private bool flandmark_get_normalized_image_frame(ref VMat input, int[] bbox, ref double[] bb, ref byte[] face_img, ref FlandmarkModel model)
+        private bool flandmark_get_normalized_image_frame(ref Mat input, int[] bbox, ref double[] bb, ref byte[] face_img, ref FlandmarkModel model)
         {
             bool flag;
             int[] d = new int[2];
@@ -410,7 +411,7 @@ namespace Vision.Cv
                 Util.Clamp(region.X, 0, input.Width-1), Util.Clamp(region.Y, 0, input.Height-1), 
                 Util.Clamp(region.Width, 0, input.Width), Util.Clamp(region.Height, 0, input.Height));
 
-            using (var resizedImage = VMat.New(input, clipRegion))
+            using (var resizedImage = new Mat(input, clipRegion.ToCvRect()))
             {
                 double scalefactor = model.Data.Options.bw[0] / region.Width;
                 //resizedImage.Resize(new Size(model.Data.Options.bw[0], model.Data.Options.bw[1]), 0, 0, Inter);

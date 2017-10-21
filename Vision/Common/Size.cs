@@ -26,5 +26,10 @@ namespace Vision
             Width = width;
             Height = height;
         }
+
+        public OpenCvSharp.Size ToCvSize()
+        {
+            return new OpenCvSharp.Size((int)Width, (int)Height);
+        }
     }
 }

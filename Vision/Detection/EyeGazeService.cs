@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenCvSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -68,7 +69,7 @@ namespace Vision.Detection
                 FaceMaxFactor = 1,
                 FaceMinFactor = 0.15,
                 FaceScaleFactor = 1.2,
-                Interpolation = Interpolation.Cubic,
+                Interpolation = InterpolationFlags.Cubic,
                 LandmarkDetect = true,
                 LandmarkSolve = true,
                 MaxFaceSize = 320,
@@ -114,18 +115,18 @@ namespace Vision.Detection
 
         private void Capture_FrameReady(object sender, FrameArgs e)
         {
-            var faceRect = FaceDetector.Detect(e.VMat);
+            var faceRect = FaceDetector.Detect(e.Mat);
 
-            if(e.VMat != null && !e.VMat.IsEmpty)
+            if(e.Mat != null && !e.Mat.IsEmpty)
             {
-                e.VMatDispose = false;
-                StartFace(e.VMat);
+                e.MatDispose = false;
+                StartFace(e.Mat);
             }
 
             FrameCaptured?.Invoke(this, e);
         }
         
-        private void StartFace(VMat mat)
+        private void StartFace(Mat mat)
         {
             if(FaceTask != null)
             {
@@ -143,7 +144,7 @@ namespace Vision.Detection
             });
         }
 
-        private void StartGaze(FaceRect[] face, VMat frame)
+        private void StartGaze(FaceRect[] face, Mat frame)
         {
             if(GazeTask != null)
             {

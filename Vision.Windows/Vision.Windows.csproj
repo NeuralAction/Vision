@@ -60,18 +60,6 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="OpenCvSharp, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6adad1e807fea099, processorArchitecture=MSIL">
-      <HintPath>..\packages\OpenCvSharp3-AnyCPU.3.2.0.20170419\lib\net40\OpenCvSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="OpenCvSharp.Blob, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6adad1e807fea099, processorArchitecture=MSIL">
-      <HintPath>..\packages\OpenCvSharp3-AnyCPU.3.2.0.20170419\lib\net40\OpenCvSharp.Blob.dll</HintPath>
-    </Reference>
-    <Reference Include="OpenCvSharp.Extensions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6adad1e807fea099, processorArchitecture=MSIL">
-      <HintPath>..\packages\OpenCvSharp3-AnyCPU.3.2.0.20170419\lib\net40\OpenCvSharp.Extensions.dll</HintPath>
-    </Reference>
-    <Reference Include="OpenCvSharp.UserInterface, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6adad1e807fea099, processorArchitecture=MSIL">
-      <HintPath>..\packages\OpenCvSharp3-AnyCPU.3.2.0.20170419\lib\net40\OpenCvSharp.UserInterface.dll</HintPath>
-    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -95,16 +83,24 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Converter.cs" />
-    <Compile Include="WindowsCLAHE.cs" />
+    <Compile Include="OldWindowsCLAHE.cs" />
     <Compile Include="WindowsStorage.cs" />
     <Compile Include="WindowsCapture.cs" />
     <Compile Include="WindowsCore.cs" />
-    <Compile Include="WindowsMat.cs" />
-    <Compile Include="WindowsCascadeClassifier.cs" />
+    <Compile Include="OldWindowsMat.cs" />
+    <Compile Include="OldWindowsCascadeClassifier.cs" />
     <Compile Include="WindowsCv.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SharpFace\OpenCvSharp\src\OpenCvSharp.Windows\OpenCvSharp.Windows.csproj">
+      <Project>{d7856971-d877-4cb1-a08c-c2a763ebfad1}</Project>
+      <Name>OpenCvSharp.Windows</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SharpFace\OpenCvSharp\src\OpenCvSharp\OpenCvSharp.csproj">
+      <Project>{658c140f-2e73-4e22-80a7-f05df0a83318}</Project>
+      <Name>OpenCvSharp</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TensorFlowSharp\TensorFlowSharp.Windows\TensorFlowSharp.Windows.csproj">
       <Project>{9a5fc834-a8df-4410-a21d-cf60b4fcacb7}</Project>
       <Name>TensorFlowSharp.Windows</Name>

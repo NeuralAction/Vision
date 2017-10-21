@@ -11,7 +11,7 @@ namespace Vision.Cv
     /// <summary>
     /// Color conversion operation for CvCvtColor
     /// </summary>
-    public enum ColorConversion
+    public enum OldColorConversion
     {
         BgrToBgra = 0,
         RgbToRgba = 0,

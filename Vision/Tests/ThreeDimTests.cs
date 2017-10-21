@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenCvSharp;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace Vision.Tests
 {
     public class ThreeDimTests
     {
-        VMat rod = VMat.New();
+        Mat rod = new Mat();
         List<Point3D> objpoint = new List<Point3D>()
         {
             new Point3D(0,0,0),
@@ -54,8 +55,8 @@ namespace Vision.Tests
         bool invertROD = false;
 
         RotationMatrixTransform transform;
-        VMat input;
-        VMat buffer;
+        Mat input;
+        Mat buffer;
         Point center;
         double theta;
         double[] vec;
@@ -64,7 +65,7 @@ namespace Vision.Tests
 
         public ThreeDimTests()
         {
-            buffer = VMat.New(new Size(500, 500), MatType.CV_8UC3);
+            buffer = MatTool.New(new Size(500, 500), MatType.CV_8UC3);
 
             center = new Point(buffer.Cols / 2, buffer.Rows / 2);
             focal_length = buffer.Cols;
@@ -75,7 +76,7 @@ namespace Vision.Tests
                 { 0, 0, 1 }
             };
 
-            input = VMat.New(new Size(500, 500), MatType.CV_8UC3);
+            input = MatTool.New(new Size(500, 500), MatType.CV_8UC3);
             for(int i=0; i<10; i++)
             {
                 double margin = i * (input.Width / 20);
@@ -248,7 +249,7 @@ namespace Vision.Tests
                 Scalar s = Scalar.BgrBlack;
                 if (i < objcolor.Count)
                     s = objcolor[i];
-                Core.Cv.DrawLine(buffer, img2dPoints[i * 2], img2dPoints[i * 2 + 1], s, 2, LineType.AntiAlias);
+                Core.Cv.DrawLine(buffer, img2dPoints[i * 2], img2dPoints[i * 2 + 1], s, 2, LineTypes.AntiAlias);
             }
 
             //calc rotation vec
@@ -256,8 +257,8 @@ namespace Vision.Tests
             vec = new double[] { rvec[0] / theta, rvec[1] / theta, rvec[2] / theta };
 
             string fmt = "0.0000";
-            Core.Cv.DrawText(buffer, $"rvec:({rvec[0].ToString(fmt)},{rvec[1].ToString(fmt)},{rvec[2].ToString(fmt)}) | tvec:({tvec[0].ToString(fmt)},{tvec[1].ToString(fmt)},{tvec[2].ToString(fmt)})", new Point(0, 20), FontFace.HersheyPlain, 1, Scalar.BgrGreen, 1, LineType.AntiAlias);
-            Core.Cv.DrawText(buffer, $"vec:({vec[0].ToString(fmt)},{vec[1].ToString(fmt)},{vec[2].ToString(fmt)}) | theta:({theta.ToString(fmt)})", new Point(0, 35), FontFace.HersheyPlain, 1, Scalar.BgrGreen, 1, LineType.AntiAlias);
+            Core.Cv.DrawText(buffer, $"rvec:({rvec[0].ToString(fmt)},{rvec[1].ToString(fmt)},{rvec[2].ToString(fmt)}) | tvec:({tvec[0].ToString(fmt)},{tvec[1].ToString(fmt)},{tvec[2].ToString(fmt)})", new Point(0, 20), HersheyFonts.HersheyPlain, 1, Scalar.BgrGreen, 1, LineTypes.AntiAlias);
+            Core.Cv.DrawText(buffer, $"vec:({vec[0].ToString(fmt)},{vec[1].ToString(fmt)},{vec[2].ToString(fmt)}) | theta:({theta.ToString(fmt)})", new Point(0, 35), HersheyFonts.HersheyPlain, 1, Scalar.BgrGreen, 1, LineTypes.AntiAlias);
             Core.Cv.ImgShow("window", buffer);
 
             //transform image
@@ -268,10 +269,10 @@ namespace Vision.Tests
                 Core.Cv.Rodrigues(rvec.ToArray(), out rodriues);
                 if (rod != null)
                     rod.Dispose();
-                rod = VMat.New(new Size(3, 3), MatType.CV_64FC1, rodriues);
+                rod = MatTool.New(new Size(3, 3), MatType.CV_64FC1, rodriues);
                 if (invertROD)
                     rod = rod.Inv();
-                using (VMat output = VMat.New())
+                using (Mat output = MatTool.New())
                 {
                     transform.Transform(input, output, rod);
 

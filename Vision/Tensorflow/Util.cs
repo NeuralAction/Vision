@@ -1,5 +1,6 @@
 ﻿using MathNet.Numerics.LinearAlgebra;
 using MathNet.Numerics.Statistics;
+using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -44,7 +45,7 @@ namespace Vision.Tensorflow
 
     public static class Tools
     {
-        public static Tensor VMatBgr2Tensor(VMat m, NormalizeMode mode = NormalizeMode.None, int resizeWidth = -1, int resizeHeight = -1, long[] shape = null, float[] imgbuffer=null)
+        public static Tensor MatBgr2Tensor(Mat m, NormalizeMode mode = NormalizeMode.None, int resizeWidth = -1, int resizeHeight = -1, long[] shape = null, float[] imgbuffer=null)
         {
             if (resizeHeight != -1 && resizeWidth != -1)
                 m.Resize(new Size(resizeWidth, resizeHeight));
@@ -68,7 +69,6 @@ namespace Vision.Tensorflow
                         imgBuf = imgBuf / 255.0f;
                         break;
                     case NormalizeMode.CenterZero:
-                        //imgBuf = imgBuf / 127.5f;
                         imgBuf = (imgBuf - imgBuf.Average()) / (float)Statistics.StandardDeviation(imgBuf);
                         break;
                     default:

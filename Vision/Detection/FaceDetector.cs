@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenCvSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -29,7 +30,7 @@ namespace Vision.Detection
         public bool SmoothVectors { get; set; } = false;
         public bool ClampVectors { get; set; } = true;
         
-        public Interpolation Interpolation { get; set; } = Interpolation.NearestNeighbor;
+        public InterpolationFlags Interpolation { get; set; } = InterpolationFlags.Nearest;
 
         CascadeClassifier FaceCascade;
         CascadeClassifier EyesCascade;
@@ -39,8 +40,8 @@ namespace Vision.Detection
 
         public FaceDetector(string FaceXml, string EyesXml)
         {
-            FaceCascade = CascadeClassifier.New(FaceXml);
-            EyesCascade = CascadeClassifier.New(EyesXml);
+            FaceCascade = new CascadeClassifier(FaceXml);
+            EyesCascade = new CascadeClassifier(EyesXml);
             Landmark = new FaceLandmarkDetector();
         }
 
@@ -54,19 +55,19 @@ namespace Vision.Detection
 
         }
         
-        public FaceRect[] Detect(VMat frame, bool debug = false)
+        public FaceRect[] Detect(Mat frame, bool debug = false)
         {
             if (frame.IsEmpty)
                 return null;
 
-            using (VMat frame_gray = VMat.New())
+            using (Mat frame_gray = new Mat())
             {
                 Profiler.Start("DetectionPre");
                 Profiler.Start("DetectionPre.Cvt");
-                frame.ConvertColor(frame_gray, ColorConversion.BgrToGray);
+                frame.ConvertColor(frame_gray, ColorConversionCodes.BGR2GRAY);
                 Profiler.End("DetectionPre.Cvt");
                 double scaleFactor = frame_gray.CalcScaleFactor(MaxSize);
-                VMat frame_face = null;
+                Mat frame_face = null;
                 if(scaleFactor != 1)
                 {
                     frame_face = frame_gray.Clone();
@@ -81,20 +82,20 @@ namespace Vision.Detection
 
                 Profiler.Start("DetectionFace");
                 double frameMinSize = Math.Min(frame_gray.Width, frame_gray.Height);
-                Rect[] cascadeResult = FaceCascade.DetectMultiScale(frame_gray, FaceScaleFactor, 2, HaarDetectionType.ScaleImage, new Size(frameMinSize * FaceMinFactor), new Size(frameMinSize * FaceMaxFactor));
+                OpenCvSharp.Rect[] cascadeResult = FaceCascade.DetectMultiScale(frame_gray, FaceScaleFactor, 2, HaarDetectionType.ScaleImage, new OpenCvSharp.Size(frameMinSize * FaceMinFactor), new OpenCvSharp.Size(frameMinSize * FaceMaxFactor));
                 var faces = from i in cascadeResult orderby i.X orderby i.Y select i;
                 List<FaceRect> FaceList = new List<FaceRect>();
                 Profiler.End("DetectionFace");
                 
                 Profiler.Start("DetectionEyes");
                 int index = 0;
-                foreach (Rect face in faces)
+                foreach (var face in faces)
                 {
                     if (Smoother.Count <= index)
                         Smoother.Add(new FaceSmoother());
                     FaceSmoother smoothCurrent = Smoother[index];
 
-                    FaceRect faceRect = new FaceRect(face, smoothCurrent);
+                    FaceRect faceRect = new FaceRect(face.ToRect(), smoothCurrent);
                     faceRect.Scale(1 / scaleFactor);
 
                     if (debug)
@@ -124,15 +125,16 @@ namespace Vision.Detection
                     
                     if(EyesDetectCascade)
                     {
-                        using (VMat faceROI = VMat.New(frame_face, faceRect))
+                        using (Mat faceROI = new Mat(frame_face, faceRect.ToCvRect()))
                         {
                             double eyeScale = faceROI.ClampSize(MaxFaceSize, Interpolation);
                             double faceMinSize = Math.Min(faceROI.Width, faceROI.Height);
                             Profiler.Start("DetectionEye");
-                            Rect[] eyes = EyesCascade.DetectMultiScale(faceROI, EyesScaleFactor, 2, HaarDetectionType.ScaleImage, new Size(faceMinSize * EyesMinFactor), new Size(faceMinSize * EyesMaxFactor));
+                            var eyes = EyesCascade.DetectMultiScale(faceROI, EyesScaleFactor, 2, HaarDetectionType.ScaleImage, new OpenCvSharp.Size(faceMinSize * EyesMinFactor), new OpenCvSharp.Size(faceMinSize * EyesMaxFactor));
 
-                            foreach (Rect eye in eyes)
+                            foreach (var teye in eyes)
                             {
+                                var eye = teye.ToRect();
                                 eye.Scale(1 / eyeScale);
                                 EyeRect eyeRect = new EyeRect(faceRect, eye);
                                 faceRect.Add(eyeRect);

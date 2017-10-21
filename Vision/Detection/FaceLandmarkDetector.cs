@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenCvSharp;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -22,7 +23,7 @@ namespace Vision.Detection
 
     public class FaceLandmarkDetector
     {
-        public Interpolation Interpolation { get => Detector.Inter; set => Detector.Inter = value; }
+        public InterpolationFlags Interpolation { get => Detector.Inter; set => Detector.Inter = value; }
         public List<Point3D> ModelPoints { get; set; }
 
         public Flandmark Detector { get; set; }
@@ -43,7 +44,7 @@ namespace Vision.Detection
 
         }
 
-        public Point[] Detect(VMat mat, FaceRect face, bool calcEyes = false, int[] margin = null)
+        public Point[] Detect(Mat mat, FaceRect face, bool calcEyes = false, int[] margin = null)
         {
             if(margin == null)
             {
@@ -61,7 +62,7 @@ namespace Vision.Detection
             return pt;
         }
 
-        public void Solve(VMat mat, FaceRect face)
+        public void Solve(Mat mat, FaceRect face)
         {
             if (face.Landmarks != null)
             {

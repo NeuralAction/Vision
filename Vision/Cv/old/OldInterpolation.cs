@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Vision.Cv
 {
     [Flags]
-    public enum Interpolation
+    public enum OldInterpolation
     {
         NearestNeighbor = 0,
 

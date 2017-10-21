@@ -33,6 +33,11 @@ namespace Vision
             Value4 = val4;
         }
 
+        public OpenCvSharp.Scalar ToCvScalar()
+        {
+            return new OpenCvSharp.Scalar(Value1, Value2, Value3, Value4);
+        }
+
         public static Scalar All(double val)
         {
             return new Scalar(val, val, val, val);
@@ -41,6 +46,16 @@ namespace Vision
         public static Scalar Random()
         {
             return new Scalar(rand.NextDouble(0, 255), rand.NextDouble(0, 255), rand.NextDouble(0, 255));
+        }
+
+        public static explicit operator OpenCvSharp.Scalar(Scalar s)
+        {
+            return s.ToCvScalar();
+        }
+
+        public static implicit operator Scalar(OpenCvSharp.Scalar s)
+        {
+            return new Scalar(s.Val0, s.Val1, s.Val2, s.Val3);
         }
     }
 }

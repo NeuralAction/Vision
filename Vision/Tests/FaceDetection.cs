@@ -11,6 +11,7 @@ using Vision.Cv;
 using Vision.Detection;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
+using OpenCvSharp;
 
 namespace Vision.Tests
 {
@@ -18,10 +19,10 @@ namespace Vision.Tests
     {
         public class FaceDetectedArgs : EventArgs
         {
-            public VMat Frame { get; set; }
+            public Mat Frame { get; set; }
             public FaceRect[] Results { get; set; }
 
-            public FaceDetectedArgs(VMat frame, FaceRect[] result)
+            public FaceDetectedArgs(Mat frame, FaceRect[] result)
             {
                 Frame = frame;
                 Results = result;
@@ -129,7 +130,7 @@ namespace Vision.Tests
 
         private void Capture_FrameReady(object sender, FrameArgs e)
         {
-            VMat mat = e.VMat;
+            Mat mat = e.Mat;
 
             if (mat != null && !mat.IsEmpty)
             {
@@ -138,8 +139,8 @@ namespace Vision.Tests
                     Profiler.Start("DetectionALL");
 
                     Profiler.Start("DetectionFaceTaskStart");
-                    e.VMatDispose = true;
-                    VMat cloned = mat.Clone();
+                    e.MatDispose = true;
+                    Mat cloned = mat.Clone();
                     FaceDetectionTask = Task.Factory.StartNew(() =>
                     {
                         FaceDetectProc(cloned);
@@ -185,7 +186,7 @@ namespace Vision.Tests
             }
         }
 
-        public void FaceDetectProc(VMat mat)
+        public void FaceDetectProc(Mat mat)
         {
             Profiler.Count("FaceFPS");
 
@@ -209,7 +210,7 @@ namespace Vision.Tests
             FaceDetectionTask = null;
         }
 
-        public void GazeDetectProc(VMat mat, FaceRect[] rect)
+        public void GazeDetectProc(Mat mat, FaceRect[] rect)
         {
             if (rect.Length > 0 && DetectGaze)
             {
@@ -220,7 +221,7 @@ namespace Vision.Tests
                     info.X = Util.Clamp(info.X, 0, ScreenProperties.PixelSize.Width);
                     info.Y = Util.Clamp(info.Y, 0, ScreenProperties.PixelSize.Height);
 
-                    info = LayoutHelper.ResizePoint(info, ScreenProperties.PixelSize, mat.Size, Stretch.Uniform);
+                    info = LayoutHelper.ResizePoint(info, ScreenProperties.PixelSize, mat.Size().ToSize(), Stretch.Uniform);
 
                     if (GazeSmooth)
                         info = filter.Calculate(info);
@@ -261,7 +262,7 @@ namespace Vision.Tests
             mat.Dispose();
         }
 
-        public void Draw(VMat mat)
+        public void Draw(Mat mat)
         {
             lock (renderLock)
             {
@@ -272,7 +273,7 @@ namespace Vision.Tests
 
                 var stretch = Stretch.Uniform;
                 var scrSize = ScreenProperties.PixelSize;
-                var matSize = mat.Size;
+                var matSize = mat.Size().ToSize();
                 var pt1 = LayoutHelper.ResizePoint(new Point(0, 0), scrSize, matSize, stretch);
                 var pt4 = LayoutHelper.ResizePoint(new Point(scrSize.Width, scrSize.Height), scrSize, matSize, stretch);
                 Core.Cv.DrawRectangle(mat, new Rect(pt1, pt4), Scalar.BgrMagenta);
@@ -330,7 +331,7 @@ namespace Vision.Tests
                             var tempPt = face.SolveRayScreenVector(ray, ScreenProperties, Flandmark.UnitPerMM);
                             tempPt.X = Util.Clamp(tempPt.X, 0, ScreenProperties.PixelSize.Width);
                             tempPt.Y = Util.Clamp(tempPt.Y, 0, ScreenProperties.PixelSize.Height);
-                            tempPt = LayoutHelper.ResizePoint(tempPt, ScreenProperties.PixelSize, mat.Size, Stretch.Uniform);
+                            tempPt = LayoutHelper.ResizePoint(tempPt, ScreenProperties.PixelSize, mat.Size().ToSize(), Stretch.Uniform);
                             Core.Cv.DrawCircle(mat, tempPt, 4, Scalar.BgrCyan, -1);
                         }
                     }

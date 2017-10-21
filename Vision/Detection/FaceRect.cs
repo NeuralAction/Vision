@@ -1,4 +1,5 @@
 ﻿using MathNet.Numerics.LinearAlgebra;
+using OpenCvSharp;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -57,13 +58,13 @@ namespace Vision.Detection
             Children.Add(rect);
         }
 
-        public void Draw(VMat frame, double thickness = 1, bool drawEyes = false, bool drawLandmarks = false)
+        public void Draw(Mat frame, double thickness = 1, bool drawEyes = false, bool drawLandmarks = false)
         {
             Point center = new Point(X + Width * 0.5, Y + Height * 0.5);
 
             Size size = new Size(Width * 0.5, Height * 0.5);
 
-            Core.Cv.DrawEllipse(frame, center, size, 0, 0, 360, Scalar.BgrMagenta, thickness, LineType.Link4, 0);
+            Core.Cv.DrawEllipse(frame, center, size, 0, 0, 360, Scalar.BgrMagenta, thickness, LineTypes.Link4, 0);
 
             if (drawEyes && Children != null)
             {
@@ -186,9 +187,9 @@ namespace Vision.Detection
             return tempScr;
         }
 
-        public VMat ROI(VMat frame)
+        public Mat ROI(Mat frame)
         {
-            return VMat.New(frame, this);
+            return new Mat(frame, ToCvRect());
         }
     }
 }

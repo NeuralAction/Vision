@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Vision.Cv
 {
-    public enum FontFace
+    public enum OldFontFace
     {
         HersheySimplex = 0,
 

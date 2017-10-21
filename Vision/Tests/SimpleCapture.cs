@@ -33,7 +33,7 @@ namespace Vision.Tests
                 return;
             }
 
-            Core.Cv.ImgShow("mat", e.VMat);
+            Core.Cv.ImgShow("mat", e.Mat);
         }
     }
 }
