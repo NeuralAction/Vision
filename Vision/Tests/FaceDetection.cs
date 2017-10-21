@@ -51,10 +51,30 @@ namespace Vision.Tests
         FaceRect[] rect = null;
         Queue<Point> trail = new Queue<Point>();
         PointKalmanFilter filter = new PointKalmanFilter();
+        Point3DLinePlot facePosePlot;
+        Point3DLinePlot faceVecPlot;
 
         private FaceDetection(string faceXml, string eyeXml, FileNode flandmarkModel)
         {
             Logger.Log(this, "Press E to Exit");
+
+            facePosePlot = new Point3DLinePlot();
+            facePosePlot.Point = new Point(10, 100);
+            facePosePlot.PlotX.Min = -1500;
+            facePosePlot.PlotX.Max = 1500;
+            facePosePlot.PlotY.Min = -1500;
+            facePosePlot.PlotY.Max = 1500;
+            facePosePlot.PlotZ.Min = 0;
+            facePosePlot.PlotZ.Max = 5000;
+
+            faceVecPlot = new Point3DLinePlot();
+            faceVecPlot.Point = new Point(270, 100);
+            faceVecPlot.PlotX.Min = -1;
+            faceVecPlot.PlotX.Max = 1;
+            faceVecPlot.PlotY.Min = -1;
+            faceVecPlot.PlotY.Max = 1;
+            faceVecPlot.PlotZ.Min = -2;
+            faceVecPlot.PlotZ.Max = 0;
 
             ScreenProperties = new ScreenProperties()
             {
@@ -150,7 +170,6 @@ namespace Vision.Tests
                     break;
                 case 's':
                     Detector.SmoothLandmarks = !Detector.SmoothLandmarks;
-                    Detector.SmoothVectors = !Detector.SmoothVectors;
                     break;
                 case 'g':
                     DetectGaze = !DetectGaze;
@@ -198,7 +217,6 @@ namespace Vision.Tests
                 Point info = GazeDetector.Detect(rect[0], mat);
                 if (info != null)
                 {
-                    Logger.Log(info.ToString());
                     info.X = Util.Clamp(info.X, 0, ScreenProperties.PixelSize.Width);
                     info.Y = Util.Clamp(info.Y, 0, ScreenProperties.PixelSize.Height);
 
@@ -210,8 +228,6 @@ namespace Vision.Tests
                     {
                         trail.Enqueue(info);
                     }
-
-                    Logger.Log("FaceDectection.GazeDetected", info.ToString());
                 }
                 Profiler.End("GazeALL");
 
@@ -262,7 +278,7 @@ namespace Vision.Tests
                 Core.Cv.DrawRectangle(mat, new Rect(pt1, pt4), Scalar.BgrMagenta);
 
                 //update face
-                if (rect != null)
+                if (rect != null && rect.Length > 0)
                 {
                     FaceRect face = null;
                     foreach (FaceRect f in rect)
@@ -270,6 +286,8 @@ namespace Vision.Tests
                         face = f;
                         f.Draw(mat, 3, true, true);
                     }
+
+                    facePosePlot.Step(new Point3D(rect[0].LandmarkTransformVector));
 
                     if (face != null && face.Landmarks != null && face.LandmarkTransformVector != null)
                     {
@@ -280,6 +298,8 @@ namespace Vision.Tests
                         var vec = face.SolveLookScreenVector(scrPt, ScreenProperties, Flandmark.UnitPerMM);
                         var point = face.SolveRayScreenRodrigues(rod, ScreenProperties, Flandmark.UnitPerMM);
                         var vecPt = face.SolveRayScreenVector(vec, ScreenProperties, Flandmark.UnitPerMM);
+
+                        faceVecPlot.Step(vec);
 
                         //Logger.Log($"theta:{Core.Cv.RodriguesTheta(rod)} vec:{vec}");
 
@@ -320,6 +340,9 @@ namespace Vision.Tests
                     if (rect.Length > 0 && rect[0].Children.Count > 0)
                         frameOk++;
                 }
+
+                facePosePlot.Draw(mat);
+                faceVecPlot.Draw(mat);
 
                 //update gaze trail
                 if (trail.Count > 20)

@@ -58,6 +58,7 @@
     <Compile Include="Cv\CLAHE.cs" />
     <Compile Include="Cv\Flandmark.cs" />
     <Compile Include="Cv\LibLBP.cs" />
+    <Compile Include="Cv\LinePlot.cs" />
     <Compile Include="Cv\MatType.cs" />
     <Compile Include="Cv\RotationMatrixTransform.cs" />
     <Compile Include="Detection\EyeGazeDetector.cs" />

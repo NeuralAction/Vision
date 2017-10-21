@@ -140,7 +140,7 @@ namespace Vision.Cv
         {
             double scaleFactor = CalcScaleFactor(maxsize);
 
-            if(scaleFactor != 1)
+            if (scaleFactor != 1)
             {
                 Resize(scaleFactor, inter);
             }
@@ -200,6 +200,21 @@ namespace Vision.Cv
         public void DrawEllipse(Point center, Size axes, double angle, double startAngle, double endAngle, Scalar color, double thickness = 1, LineType lineType = LineType.Link8, int shift = 0)
         {
             Core.Cv.DrawEllipse(this, center, axes, angle, startAngle, endAngle, color, thickness, lineType, shift);
+        }
+
+        public void DrawLine(double x, double y, double x1, double y1)
+        {
+            DrawLine(new Point(x, y), new Point(x1, y1));
+        }
+
+        public void DrawLine(Point start, Point end)
+        {
+            DrawLine(start, end, Scalar.BgrWhite);
+        }
+
+        public void DrawLine(Point start, Point end, Scalar scalar, double thickness = 1, LineType lineType = LineType.Link8, int shift = 0)
+        {
+            Core.Cv.DrawLine(this, start, end, scalar, (int)thickness, lineType, shift);
         }
 
         #endregion Draw

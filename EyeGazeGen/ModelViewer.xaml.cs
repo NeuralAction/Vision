@@ -94,7 +94,8 @@ namespace EyeGazeGen
                         LandmarkDetect = true,
                         LandmarkSolve = true,
                         SmoothLandmarks = false,
-                        SmoothVectors = true
+                        SmoothVectors = true,
+                        ClampVectors = true,
                     });
                 }
 

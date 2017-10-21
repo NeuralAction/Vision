@@ -27,6 +27,7 @@ namespace Vision.Detection
 
         public bool SmoothLandmarks { get; set; } = false;
         public bool SmoothVectors { get; set; } = false;
+        public bool ClampVectors { get; set; } = true;
         
         public Interpolation Interpolation { get; set; } = Interpolation.NearestNeighbor;
 
@@ -111,6 +112,8 @@ namespace Vision.Detection
                         if (LandmarkSolve)
                         {
                             Landmark.Solve(frame_face, faceRect);
+                            if (ClampVectors)
+                                smoothCurrent.ClampVector(faceRect);
                             if (SmoothVectors)
                                 smoothCurrent.SmoothVector(faceRect);
                         }
@@ -184,6 +187,7 @@ namespace Vision.Detection
 
         PointKalmanFilter[] LandmarkFilter;
         ArrayKalmanFilter TranslateFilter;
+        bool vectorInverted = false;
 
         public FaceSmoother()
         {
@@ -207,11 +211,11 @@ namespace Vision.Detection
             }
         }
 
-        public void SmoothVector(FaceRect face)
+        public void ClampVector(FaceRect face)
         {
-            if(face.LandmarkTransformVector != null && face.LandmarkRotationVector != null)
+            if (face.LandmarkTransformVector != null && face.LandmarkRotationVector != null)
             {
-                if(face.LandmarkTransformVector[2] < 0)
+                if (face.LandmarkTransformVector[2] < 0)
                 {
                     ArrayMul(face.LandmarkTransformVector, -1);
                 }
@@ -219,10 +223,22 @@ namespace Vision.Detection
                 double min = face.LandmarkTransformVector.Min();
                 double max = face.LandmarkTransformVector.Max();
                 double absMax = Math.Max(Math.Abs(min), Math.Abs(max));
-                if(absMax > TranslateLimit)
+                if (absMax > TranslateLimit)
                 {
-                    ArrayMul(face.LandmarkTransformVector, TranslateLimit/absMax);
+                    ArrayMul(face.LandmarkTransformVector, TranslateLimit / absMax);
+                    vectorInverted = true;
+                }
+            }
+        }
+
+        public void SmoothVector(FaceRect face)
+        {
+            if(face.LandmarkTransformVector != null && face.LandmarkRotationVector != null)
+            {
+                if (vectorInverted)
+                {
                     face.LandmarkTransformVector = TranslateFilter.Clone().Calculate(face.LandmarkTransformVector);
+                    vectorInverted = false;
                 }
                 else
                 {
