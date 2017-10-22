@@ -21,14 +21,6 @@ namespace Vision.Detection
         }
     }
 
-    public abstract class FaceLandmarkDetectorBackendBase
-    {
-        public abstract Point[] Detect()
-        {
-
-        }
-    }
-
     public class FaceLandmarkDetector
     {
         public InterpolationFlags Interpolation { get => Detector.Inter; set => Detector.Inter = value; }
@@ -85,14 +77,9 @@ namespace Vision.Detection
 
                 var model_points = ModelPoints;
 
-                float focal_length = (float)mat.Width;
+                float focal_length = mat.Width;
                 Point center = new Point(mat.Width / 2, mat.Height / 2);
-                double[,] camera_matrix = new double[,]
-                {
-                    { focal_length, 0, (float)center.X },
-                    { 0, focal_length, (float)center.Y },
-                    { 0, 0, 1 }
-                };
+                double[,] camera_matrix = MatTool.CameraMatrixArray(focal_length, focal_length, center.X, center.Y);
                 var dist_coeffs = new double[4] { 0, 0, 0, 0 };
 
                 double[] rotation_vector;

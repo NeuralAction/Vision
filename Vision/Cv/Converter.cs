@@ -8,6 +8,11 @@ namespace Vision.Cv
 {
     public static class Converter
     {
+        public static Rect ToRect(this OpenCvSharp.Rect2d r)
+        {
+            return new Rect(r.X, r.Y, r.Width, r.Height);
+        }
+
         public static Rect ToRect(this OpenCvSharp.Rect r)
         {
             return new Rect(r.X, r.Y, r.Width, r.Height);

@@ -46,6 +46,8 @@ namespace Vision.Detection
         public double[,] LandmarkCameraMatrix { get; set; }
         public double[] LandmarkDistCoeffs { get; set; }
 
+        public double UnitPerMM { get; set; }
+
         public FaceSmoother Smoother { get; set; }
 
         public FaceRect(Rect rect, FaceSmoother smoother) : base(rect.Rectangle)
@@ -64,7 +66,7 @@ namespace Vision.Detection
 
             Size size = new Size(Width * 0.5, Height * 0.5);
 
-            Core.Cv.DrawEllipse(frame, center, size, 0, 0, 360, Scalar.BgrMagenta, thickness, LineTypes.Link4, 0);
+            Core.Cv.DrawEllipse(frame, center, size, 0, 0, 360, Scalar.BgrMagenta, thickness, LineTypes.AntiAlias, 0);
 
             if (drawEyes && Children != null)
             {
@@ -85,7 +87,7 @@ namespace Vision.Detection
                         first = false;
                     }
                     count++;
-                    Core.Cv.DrawCircle(frame, pt, 2, color, 4);
+                    Core.Cv.DrawCircle(frame, pt, 2, color, 4, LineTypes.AntiAlias);
                     frame.DrawText(pt.X + 5, pt.Y, count.ToString());
                 }
 
@@ -94,10 +96,10 @@ namespace Vision.Detection
                     Profiler.Start("FaceRectProject");
                     List<Point3D> nose_end_point3D = new List<Point3D>()
                     {
-                        new Point3D(0,0,0),
-                        new Point3D(450,0,0),
-                        new Point3D(0,450,0),
-                        new Point3D(0,0,450),
+                        new Point3D(0,0,0)*UnitPerMM,
+                        new Point3D(80,0,0)*UnitPerMM,
+                        new Point3D(0,80,0)*UnitPerMM,
+                        new Point3D(0,0,80)*UnitPerMM,
                     };
 
                     double[] rv = LandmarkRotationVector;
@@ -110,9 +112,9 @@ namespace Vision.Detection
                     Core.Cv.ProjectPoints(nose_end_point3D, rv, tv, cm, dc, out nose_end_point2D, out jacobia);
 
                     Point start_origin = nose_end_point2D[0];
-                    Core.Cv.DrawLine(frame, start_origin, nose_end_point2D[1], Scalar.BgrRed, 2);
-                    Core.Cv.DrawLine(frame, start_origin, nose_end_point2D[2], Scalar.BgrGreen, 2);
-                    Core.Cv.DrawLine(frame, start_origin, nose_end_point2D[3], Scalar.BgrBlue, 2);
+                    Core.Cv.DrawLine(frame, start_origin, nose_end_point2D[1], Scalar.BgrRed, 2, LineTypes.AntiAlias);
+                    Core.Cv.DrawLine(frame, start_origin, nose_end_point2D[2], Scalar.BgrGreen, 2, LineTypes.AntiAlias);
+                    Core.Cv.DrawLine(frame, start_origin, nose_end_point2D[3], Scalar.BgrBlue, 2, LineTypes.AntiAlias);
 
                     string msgTv = $"tv:{tv[0].ToString("0.0").PadRight(5)},{tv[1].ToString("0.0").PadRight(5)},{tv[2].ToString("0.0").PadRight(5)}";
                     string msgRv = $"rv:{rv[0].ToString("0.0").PadRight(5)},{rv[1].ToString("0.0").PadRight(5)},{rv[2].ToString("0.0").PadRight(5)}";
@@ -123,9 +125,11 @@ namespace Vision.Detection
             }
         }
 
-        public double[] SolveLookScreenRodrigues(Point scrPt, ScreenProperties properties, double unitPermm)
+        public double[] SolveLookScreenRodrigues(Point scrPt, ScreenProperties properties)
         {
-            Vector<double> ptVec = CreateVector.Dense(SolveLookScreenVector(scrPt, properties, unitPermm).ToArray());
+            var unitPermm = UnitPerMM;
+
+            Vector<double> ptVec = CreateVector.Dense(SolveLookScreenVector(scrPt, properties).ToArray());
 
             Vector<double> originVec = CreateVector.Dense(new double[] { 0, 0, -1 });
 
@@ -146,8 +150,10 @@ namespace Vision.Detection
             return rod;
         }
 
-        public Point3D SolveLookScreenVector(Point scrPt, ScreenProperties properties, double unitPermm)
+        public Point3D SolveLookScreenVector(Point scrPt, ScreenProperties properties)
         {
+            var unitPermm = UnitPerMM;
+
             Point3D point3d = properties.ToCameraCoordinate(unitPermm, scrPt);
             point3d = point3d - new Point3D(LandmarkTransformVector);
 
@@ -157,19 +163,22 @@ namespace Vision.Detection
             return new Point3D(ptVec.ToArray());
         }
 
-        public Point SolveRayScreenRodrigues(double[] rod, ScreenProperties properties, double unitPermm)
+        public Point SolveRayScreenRodrigues(double[] rod, ScreenProperties properties)
         {
+            var unitPermm = UnitPerMM;
+
             double[,] rotMat;
             Core.Cv.Rodrigues(rod, out rotMat);
 
             var rotMatMat = CreateMatrix.DenseOfArray(rotMat);
             var tempVec = CreateVector.Dense(new double[] { 0, 0, -1 }) * rotMatMat;
 
-            return SolveRayScreenVector(new Point3D(tempVec.ToArray()), properties, unitPermm);
+            return SolveRayScreenVector(new Point3D(tempVec.ToArray()), properties);
         }
 
-        public Point SolveRayScreenVector(Point3D vec, ScreenProperties properties, double unitPermm)
+        public Point SolveRayScreenVector(Point3D vec, ScreenProperties properties)
         {
+            var unitPermm = UnitPerMM;
             var tempVec = CreateVector.Dense(vec.ToArray());
             var tempScale = Math.Abs(LandmarkTransformVector[2] / tempVec[2]);
             tempVec = tempVec * tempScale;
@@ -178,7 +187,7 @@ namespace Vision.Detection
             if (tempVec[2] > 0.001)
                 throw new ArgumentException("vector cannot be solve xD");
 
-            var tempScr = properties.ToScreenCoordinate(Flandmark.UnitPerMM, new Point3D(tempVec.ToArray()));
+            var tempScr = properties.ToScreenCoordinate(UnitPerMM, new Point3D(tempVec.ToArray()));
             //tempScr.X = properties.PixelSize.Width - Util.FixZero(tempScr.X);
             //tempScr.Y = -Util.FixZero(tempScr.Y);
             tempScr.X = Util.FixZero(tempScr.X);

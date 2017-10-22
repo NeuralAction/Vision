@@ -161,7 +161,7 @@ namespace Vision
             string ret = "";
             foreach (string s in pathes)
             {
-                ret += "/" + s.Trim('\\', '/');
+                ret = ret.TrimEnd('\\', '/') + "/" + s.TrimStart('\\', '/');
             }
             return ret;
         }
@@ -210,11 +210,11 @@ namespace Vision
             return node;
         }
 
-        public static void UnZip(FileNode zipfile, DirectoryNode outputdir)
+        public static void UnZip(FileNode zipfile, DirectoryNode outputdir, bool overwrite = false)
         {
-            Current.InternalUnZip(zipfile, outputdir);
+            Current.InternalUnZip(zipfile, outputdir, overwrite);
         }
-        protected abstract void InternalUnZip(FileNode zipfile, DirectoryNode outputdir);
+        protected abstract void InternalUnZip(FileNode zipfile, DirectoryNode outputdir, bool overwrite);
 
         public static bool IsImage(FileNode node)
         {

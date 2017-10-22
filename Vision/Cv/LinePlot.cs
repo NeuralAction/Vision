@@ -1,18 +1,58 @@
 ﻿using OpenCvSharp;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Vision.Cv
 {
-    public class UIObject
+    public abstract class UIObject : INotifyPropertyChanged, IDisposable
     {
-        public virtual Size Size { get; set; } = new Size(320, 100);
-        public virtual Point Point { get; set; } = new Point(0, 0);
-        public virtual Scalar Foreground { get; set; } = new Scalar(255, 255, 255, 255);
-        public virtual Scalar Background { get; set; } = new Scalar(0, 0, 0, 80);
+        private Size size = new Size(320, 100);
+        public virtual Size Size
+        {
+            get => size;
+            set { size = value; OnPropertyChanged(); }
+        }
+
+        private Point point = new Point(0, 0);
+        public virtual Point Point
+        {
+            get => point;
+            set { point = value; OnPropertyChanged(); }
+        }
+
+        private Scalar foreground = new Scalar(255, 255, 255, 255);
+        public virtual Scalar Foreground
+        {
+            get => foreground;
+            set { foreground = value; OnPropertyChanged(); }
+        }
+
+        private Scalar background = new Scalar(0, 0, 0, 100);
+        public virtual Scalar Background
+        {
+            get => background;
+            set { background = value; OnPropertyChanged(); }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged(PropertyChangedEventArgs e)
+        {
+            PropertyChanged?.Invoke(this, e);
+        }
+
+        protected void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = "")
+        {
+            OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
+        }
+
+        public abstract void Draw(Mat target);
+
+        public virtual void Dispose() { }
     }
 
     public class LinePlot : UIObject
@@ -23,12 +63,13 @@ namespace Vision.Cv
         public double Min { get; set; } = 0;
         public string Name { get; set; }
 
+        Mat backgroundCache;
         Queue<double> valueQueue = new Queue<double>();
         long lastMs = 0;
 
         public LinePlot()
         {
-
+            UpdateCache();
         }
 
         public void Step(double value)
@@ -44,18 +85,42 @@ namespace Vision.Cv
             }
         }
 
-        public void Draw(Mat target)
+        public override void Dispose()
+        {
+            base.Dispose();
+
+        }
+
+        protected override void OnPropertyChanged(PropertyChangedEventArgs e)
+        {
+            base.OnPropertyChanged(e);
+            UpdateCache();
+        }
+
+        private void UpdateCache()
+        {
+            if (backgroundCache != null)
+            {
+                backgroundCache.Dispose();
+                backgroundCache = null;
+            }
+
+            backgroundCache = new Mat(Size.ToCvSize(), MatType.CV_8UC3);
+            backgroundCache.DrawRectangle(new Rect(new Point(0, 0), Size), Background, -1);
+        }
+
+        public override void Draw(Mat target)
         {
             if (target == null)
                 throw new ArgumentNullException();
 
-            target.DrawRectangle(new Rect(Point, Size), Background, -1);
+            Core.Cv.DrawMatAlpha(target, backgroundCache, Point, Background.Value4 / 255.0);
             target.DrawRectangle(new Rect(Point, Size), Foreground, 1);
 
             Core.Cv.DrawText(target, Name, Point + new Point(5, 20), HersheyFonts.HersheyPlain, 1, Foreground, 1, LineTypes.AntiAlias);
             var text = Max.ToString();
-            Core.Cv.DrawText(target, text, Point + new Point(Size.Width - 5 - text.Length * 10, 15), HersheyFonts.HersheyPlain, 0.75, Foreground, 1, LineTypes.AntiAlias);
-            Core.Cv.DrawText(target, Min.ToString(), Point + new Point(Size.Width - 5 - text.Length * 10, Size.Height - 5), HersheyFonts.HersheyPlain, 0.75, Foreground, 1, LineTypes.AntiAlias);
+            Core.Cv.DrawText(target, text, Point + new Point(Size.Width - 7 - text.Length * 10, 15), HersheyFonts.HersheyPlain, 0.75, Foreground, 1, LineTypes.AntiAlias);
+            Core.Cv.DrawText(target, Min.ToString(), Point + new Point(Size.Width - 7 - text.Length * 10, Size.Height - 5), HersheyFonts.HersheyPlain, 0.75, Foreground, 1, LineTypes.AntiAlias);
 
             Point pt = new Point(0, Size.Height / 2);
             int index = 0;
@@ -110,7 +175,7 @@ namespace Vision.Cv
             PlotZ.Step(pt.Z);
         }
 
-        public void Draw(Mat frame)
+        public override void Draw(Mat frame)
         {
             PlotX.Draw(frame);
             PlotY.Draw(frame);

@@ -121,9 +121,17 @@ namespace Vision.Windows
             return null;
         }
 
-        protected override void InternalUnZip(FileNode zipfile, DirectoryNode outputdir)
+        protected override void InternalUnZip(FileNode zipfile, DirectoryNode outputdir, bool overwrite)
         {
-            ZipFile.ExtractToDirectory(zipfile.AbosolutePath, outputdir.AbosolutePath);
+            var zip = ZipFile.Open(zipfile.AbosolutePath, ZipArchiveMode.Read);
+            foreach (var item in zip.Entries)
+            {
+                var abs = PathCombine(outputdir.AbosolutePath, item.FullName);
+                if (abs.EndsWith("\\") || abs.EndsWith("/"))
+                    CreateDirectory(abs, true);
+                else
+                    item.ExtractToFile(abs, overwrite);
+            }
         }
     }
 }

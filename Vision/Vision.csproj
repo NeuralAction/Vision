@@ -54,36 +54,26 @@
     <Compile Include="Common\Util.cs" />
     <Compile Include="Cv\Converter.cs" />
     <Compile Include="Cv\MatTool.cs" />
-    <Compile Include="Cv\old\OldBorderTypes.cs" />
     <Compile Include="Cv\Capture.cs" />
     <Compile Include="Cv\CascadeClassifier.cs" />
-    <Compile Include="Cv\old\OldCLAHE.cs" />
     <Compile Include="Cv\Flandmark.cs" />
     <Compile Include="Cv\LibLBP.cs" />
     <Compile Include="Cv\LinePlot.cs" />
-    <Compile Include="Cv\old\OldMatType.cs" />
     <Compile Include="Cv\RotationMatrixTransform.cs" />
     <Compile Include="Detection\EyeGazeDetector.cs" />
     <Compile Include="Detection\EyeGazeService.cs" />
     <Compile Include="Detection\EyeOpenDetector.cs" />
     <Compile Include="Detection\FaceDetectorXmlLoader.cs" />
-    <Compile Include="Cv\old\OldColorConversion.cs" />
     <Compile Include="Cv\Cv.cs" />
-    <Compile Include="Cv\old\OldFlipMode.cs" />
-    <Compile Include="Cv\old\OldFontFace.cs" />
-    <Compile Include="Cv\old\OldInterpolation.cs" />
     <Compile Include="Detection\EyeRect.cs" />
     <Compile Include="Detection\FaceDetector.cs" />
     <Compile Include="Detection\EyeGazeInfo.cs" />
     <Compile Include="Detection\FaceLandmarkDetector.cs" />
     <Compile Include="Detection\FaceRect.cs" />
-    <Compile Include="Cv\old\OldHaarDetectionType.cs" />
-    <Compile Include="Cv\old\OldLineType.cs" />
     <Compile Include="Common\Point.cs" />
     <Compile Include="Common\Scalar.cs" />
     <Compile Include="Common\Size.cs" />
     <Compile Include="Common\VirtualObject.cs" />
-    <Compile Include="Cv\old\OldVMat.cs" />
     <Compile Include="Common\Rect.cs" />
     <Compile Include="Detection\ScreenProperties.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -127,6 +117,10 @@
       <Project>{658c140f-2e73-4e22-80a7-f05df0a83318}</Project>
       <Name>OpenCvSharp</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SharpFace\SharpFace\SharpFace.csproj">
+      <Project>{b3a225b9-1a79-4330-9b4e-a3c4e07bbeab}</Project>
+      <Name>SharpFace</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TensorFlowSharp\TensorFlowSharp\TensorFlowSharp.csproj">
       <Project>{a6e9a29f-e57f-42aa-824c-9581b2783e5f}</Project>
       <Name>TensorFlowSharp</Name>
@@ -152,6 +146,7 @@
     <EmbeddedResource Include="Detection\frozen_open.pb" />
     <EmbeddedResource Include="Detection\frozen_gazeEx.pb" />
     <EmbeddedResource Include="Detection\frozen_gazeFace.pb" />
+    <EmbeddedResource Include="Detection\openface_model.zip" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

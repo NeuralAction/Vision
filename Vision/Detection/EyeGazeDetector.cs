@@ -159,7 +159,7 @@ namespace Vision.Detection
                 }
 
                 Vector<double> vec = CreateVector.Dense(new double[] { x, y, -1 });
-                pt = face.SolveRayScreenVector(new Point3D(vec.ToArray()), properties, Flandmark.UnitPerMM);
+                pt = face.SolveRayScreenVector(new Point3D(vec.ToArray()), properties);
             }
 
             if (ClipToBound)

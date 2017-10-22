@@ -34,6 +34,24 @@ namespace Vision.Cv
             return new Mat(Mat, new Rect(clmpX, clmpY, clmpW, clmpH).ToCvRect());
         }
 
+        public static double[,] CameraMatrixArray(double fx, double fy, double cx, double cy)
+        {
+            return new double[,]
+            {
+                { fx, 0, cx },
+                { 0, fy, cy },
+                { 0, 0, 1 }
+            };
+        }
+        
+        public static void ArrayMul(double[] arr, double d)
+        {
+            for (int i = 0; i < arr.Length; i++)
+            {
+                arr[i] *= d;
+            }
+        }
+
         #region extensions
 
         public static void ConvertColor(this Mat self, Mat output, ColorConversionCodes convert)
@@ -169,7 +187,7 @@ namespace Vision.Cv
 
         public static void DrawText(this Mat self, Point org, string txt, Scalar color)
         {
-            Core.Cv.DrawText(self, txt, org, HersheyFonts.HersheyPlain, 2.5, color, 2, LineTypes.Link4);
+            Core.Cv.DrawText(self, txt, org, HersheyFonts.HersheyPlain, 2, color, 2, LineTypes.AntiAlias);
         }
 
         public static void DrawRectangle(this Mat self, Rect rect, Scalar color, int thickness = 1, LineTypes lineType = LineTypes.Link8, int shift = 0)

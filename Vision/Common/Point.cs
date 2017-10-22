@@ -103,6 +103,16 @@ namespace Vision
             return new Point3D(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
         }
 
+        public static Point3D operator *(Point3D a, double d)
+        {
+            return new Point3D(a.X * d, a.Y * d, a.Z * d);
+        }
+
+        public static Point3D operator *(double d, Point3D a)
+        {
+            return a * d;
+        }
+
         public double[] ToArray()
         {
             return new double[] { X, Y, Z };

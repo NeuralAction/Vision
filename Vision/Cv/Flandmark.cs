@@ -109,7 +109,7 @@ namespace Vision.Cv
         /// <summary>
         /// Unit/Millimeter based on eye distance
         /// </summary>
-        public static double UnitPerMM => (Math.Abs(DefaultModel[ModelLeftEyeLeft].X) + Math.Abs(DefaultModel[ModelRightEyeRight].X)) / EyeDistance;
+        public static double UnitPerMilimeter => (Math.Abs(DefaultModel[ModelLeftEyeLeft].X) + Math.Abs(DefaultModel[ModelRightEyeRight].X)) / EyeDistance;
 
         public FlandmarkModel Model;
 

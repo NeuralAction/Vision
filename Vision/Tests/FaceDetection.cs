@@ -15,7 +15,7 @@ using OpenCvSharp;
 
 namespace Vision.Tests
 {
-    public class FaceDetection : IDisposable
+    public class FaceDetectionTests : IDisposable
     {
         public class FaceDetectedArgs : EventArgs
         {
@@ -29,13 +29,84 @@ namespace Vision.Tests
             }
         }
 
-        public bool DrawOn { get; set; } = true;
-        public bool DetectGaze { get; set; } = false;
-        public bool GazeSmooth { get; set; } = false;
-        public FaceDetector Detector { get; set; }
+        public FaceDetectionProvider FaceProvider { get; set; }
+        private FaceDetector FaceDetector { get; set; }
+        private OpenFaceDetector OpenFaceDetector { get; set; }
+
         public EyeGazeDetector GazeDetector { get; set; }
         public EyeOpenDetector OpenDetector { get; set; }
         public ScreenProperties ScreenProperties { get; set; }
+        public bool DrawOn { get; set; } = true;
+        public bool DetectGaze { get; set; } = false;
+        public bool GazeSmooth { get; set; } = false;
+
+        public bool LandmarkDetect
+        {
+            get
+            {
+                if (FaceProvider is FaceDetector)
+                {
+                    return ((FaceDetector)FaceProvider).LandmarkDetect;
+                }
+                else if (FaceProvider is OpenFaceDetector)
+                {
+                    return true;
+                }
+                else
+                {
+                    throw new Exception();
+                }
+            }
+            set
+            {
+                if (FaceProvider is FaceDetector)
+                {
+                    ((FaceDetector)FaceProvider).LandmarkDetect = value;
+                }
+                else if (FaceProvider is OpenFaceDetector)
+                {
+                    return;
+                }
+                else
+                {
+                    throw new Exception();
+                }
+            }
+        }
+
+        public bool SmoothLandmarks
+        {
+            get
+            {
+                if (FaceProvider is FaceDetector)
+                {
+                    return ((FaceDetector)FaceProvider).SmoothLandmarks;
+                }
+                else if (FaceProvider is OpenFaceDetector)
+                {
+                    return ((OpenFaceDetector)FaceProvider).SmoothLandmarks;
+                }
+                else
+                {
+                    throw new Exception();
+                }
+            }
+            set
+            {
+                if (FaceProvider is FaceDetector)
+                {
+                    ((FaceDetector)FaceProvider).SmoothLandmarks = value;
+                }
+                else if (FaceProvider is OpenFaceDetector)
+                {
+                    ((OpenFaceDetector)FaceProvider).SmoothLandmarks = value;
+                }
+                else
+                {
+                    throw new Exception();
+                }
+            }
+        }
 
         public event EventHandler<FaceDetectedArgs> Detected;
 
@@ -55,27 +126,17 @@ namespace Vision.Tests
         Point3DLinePlot facePosePlot;
         Point3DLinePlot faceVecPlot;
 
-        private FaceDetection(string faceXml, string eyeXml, FileNode flandmarkModel)
+        private FaceDetectionTests(string faceXml, string eyeXml, FileNode flandmarkModel)
         {
             Logger.Log(this, "Press E to Exit");
 
             facePosePlot = new Point3DLinePlot();
             facePosePlot.Point = new Point(10, 100);
-            facePosePlot.PlotX.Min = -1500;
-            facePosePlot.PlotX.Max = 1500;
-            facePosePlot.PlotY.Min = -1500;
-            facePosePlot.PlotY.Max = 1500;
-            facePosePlot.PlotZ.Min = 0;
-            facePosePlot.PlotZ.Max = 5000;
-
+            
             faceVecPlot = new Point3DLinePlot();
             faceVecPlot.Point = new Point(270, 100);
-            faceVecPlot.PlotX.Min = -1;
-            faceVecPlot.PlotX.Max = 1;
-            faceVecPlot.PlotY.Min = -1;
-            faceVecPlot.PlotY.Max = 1;
-            faceVecPlot.PlotZ.Min = -2;
-            faceVecPlot.PlotZ.Max = 0;
+
+            UpdateGraph(1500,5000);
 
             ScreenProperties = new ScreenProperties()
             {
@@ -83,31 +144,33 @@ namespace Vision.Tests
                 PixelSize = new Size(1920, 1080),
                 Size = new Size(410, 285)
             };
-            Detector = new FaceDetector(faceXml, eyeXml);
+            OpenFaceDetector = new OpenFaceDetector(new OpenFaceModelLoader());
+            FaceDetector = new FaceDetector(faceXml, eyeXml);
+            FaceProvider = OpenFaceDetector;
             GazeDetector = new EyeGazeDetector(ScreenProperties);
             OpenDetector = new EyeOpenDetector();
         }
 
-        public FaceDetection(string filePath, string faceXml, string eyeXml, FileNode flandmarkModel) : this(faceXml, eyeXml, flandmarkModel)
+        public FaceDetectionTests(string filePath, string faceXml, string eyeXml, FileNode flandmarkModel) : this(faceXml, eyeXml, flandmarkModel)
         {
             FilePath = filePath;
             capture = Capture.New(FilePath);
             capture.FrameReady += Capture_FrameReady;
         }
 
-        public FaceDetection(int index, string faceXml, string eyeXml, FileNode flandmarkModel) : this(faceXml, eyeXml, flandmarkModel)
+        public FaceDetectionTests(int index, string faceXml, string eyeXml, FileNode flandmarkModel) : this(faceXml, eyeXml, flandmarkModel)
         {
             this.index = index;
             capture = Capture.New(index);
             capture.FrameReady += Capture_FrameReady;
         }
 
-        public FaceDetection(int index, FaceDetectorXmlLoader loader, FlandmarkModelLoader floader) : this(index, loader.FaceXmlPath, loader.EyeXmlPath, floader.Data)
+        public FaceDetectionTests(int index, FaceDetectorXmlLoader loader, FlandmarkModelLoader floader) : this(index, loader.FaceXmlPath, loader.EyeXmlPath, floader.Data)
         {
 
         }
 
-        public FaceDetection(string filepath, FaceDetectorXmlLoader loader, FlandmarkModelLoader floader) : this(filepath, loader.FaceXmlPath, loader.EyeXmlPath, floader.Data)
+        public FaceDetectionTests(string filepath, FaceDetectorXmlLoader loader, FlandmarkModelLoader floader) : this(filepath, loader.FaceXmlPath, loader.EyeXmlPath, floader.Data)
         {
 
         }
@@ -126,6 +189,23 @@ namespace Vision.Tests
         {
             capture.Start();
             capture.Join();
+        }
+
+        private void UpdateGraph(double transX, double transZ)
+        {
+            facePosePlot.PlotX.Min = -transX;
+            facePosePlot.PlotX.Max = transX;
+            facePosePlot.PlotY.Min = -transX;
+            facePosePlot.PlotY.Max = transX;
+            facePosePlot.PlotZ.Min = 0;
+            facePosePlot.PlotZ.Max = transZ;
+
+            faceVecPlot.PlotX.Min = -1;
+            faceVecPlot.PlotX.Max = 1;
+            faceVecPlot.PlotY.Min = -1;
+            faceVecPlot.PlotY.Max = 1;
+            faceVecPlot.PlotZ.Min = -2;
+            faceVecPlot.PlotZ.Max = 0;
         }
 
         private void Capture_FrameReady(object sender, FrameArgs e)
@@ -167,16 +247,22 @@ namespace Vision.Tests
                     e.Break = true;
                     break;
                 case 'l':
-                    Detector.LandmarkDetect = !Detector.LandmarkDetect;
+                    LandmarkDetect = !LandmarkDetect;
                     break;
                 case 's':
-                    Detector.SmoothLandmarks = !Detector.SmoothLandmarks;
+                    SmoothLandmarks = !SmoothLandmarks;
                     break;
                 case 'g':
                     DetectGaze = !DetectGaze;
                     break;
                 case 'h':
                     GazeSmooth = !GazeSmooth;
+                    break;
+                case '1':
+                    FaceProvider = FaceDetector;
+                    break;
+                case '2':
+                    FaceProvider = OpenFaceDetector;
                     break;
                 case ' ':
                     Core.Cv.WaitKey(0);
@@ -191,7 +277,7 @@ namespace Vision.Tests
             Profiler.Count("FaceFPS");
 
             Profiler.Start("DetectionFace");
-            FaceRect[] rect = Detector.Detect(mat);
+            FaceRect[] rect = FaceProvider.Detect(mat);
 
             Profiler.Start("DetectionGazeTaskStart");
             if(GazeDetectionTask != null)
@@ -212,7 +298,7 @@ namespace Vision.Tests
 
         public void GazeDetectProc(Mat mat, FaceRect[] rect)
         {
-            if (rect.Length > 0 && DetectGaze)
+            if (rect != null && rect.Length > 0 && DetectGaze)
             {
                 Profiler.Start("GazeALL");
                 Point info = GazeDetector.Detect(rect[0], mat);
@@ -288,25 +374,25 @@ namespace Vision.Tests
                         f.Draw(mat, 3, true, true);
                     }
 
-                    facePosePlot.Step(new Point3D(rect[0].LandmarkTransformVector));
-
                     if (face != null && face.Landmarks != null && face.LandmarkTransformVector != null)
                     {
+                        facePosePlot.Step(new Point3D(face.LandmarkTransformVector));
+
                         //Slove Unit Test
                         var scrPt = new Point(960, 0);
 
-                        var rod = face.SolveLookScreenRodrigues(scrPt, ScreenProperties, Flandmark.UnitPerMM);
-                        var vec = face.SolveLookScreenVector(scrPt, ScreenProperties, Flandmark.UnitPerMM);
-                        var point = face.SolveRayScreenRodrigues(rod, ScreenProperties, Flandmark.UnitPerMM);
-                        var vecPt = face.SolveRayScreenVector(vec, ScreenProperties, Flandmark.UnitPerMM);
+                        var rod = face.SolveLookScreenRodrigues(scrPt, ScreenProperties);
+                        var vec = face.SolveLookScreenVector(scrPt, ScreenProperties);
+                        var rodPt = face.SolveRayScreenRodrigues(rod, ScreenProperties);
+                        var vecPt = face.SolveRayScreenVector(vec, ScreenProperties);
 
                         faceVecPlot.Step(vec);
 
                         //Logger.Log($"theta:{Core.Cv.RodriguesTheta(rod)} vec:{vec}");
 
-                        if (Point.EucludianDistance(point, scrPt) > 0.01)
+                        if (Point.EucludianDistance(rodPt, scrPt) > 0.01)
                         {
-                            Logger.Error(this, $"SolveLook/RayScreen Rodrigues Test Fails / target: {scrPt}, result: {point}");
+                            Logger.Error(this, $"SolveLook/RayScreen Rodrigues Test Fails / target: {scrPt}, result: {rodPt}");
                         }
                         if (Point.EucludianDistance(vecPt, scrPt) > 0.01)
                         {
@@ -328,7 +414,7 @@ namespace Vision.Tests
 
                         foreach(var ray in rays)
                         {
-                            var tempPt = face.SolveRayScreenVector(ray, ScreenProperties, Flandmark.UnitPerMM);
+                            var tempPt = face.SolveRayScreenVector(ray, ScreenProperties);
                             tempPt.X = Util.Clamp(tempPt.X, 0, ScreenProperties.PixelSize.Width);
                             tempPt.Y = Util.Clamp(tempPt.Y, 0, ScreenProperties.PixelSize.Height);
                             tempPt = LayoutHelper.ResizePoint(tempPt, ScreenProperties.PixelSize, mat.Size().ToSize(), Stretch.Uniform);
@@ -341,6 +427,8 @@ namespace Vision.Tests
                     if (rect.Length > 0 && rect[0].Children.Count > 0)
                         frameOk++;
                 }
+
+                UpdateGraph(100 * FaceProvider.UnitPerMM, 600 * FaceProvider.UnitPerMM);
 
                 facePosePlot.Draw(mat);
                 faceVecPlot.Draw(mat);
@@ -380,10 +468,10 @@ namespace Vision.Tests
                 capture = null;
             }
 
-            if(Detector != null)
+            if(FaceProvider != null)
             {
-                Detector.Dispose();
-                Detector = null;
+                FaceProvider.Dispose();
+                FaceProvider = null;
             }
         }
     }

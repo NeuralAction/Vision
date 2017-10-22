@@ -152,7 +152,7 @@ namespace WindowsTests
 
         public void FaceDetection()
         {
-            FaceDetection detect = null;
+            FaceDetectionTests detect = null;
 
             Console.Write("Index [Press enter to detect from file] >>> ");
             string cmd = Console.ReadLine();
@@ -167,13 +167,13 @@ namespace WindowsTests
                 {
                     return;
                 }
-                detect = new FaceDetection(ind, new FaceDetectorXmlLoader(), new FlandmarkModelLoader());
+                detect = new FaceDetectionTests(ind, new FaceDetectorXmlLoader(), new FlandmarkModelLoader());
             }
             else
             {
                 if (DialogResult.OK == ofd.ShowDialog())
                 {
-                    detect = new FaceDetection(ofd.FileName, new FaceDetectorXmlLoader(), new FlandmarkModelLoader());
+                    detect = new FaceDetectionTests(ofd.FileName, new FaceDetectorXmlLoader(), new FlandmarkModelLoader());
                 }
             }
 

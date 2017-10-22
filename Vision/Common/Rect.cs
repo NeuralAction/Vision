@@ -154,6 +154,16 @@ namespace Vision
             _height *= scaleFactor;
         }
 
+        public static Rect operator*(double d, Rect r)
+        {
+            return r * d;
+        }
+
+        public static Rect operator*(Rect r, double d)
+        {
+            return new Rect(r.X * d, r.Y * d, r.Width * d, r.Height * d);
+        }
+
         public static explicit operator OpenCvSharp.Rect(Rect r)
         {
             return r.ToCvRect();

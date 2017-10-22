@@ -132,6 +132,14 @@ namespace Vision.Cv
             Cv2.Line(img, start.ToCvPoint(), end.ToCvPoint(), color.ToCvScalar(), thickness, lineType, shift);
         }
 
+        public void DrawMatAlpha(Mat target, Mat img, Point pt, double alpha)
+        {
+            using(Mat roi = new Mat(target, new OpenCvSharp.Rect((int)pt.X, (int)pt.Y, img.Width, img.Height)))
+            {
+                Cv2.AddWeighted(roi, 1 - alpha, img, alpha, 0, roi);
+            }
+        }
+
         //Math
         public void ProjectPoints(List<Point3D> objectPoints, double[] rvec, double[] tvec, double[,] cameraMatrix, double[] distCoeffs, out Point[] imagePoints, out double[,] jacobian)
         {

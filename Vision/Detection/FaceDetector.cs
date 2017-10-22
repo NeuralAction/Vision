@@ -5,10 +5,149 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Vision.Cv;
+using SharpFace;
 
 namespace Vision.Detection
 {
-    public class FaceDetector : IDisposable
+    public abstract class FaceDetectionProvider : IDisposable
+    {
+        public abstract double UnitPerMM { get; }
+
+        /// <summary>
+        /// Detect faces in full image. Return empty array when nothing found.
+        /// </summary>
+        /// <param name="frame"></param>
+        /// <param name="debug"></param>
+        /// <returns></returns>
+        public abstract FaceRect[] Detect(Mat frame, bool debug = false);
+        public abstract void Dispose();
+
+        protected List<FaceSmoother> Smoother = new List<FaceSmoother>();
+        protected FaceSmoother GetSmoother(int index)
+        {
+            for (int i = 0; i < index - Smoother.Count + 1; i++)
+            {
+                Smoother.Add(new FaceSmoother());
+            }
+            return Smoother[index];
+        }
+    }
+
+    public class OpenFaceModelLoader
+    {
+        public static ManifestResource ModelResource = new ManifestResource("Vision.Detection", "openface_model.zip");
+
+        public bool Loaded { get; set; } = false;
+
+        public void Load()
+        {
+            var file = Storage.LoadResource(ModelResource, true);
+            Storage.UnZip(file, Storage.Root, true);
+            Loaded = true;
+        }
+    }
+
+    public class OpenFaceDetector : FaceDetectionProvider
+    {
+        public LandmarkDetectorWrap Detector { get; set; }
+
+        public InterpolationFlags Interpolation { get; set; } = InterpolationFlags.Nearest;
+
+        public override double UnitPerMM => 1;
+        public bool SmoothLandmarks { get; set; }
+        public double MaxSize { set; get; } = 400;
+
+        public OpenFaceDetector(OpenFaceModelLoader loader)
+        {
+            Logger.Log(this, "Start Load CLNF Model");
+            if (loader != null && !loader.Loaded)
+            {
+                loader.Load();
+            }
+            Detector = new LandmarkDetectorWrap(Storage.Root.AbosolutePath);
+            var model = new FileNode(Detector.Parameters.model_location, true);
+            if (Storage.IsExist(model))
+            {
+                Detector.Load();
+            }
+            else
+            {
+                throw new Exception("Model is not found");
+            }
+            Logger.Log(this, "Finish Load CLNF Model");
+        }
+        
+        /// <summary>
+        /// default load behavior is not load.
+        /// </summary>
+        public OpenFaceDetector() : this(null)
+        {
+
+        }
+
+        public override FaceRect[] Detect(Mat frame, bool debug = false)
+        {
+            List<FaceRect> faces = new List<FaceRect>();
+
+            Profiler.Start("Detector.Resize");
+            var scale = frame.CalcScaleFactor(MaxSize);
+            using (var resize = new Mat())
+            {
+                Cv2.Resize(frame, resize, new OpenCvSharp.Size(frame.Width * scale, frame.Height * scale), 0, 0, Interpolation);
+                Profiler.End("Detector.Resize");
+
+                Profiler.Start("Detector.DetectImage");
+                if (Detector.DetectImage(resize))
+                {
+                    var face = GetFaceRect(1 / scale);
+
+                    faces.Add(face);
+                }
+                Profiler.End("Detector.DetectImage");
+            }
+            return faces.ToArray();
+        }
+
+        private FaceRect GetFaceRect(double scale = 1)
+        {
+            Profiler.Start("Detector.GetRect");
+            var boundbox = Detector.BoundaryBox.ToRect() * scale;
+            var boundboxMax = Math.Max(boundbox.Width, boundbox.Height) / 2;
+            var realbox = new Rect(boundbox.Center - new Point(boundboxMax, boundboxMax), new Size(boundboxMax * 2));
+
+            var face = new FaceRect(realbox, GetSmoother(0));
+
+            var landmarks = Detector.Landmarks;
+            var convertedLandmark = new Point[landmarks.Count];
+            var i = 0;
+            foreach (var item in landmarks)
+            {
+                convertedLandmark[i] = new Point(item.X * scale, item.Y * scale); i++;
+            }
+            face.Landmarks = convertedLandmark;
+
+            face.LandmarkTransformVector = Detector.Transform;
+            face.LandmarkRotationVector = Detector.RodriguesRotation;
+            face.LandmarkDistCoeffs = new double[4] { 0, 0, 0, 0 };
+            face.LandmarkCameraMatrix = MatTool.CameraMatrixArray(Detector.FocalX * scale, Detector.FocalY * scale, Detector.CenterX * scale, Detector.CenterY * scale);
+            face.UnitPerMM = UnitPerMM;
+
+            Profiler.End("Detector.GetRect");
+
+            return face;
+        }
+
+        public override void Dispose()
+        {
+            if (Detector != null)
+            {
+                Detector.Dispose();
+                Detector = null;
+            }
+        }
+    }
+
+    public class FaceDetector : FaceDetectionProvider
     {
         public double FaceScaleFactor { get; set; } = 1.2;
         public double FaceMinFactor { get; set; } = 0.1;
@@ -23,6 +162,7 @@ namespace Vision.Detection
         public double EyesMaxFactor { get; set; } = 0.5;
         public int MaxFaceSize { get; set; } = 100;
 
+        public override double UnitPerMM => Flandmark.UnitPerMilimeter;
         public bool LandmarkDetect { get; set; } = true;
         public bool LandmarkSolve { get; set; } = true;
 
@@ -35,8 +175,6 @@ namespace Vision.Detection
         CascadeClassifier FaceCascade;
         CascadeClassifier EyesCascade;
         FaceLandmarkDetector Landmark;
-        
-        List<FaceSmoother> Smoother = new List<FaceSmoother>();
 
         public FaceDetector(string FaceXml, string EyesXml)
         {
@@ -55,7 +193,7 @@ namespace Vision.Detection
 
         }
         
-        public FaceRect[] Detect(Mat frame, bool debug = false)
+        public override FaceRect[] Detect(Mat frame, bool debug = false)
         {
             if (frame.IsEmpty)
                 return null;
@@ -93,12 +231,11 @@ namespace Vision.Detection
                 int index = 0;
                 foreach (var face in faces)
                 {
-                    if (Smoother.Count <= index)
-                        Smoother.Add(new FaceSmoother());
-                    FaceSmoother smoothCurrent = Smoother[index];
+                    FaceSmoother smoothCurrent = GetSmoother(index);
 
                     FaceRect faceRect = new FaceRect(face.ToRect(), smoothCurrent);
                     faceRect.Scale(1 / scaleFactor);
+                    faceRect.UnitPerMM = UnitPerMM;
 
                     if (debug)
                         faceRect.Draw(frame, drawLandmarks: true);
@@ -169,7 +306,7 @@ namespace Vision.Detection
             }
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
             if(EyesCascade != null)
             {
