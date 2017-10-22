@@ -21,6 +21,14 @@ namespace Vision.Detection
         }
     }
 
+    public abstract class FaceLandmarkDetectorBackendBase
+    {
+        public abstract Point[] Detect()
+        {
+
+        }
+    }
+
     public class FaceLandmarkDetector
     {
         public InterpolationFlags Interpolation { get => Detector.Inter; set => Detector.Inter = value; }

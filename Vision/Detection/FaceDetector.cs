@@ -63,9 +63,11 @@ namespace Vision.Detection
             using (Mat frame_gray = new Mat())
             {
                 Profiler.Start("DetectionPre");
+
                 Profiler.Start("DetectionPre.Cvt");
                 frame.ConvertColor(frame_gray, ColorConversionCodes.BGR2GRAY);
                 Profiler.End("DetectionPre.Cvt");
+
                 double scaleFactor = frame_gray.CalcScaleFactor(MaxSize);
                 Mat frame_face = null;
                 if(scaleFactor != 1)
