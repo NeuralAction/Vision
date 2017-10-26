@@ -52,6 +52,11 @@ namespace Vision
             return new OpenCvSharp.Point(X, Y);
         }
 
+        public Point Clone()
+        {
+            return new Point(X, Y);
+        }
+
         public static explicit operator OpenCvSharp.Point(Point t)
         {
             return t.ToCvPoint();

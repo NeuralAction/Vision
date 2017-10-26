@@ -52,6 +52,15 @@ namespace Vision.Cv
             }
         }
 
+        public static bool ROIValid(Mat mat, Rect roi)
+        {
+            if (roi.X < 0 || roi.X + roi.Width >= mat.Width)
+                return false;
+            if (roi.Y < 0 || roi.Y + roi.Height >= mat.Height)
+                return false;
+            return true;
+        }
+
         #region extensions
 
         public static void ConvertColor(this Mat self, Mat output, ColorConversionCodes convert)

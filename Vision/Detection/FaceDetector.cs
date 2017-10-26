@@ -51,11 +51,15 @@ namespace Vision.Detection
     {
         public LandmarkDetectorWrap Detector { get; set; }
 
-        public InterpolationFlags Interpolation { get; set; } = InterpolationFlags.Nearest;
+        public InterpolationFlags Interpolation { get; set; } = InterpolationFlags.Cubic;
 
         public override double UnitPerMM => 1;
-        public bool SmoothLandmarks { get; set; }
-        public double MaxSize { set; get; } = 400;
+        public bool UseSmooth
+        {
+            get => Detector.InVideo;
+            set { Detector.InVideo = value; }
+        }
+        public double MaxSize { set; get; } = 320;
 
         public OpenFaceDetector(OpenFaceModelLoader loader)
         {
@@ -99,9 +103,13 @@ namespace Vision.Detection
                 Profiler.Start("Detector.DetectImage");
                 if (Detector.DetectImage(resize))
                 {
+                    Profiler.Start("Detector.GetRect");
+
                     var face = GetFaceRect(1 / scale);
 
                     faces.Add(face);
+
+                    Profiler.End("Detector.GetRect");
                 }
                 Profiler.End("Detector.DetectImage");
             }
@@ -110,10 +118,9 @@ namespace Vision.Detection
 
         private FaceRect GetFaceRect(double scale = 1)
         {
-            Profiler.Start("Detector.GetRect");
             var boundbox = Detector.BoundaryBox.ToRect() * scale;
-            var boundboxMax = Math.Max(boundbox.Width, boundbox.Height) / 2;
-            var realbox = new Rect(boundbox.Center - new Point(boundboxMax, boundboxMax), new Size(boundboxMax * 2));
+            var boundboxMax = Math.Max(boundbox.Width, boundbox.Height) * 1.1;
+            var realbox = new Rect(boundbox.Center - new Point(boundboxMax / 2, boundboxMax / 2), new Size(boundboxMax));
 
             var face = new FaceRect(realbox, GetSmoother(0));
 
@@ -132,9 +139,45 @@ namespace Vision.Detection
             face.LandmarkCameraMatrix = MatTool.CameraMatrixArray(Detector.FocalX * scale, Detector.FocalY * scale, Detector.CenterX * scale, Detector.CenterY * scale);
             face.UnitPerMM = UnitPerMM;
 
-            Profiler.End("Detector.GetRect");
-
+            var left = GetEye(face, 36, 41);
+            var right = GetEye(face, 42, 47);
+            face.Add(left);
+            face.Add(right);
+            
             return face;
+        }
+
+        private EyeRect GetEye(FaceRect rect, int start, int end)
+        {
+            var data = rect.Landmarks;
+            var center = new Point();
+            var max = new Point();
+            var min = new Point(1000000, 1000000);
+            for (int i = start; i <= end; i++)
+            {
+                var x = data[i].X;
+                var y = data[i].Y;
+                center.X += x;
+                center.Y += y;
+                max.X = Math.Max(max.X, x);
+                max.Y = Math.Max(max.Y, y);
+                min.X = Math.Min(min.X, x);
+                min.Y = Math.Min(min.Y, y);
+            }
+            center.X /= end - start + 1;
+            center.Y /= end - start + 1;
+
+            var landmarkSize = Math.Max(max.X - min.X, max.Y - min.Y) * 1.25;
+            var faceSize = Math.Max(rect.Width, rect.Height) * 0.33;
+
+            var avgSize = (faceSize + landmarkSize) / 2;
+            center.X -= avgSize / 2;
+            center.Y -= avgSize / 2;
+            center.X -= rect.X;
+            center.Y -= rect.Y;
+            var ret = new EyeRect(rect, new Rect(center, new Size(avgSize)));
+
+            return ret;
         }
 
         public override void Dispose()

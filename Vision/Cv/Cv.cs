@@ -98,9 +98,9 @@ namespace Vision.Cv
         public abstract char WaitKey(int duration);
 
         //Draw
-        public void DrawRectangle(Mat self, Rect rect, Scalar color, int thickness = 1, LineTypes lineType = LineTypes.Link8, int shift = 0)
+        public void DrawRectangle(Mat self, Rect rect, Scalar color, double thickness = 1, LineTypes lineType = LineTypes.Link8, int shift = 0)
         {
-            Cv2.Rectangle(self, rect.ToCvRect(), color.ToCvScalar(), thickness, lineType, shift);
+            Cv2.Rectangle(self, rect.ToCvRect(), color.ToCvScalar(), (int)thickness, lineType, shift);
         }
 
         public void DrawCircle(Mat img, Point center, double radius, Scalar color, double thickness = 1, LineTypes lineType = LineTypes.Link8, int shift = 0)
@@ -121,10 +121,24 @@ namespace Vision.Cv
                 (int)Math.Round(thickness), lineType, shift);
         }
 
-        public void DrawText(Mat img, string text, Point org, HersheyFonts fontFace, double fontScale, Scalar color, int thickness = 1, LineTypes lineType = LineTypes.Link8, bool bottomLeftOrigin = false)
+        public void DrawText(Mat img, string text, Point org, HersheyFonts fontFace, double fontScale, Scalar color, int thickness = 1, LineTypes lineType = LineTypes.AntiAlias, bool bottomLeftOrigin = false)
         {
-            Cv2.PutText(img, text, new OpenCvSharp.Point(org.X, org.Y), fontFace, fontScale,
-                new OpenCvSharp.Scalar(color.Value1, color.Value2, color.Value3, color.Value4), thickness, lineType, bottomLeftOrigin);
+            string[] lines;
+            if (text.Contains("\n"))
+            {
+                lines = text.Split('\n');
+            }
+            else
+            {
+                lines = new string[] { text };
+            }
+
+            var pt = org.Clone();
+            foreach (var line in lines)
+            {
+                Cv2.PutText(img, line, pt.ToCvPoint(), fontFace, fontScale, color.ToCvScalar(), thickness, lineType, bottomLeftOrigin);
+                pt.Y += 35;
+            }
         }
 
         public void DrawLine(Mat img, Point start, Point end, Scalar color, int thickness = 1, LineTypes lineType = LineTypes.Link8, int shift = 0)
@@ -132,7 +146,7 @@ namespace Vision.Cv
             Cv2.Line(img, start.ToCvPoint(), end.ToCvPoint(), color.ToCvScalar(), thickness, lineType, shift);
         }
 
-        public void DrawMatAlpha(Mat target, Mat img, Point pt, double alpha)
+        public void DrawMatAlpha(Mat target, Mat img, Point pt, double alpha = 1)
         {
             using(Mat roi = new Mat(target, new OpenCvSharp.Rect((int)pt.X, (int)pt.Y, img.Width, img.Height)))
             {

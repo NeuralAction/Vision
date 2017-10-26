@@ -17,7 +17,27 @@ namespace Vision.Detection
             get
             {
                 Point pt = Center;
-                return new Point(Center.X + Parent.X, Center.Y + Parent.Y);
+                return new Point(pt.X + Parent.X, pt.Y + Parent.Y);
+            }
+        }
+
+        public Point AbsolutePoint
+        {
+            get
+            {
+                return new Point(X + Parent.X, Y + Parent.Y);
+            }
+        }
+
+        public EyeRect Absolute
+        {
+            get
+            {
+                EyeRect ret = Clone();
+                var point = AbsolutePoint;
+                ret.X = point.X;
+                ret.Y = point.Y;
+                return ret;
             }
         }
 
@@ -68,6 +88,11 @@ namespace Vision.Detection
         {
             double size = Math.Max(Parent.Width, Parent.Height) * percentOfFace;
             return MatTool.New(frame, new Vision.Rect(Parent.X + Center.X - size * 0.5, Parent.Y + Center.Y - size * 0.5, size, size), true);
+        }
+
+        public EyeRect Clone()
+        {
+            return (EyeRect)MemberwiseClone();
         }
     }
 }

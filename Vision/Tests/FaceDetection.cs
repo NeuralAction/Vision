@@ -84,7 +84,7 @@ namespace Vision.Tests
                 }
                 else if (FaceProvider is OpenFaceDetector)
                 {
-                    return ((OpenFaceDetector)FaceProvider).SmoothLandmarks;
+                    return ((OpenFaceDetector)FaceProvider).UseSmooth;
                 }
                 else
                 {
@@ -99,7 +99,7 @@ namespace Vision.Tests
                 }
                 else if (FaceProvider is OpenFaceDetector)
                 {
-                    ((OpenFaceDetector)FaceProvider).SmoothLandmarks = value;
+                    ((OpenFaceDetector)FaceProvider).UseSmooth = value;
                 }
                 else
                 {
@@ -123,6 +123,8 @@ namespace Vision.Tests
         FaceRect[] rect = null;
         Queue<Point> trail = new Queue<Point>();
         PointKalmanFilter filter = new PointKalmanFilter();
+
+        List<UIObject> UiList = new List<UIObject>();
         Point3DLinePlot facePosePlot;
         Point3DLinePlot faceVecPlot;
 
@@ -130,11 +132,18 @@ namespace Vision.Tests
         {
             Logger.Log(this, "Press E to Exit");
 
-            facePosePlot = new Point3DLinePlot();
-            facePosePlot.Point = new Point(10, 100);
-            
-            faceVecPlot = new Point3DLinePlot();
-            faceVecPlot.Point = new Point(270, 100);
+            facePosePlot = new Point3DLinePlot
+            {
+                Point = new Point(10, 135)
+            };
+
+            faceVecPlot = new Point3DLinePlot
+            {
+                Point = new Point(270, 135)
+            };
+
+            UiList.Add(faceVecPlot);
+            UiList.Add(facePosePlot);
 
             UpdateGraph(1500,5000);
 
@@ -144,7 +153,10 @@ namespace Vision.Tests
                 PixelSize = new Size(1920, 1080),
                 Size = new Size(410, 285)
             };
-            OpenFaceDetector = new OpenFaceDetector(new OpenFaceModelLoader());
+            OpenFaceDetector = new OpenFaceDetector(new OpenFaceModelLoader())
+            {
+                UseSmooth = true
+            };
             FaceDetector = new FaceDetector(faceXml, eyeXml);
             FaceProvider = OpenFaceDetector;
             GazeDetector = new EyeGazeDetector(ScreenProperties);
@@ -367,16 +379,44 @@ namespace Vision.Tests
                 //update face
                 if (rect != null && rect.Length > 0)
                 {
-                    FaceRect face = null;
                     foreach (FaceRect f in rect)
                     {
-                        face = f;
                         f.Draw(mat, 3, true, true);
                     }
+                    FaceRect face = rect[0];
 
                     if (face != null && face.Landmarks != null && face.LandmarkTransformVector != null)
                     {
-                        facePosePlot.Step(new Point3D(face.LandmarkTransformVector));
+                        //Draw rois
+                        List<Mat> rois = new List<Mat>();
+
+                        if (MatTool.ROIValid(mat, face))
+                        {
+                            Mat roiFace = face.ROI(mat);
+                            rois.Add(roiFace);
+                        }
+                        if (face.RightEye != null && MatTool.ROIValid(mat, face.RightEye.Absolute))
+                        {
+                            Mat roi = face.RightEye.ROI(mat);
+                            rois.Add(roi);
+                        }
+                        if (face.LeftEye != null && MatTool.ROIValid(mat, face.LeftEye.Absolute))
+                        {
+                            Mat roi = face.LeftEye.ROI(mat);
+                            rois.Add(roi);
+                        }
+
+                        var roiMargin = 10;
+                        Size roiSize = new Size(100);
+                        Point roiPt = new Point(mat.Width - roiSize.Width - roiMargin, mat.Height - roiSize.Height - 50);
+                        foreach (var item in rois)
+                        {
+                            Cv2.Resize(item, item, roiSize.ToCvSize(), 0, 0, InterpolationFlags.Cubic);
+                            Core.Cv.DrawMatAlpha(mat, item, roiPt);
+                            Core.Cv.DrawRectangle(mat, new Rect(roiPt, roiSize), Scalar.BgrWhite);
+                            item.Dispose();
+                            roiPt.X -= roiSize.Width + roiMargin;
+                        }
 
                         //Slove Unit Test
                         var scrPt = new Point(960, 0);
@@ -386,9 +426,8 @@ namespace Vision.Tests
                         var rodPt = face.SolveRayScreenRodrigues(rod, ScreenProperties);
                         var vecPt = face.SolveRayScreenVector(vec, ScreenProperties);
 
+                        facePosePlot.Step(new Point3D(face.LandmarkTransformVector));
                         faceVecPlot.Step(vec);
-
-                        //Logger.Log($"theta:{Core.Cv.RodriguesTheta(rod)} vec:{vec}");
 
                         if (Point.EucludianDistance(rodPt, scrPt) > 0.01)
                         {
@@ -430,8 +469,10 @@ namespace Vision.Tests
 
                 UpdateGraph(100 * FaceProvider.UnitPerMM, 600 * FaceProvider.UnitPerMM);
 
-                facePosePlot.Draw(mat);
-                faceVecPlot.Draw(mat);
+                foreach (var item in UiList)
+                {
+                    item.Draw(mat);
+                }
 
                 //update gaze trail
                 if (trail.Count > 20)
@@ -453,10 +494,13 @@ namespace Vision.Tests
                 yoffset %= 1;
 
                 //draw texts
+                var detectionTime = Profiler.Get("DetectionALL");
+                string demo = $"DetectFPS: {Profiler.Get("FaceFPS")} ({detectionTime.ToString("0.00")}ms/{(1000 / detectionTime).ToString("0.00")}fps)\n" +
+                    $"Frame: {frameOk}/{frameMax} ({((double)frameOk / frameMax * 100).ToString("0.00")}%)\n" +
+                    $"LndSmt: {SmoothLandmarks} GzSmt: {GazeSmooth}";
+                mat.DrawText(50, 50, demo, Scalar.BgrGreen);
                 mat.DrawText(50, 400 + 250 * Math.Pow(Math.Sin(2 * Math.PI * yoffset), 3), "HELLO WORLD");
-                mat.DrawText(50, 50, $"DetectFPS: {Profiler.Get("FaceFPS")} ({Profiler.Get("DetectionALL").ToString("0.00")}ms)", Scalar.BgrGreen);
                 mat.DrawText(50, mat.Height - 50, $"DrawFPS: {Profiler.Get("DrawFPS")}", Scalar.BgrGreen);
-                mat.DrawText(50, 85, "Frame: " + frameOk + "/" + frameMax + " (" + ((double)frameOk / frameMax * 100).ToString("0.00") + "%)", Scalar.BgrGreen);
             }
         }
 
