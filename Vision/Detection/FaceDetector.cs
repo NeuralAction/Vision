@@ -35,6 +35,18 @@ namespace Vision.Detection
 
     public class OpenFaceModelLoader
     {
+        static OpenFaceModelLoader defaultModel;
+        public static OpenFaceModelLoader Default
+        {
+            get
+            {
+                if(defaultModel == null)
+                {
+                    defaultModel = new OpenFaceModelLoader();
+                }
+                return defaultModel;
+            }
+        }
         public static ManifestResource ModelResource = new ManifestResource("Vision.Detection", "openface_model.zip");
 
         public bool Loaded { get; set; } = false;
@@ -82,9 +94,9 @@ namespace Vision.Detection
         }
         
         /// <summary>
-        /// default load behavior is not load.
+        /// default load behavior use default
         /// </summary>
-        public OpenFaceDetector() : this(null)
+        public OpenFaceDetector() : this(OpenFaceModelLoader.Default)
         {
 
         }
@@ -105,7 +117,7 @@ namespace Vision.Detection
                 {
                     Profiler.Start("Detector.GetRect");
 
-                    var face = GetFaceRect(1 / scale);
+                    var face = GetFaceRect(frame, 1 / scale);
 
                     faces.Add(face);
 
@@ -116,13 +128,22 @@ namespace Vision.Detection
             return faces.ToArray();
         }
 
-        private FaceRect GetFaceRect(double scale = 1)
+        private FaceRect GetFaceRect(Mat frame, double scale = 1)
         {
-            var boundbox = Detector.BoundaryBox.ToRect() * scale;
-            var boundboxMax = Math.Max(boundbox.Width, boundbox.Height) * 1.1;
-            var realbox = new Rect(boundbox.Center - new Point(boundboxMax / 2, boundboxMax / 2), new Size(boundboxMax));
+            var boundBox = Detector.BoundaryBox.ToRect() * scale;
+            var boundBoxMax = Math.Max(boundBox.Width, boundBox.Height) * 1.1;
+            var oriBox = new Rect(boundBox.Center - new Point(boundBoxMax / 2, boundBoxMax / 2), new Size(boundBoxMax));
+            var oriLT = new Point(oriBox.X, oriBox.Y);
+            var oriRB = new Point(oriBox.X + oriBox.Width, oriBox.Y + oriBox.Height);
+            var minPt = new Point(0, 0);
+            var maxPt = new Point(frame.Width - 1, frame.Height - 1);
+            oriLT = MatTool.Clamp(oriLT, minPt, maxPt);
+            oriRB = MatTool.Clamp(oriRB, minPt, maxPt);
+            var realCenter = MatTool.Average(oriRB, oriLT);
+            var realSize = Math.Min(Math.Abs(oriLT.X - oriRB.X), Math.Abs(oriLT.Y - oriRB.Y));
+            var realBox = new Rect(realCenter.X - realSize / 2, realCenter.Y - realSize / 2, realSize, realSize);
 
-            var face = new FaceRect(realbox, GetSmoother(0));
+            var face = new FaceRect(realBox, GetSmoother(0));
 
             var landmarks = Detector.Landmarks;
             var convertedLandmark = new Point[landmarks.Count];

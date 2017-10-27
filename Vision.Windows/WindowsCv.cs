@@ -78,7 +78,7 @@ namespace Vision.Windows
 
         protected override void InternalImgWrite(string name, Mat img, int quality)
         {
-            throw new NotImplementedException();
+            Cv2.ImWrite(name, img, new ImageEncodingParam(ImwriteFlags.JpegQuality, quality));
         }
     }
 }

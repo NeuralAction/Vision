@@ -34,6 +34,8 @@ namespace Vision.Cv
             return new Mat(Mat, new Rect(clmpX, clmpY, clmpW, clmpH).ToCvRect());
         }
 
+        #region Math
+
         public static double[,] CameraMatrixArray(double fx, double fy, double cx, double cy)
         {
             return new double[,]
@@ -61,6 +63,36 @@ namespace Vision.Cv
             return true;
         }
 
+        public static double Clamp(double value, double min, double max)
+        {
+            return Math.Max(min, Math.Min(max, value));
+        }
+
+        public static Point Clamp(Point pt, Point min, Point max)
+        {
+            return new Point(Clamp(pt.X, min.X, max.X), Clamp(pt.Y, min.Y, max.Y));
+        }
+
+        public static double Average(params double[] avg)
+        {
+            return avg.Average();
+        }
+
+        public static Point Average(params Point[] pts)
+        {
+            Point pt = new Point();
+            foreach (var item in pts)
+            {
+                pt.X += item.X;
+                pt.Y += item.Y;
+            }
+            pt.X /= pts.Length;
+            pt.Y /= pts.Length;
+            return pt;
+        }
+
+        #endregion Math
+
         #region extensions
 
         public static void ConvertColor(this Mat self, Mat output, ColorConversionCodes convert)
@@ -70,7 +102,7 @@ namespace Vision.Cv
 
         public static void ConvertColor(this Mat self, ColorConversionCodes convert)
         {
-            ConvertColor(self, convert);
+            ConvertColor(self, self, convert);
         }
 
         public static void EqualizeHistogram(this Mat self, Mat output)
@@ -117,7 +149,7 @@ namespace Vision.Cv
 
         public static void NormalizeRGB(this Mat self)
         {
-            NormalizeRGB(self);
+            NormalizeRGB(self, self);
         }
 
         public static Mat[] Split(this Mat self)

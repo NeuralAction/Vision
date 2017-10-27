@@ -122,8 +122,6 @@ namespace Vision.Detection
 
         public double[] SolveLookScreenRodrigues(Point scrPt, ScreenProperties properties)
         {
-            var unitPermm = UnitPerMM;
-
             Vector<double> ptVec = CreateVector.Dense(SolveLookScreenVector(scrPt, properties).ToArray());
 
             Vector<double> originVec = CreateVector.Dense(new double[] { 0, 0, -1 });
@@ -160,8 +158,6 @@ namespace Vision.Detection
 
         public Point SolveRayScreenRodrigues(double[] rod, ScreenProperties properties)
         {
-            var unitPermm = UnitPerMM;
-
             double[,] rotMat;
             Core.Cv.Rodrigues(rod, out rotMat);
 
@@ -174,6 +170,7 @@ namespace Vision.Detection
         public Point SolveRayScreenVector(Point3D vec, ScreenProperties properties)
         {
             var unitPermm = UnitPerMM;
+
             var tempVec = CreateVector.Dense(vec.ToArray());
             var tempScale = Math.Abs(LandmarkTransformVector[2] / tempVec[2]);
             tempVec = tempVec * tempScale;
@@ -182,7 +179,7 @@ namespace Vision.Detection
             if (tempVec[2] > 0.001)
                 throw new ArgumentException("vector cannot be solve xD");
 
-            var tempScr = properties.ToScreenCoordinate(UnitPerMM, new Point3D(tempVec.ToArray()));
+            var tempScr = properties.ToScreenCoordinate(unitPermm, new Point3D(tempVec.ToArray()));
             //tempScr.X = properties.PixelSize.Width - Util.FixZero(tempScr.X);
             //tempScr.Y = -Util.FixZero(tempScr.Y);
             tempScr.X = Util.FixZero(tempScr.X);

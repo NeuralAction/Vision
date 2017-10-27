@@ -153,7 +153,7 @@ namespace Vision.Tests
                 PixelSize = new Size(1920, 1080),
                 Size = new Size(410, 285)
             };
-            OpenFaceDetector = new OpenFaceDetector(new OpenFaceModelLoader())
+            OpenFaceDetector = new OpenFaceDetector()
             {
                 UseSmooth = true
             };

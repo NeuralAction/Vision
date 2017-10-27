@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenCvSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -29,18 +30,11 @@ namespace EyeGazeGen
         public EyeGazeModel Model { get => model; set => model = value; }
         private double zoom = 1;
         public double Zoom { get => zoom; set => zoom = value; }
-        private FaceDetector Detector = new FaceDetector(new FaceDetectorXmlLoader())
-        {
-            EyesDetectCascade = true,
-            EyesDetectLandmark = true,
-            LandmarkDetect = true,
-            LandmarkSolve = true,
-            SmoothLandmarks = false,
-            SmoothVectors = true
-        };
+        private FaceDetectionProvider Detector;
 
-        public ModelViewerControl()
+        public ModelViewerControl(FaceDetectionProvider prov)
         {
+            Detector = prov;
             InitializeComponent();
         }
 
@@ -117,7 +111,7 @@ namespace EyeGazeGen
 
                 EyeGazeModelElement element = (EyeGazeModelElement)ellipse.Tag;
                 string filepath = element.File.AbosolutePath;
-                using (VMat mat = Core.Cv.ImgRead(element.File))
+                using (Mat mat = Core.Cv.ImgRead(element.File))
                 {
                     FaceRect[] rect = Detector.Detect(mat);
                     if (rect.Length > 0 && rect[0].Children.Count > 0)
@@ -127,7 +121,7 @@ namespace EyeGazeGen
                         EyeRect eye = rect[0].LeftEye;
                         if (eye != null)
                         {
-                            using(VMat roi = eye.RoiCropByPercent(mat))
+                            using(Mat roi = eye.RoiCropByPercent(mat))
                             {
                                 roi.Resize(new Vision.Size(160, 160));
                                 roi.NormalizeRGB();

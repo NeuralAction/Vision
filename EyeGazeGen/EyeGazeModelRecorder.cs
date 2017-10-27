@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenCvSharp;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -27,7 +28,7 @@ namespace Vision.Detection
     public class EyeGazeModelRecorder
     {
         public event EventHandler<EyeGazePointArg> SetPoint;
-        public event EventHandler<VMat> FrameReady;
+        public event EventHandler<Mat> FrameReady;
         public event EventHandler<Point> Captured; 
 
         public bool IsRecording { get; set; } = false;
@@ -40,7 +41,7 @@ namespace Vision.Detection
         private Task recThread;
         private Capture capture;
         private object matLocker = new object();
-        private VMat mat;
+        private Mat mat;
         private int captureCount = 0;
         private CancellationTokenSource tokenSource;
 
@@ -124,7 +125,7 @@ namespace Vision.Detection
                             if (!IsPaused)
                             {
                                 FileNode node = Parent.GetFile($"{captureCount},{Math.Round(pt.X)},{Math.Round(pt.Y)}.jpg");
-                                Core.Cv.ImgWrite(node, mat, 90);
+                                Core.Cv.ImgWrite(node, mat, 95);
                                 captureCount++;
                                 if (captureCount > 1 && captureCount % 20 == 0)
                                 {
@@ -157,8 +158,8 @@ namespace Vision.Detection
                     mat = null;
                 }
 
-                mat = e.VMat;
-                e.VMatDispose = false;
+                mat = e.Mat;
+                e.MatDispose = false;
                 FrameReady?.Invoke(this, mat);
             }
         }

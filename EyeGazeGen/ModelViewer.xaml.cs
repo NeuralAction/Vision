@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenCvSharp;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,6 +18,9 @@ using Vision;
 using Vision.Cv;
 using Vision.Detection;
 
+using Window = System.Windows.Window;
+using FileNode = Vision.FileNode;
+
 namespace EyeGazeGen
 {
     /// <summary>
@@ -26,12 +30,15 @@ namespace EyeGazeGen
     {
         EyeGazeModel model;
         ScreenProperties ScreenProperties;
-        public ModelViewer(Window wnd, EyeGazeModel model)
+        ModelViewerControl viewControl;
+        public ModelViewer(Window wnd, EyeGazeModel model, FaceDetectionProvider prov)
         {
-            this.model = model;
-
             InitializeComponent();
 
+            viewControl = new ModelViewerControl(prov);
+            Grid.Children.Add(viewControl);
+            this.model = model;
+            
             Owner = wnd;
             Title = model.SessionName;
 
@@ -40,6 +47,16 @@ namespace EyeGazeGen
         }
 
         private void Bt_Create_EyesModel_Click(object sender, RoutedEventArgs e)
+        {
+            IsEnabled = false;
+            Task.Factory.StartNew(() =>
+            {
+                Save();
+                Dispatcher.Invoke(() => { IsEnabled = true; });
+            });
+        }
+
+        private void Save()
         {
             var dir = model.Directory.GetDirectory($"[{DateTime.Now.ToString()}] EyesSubModule");
             Storage.FixPathChars(dir);
@@ -69,33 +86,19 @@ namespace EyeGazeGen
             if (dir != null)
             {
                 FileNode text = dir.NewFile("model.txt");
-                using(var stream = text.Open())
+                using (var stream = text.Open())
                 {
                     model.WriteModelText(stream);
                 }
-                var xmlloader = new FaceDetectorXmlLoader();
 
-                List<FaceDetector> detectors = new List<FaceDetector>();
+                List<FaceDetectionProvider> detectors = new List<FaceDetectionProvider>();
                 for (int i = 0; i < Environment.ProcessorCount; i++)
                 {
-                    detectors.Add(new FaceDetector(xmlloader)
+                    Logger.Log($"Load Detector [{i + 1}/{Environment.ProcessorCount}]");
+                    detectors.Add(new OpenFaceDetector()
                     {
-                        MaxSize = 400,
-                        MaxFaceSize = 400,
-                        EyesScaleFactor = 1.1,
-                        FaceScaleFactor = 1.1,
-                        EyesMinFactor = 0.1,
-                        EyesMaxFactor = 0.8,
-                        EyesDetectCascade = true,
-                        EyesDetectLandmark = true,
-                        FaceMaxFactor = 0.957,
-                        FaceMinFactor = 0.15,
-                        Interpolation = Interpolation.Cubic,
-                        LandmarkDetect = true,
-                        LandmarkSolve = true,
-                        SmoothLandmarks = false,
-                        SmoothVectors = true,
-                        ClampVectors = true,
+                        MaxSize = 640,
+                        Interpolation = InterpolationFlags.Lanczos4
                     });
                 }
 
@@ -112,7 +115,7 @@ namespace EyeGazeGen
                 Parallel.ForEach(model.Elements, new ParallelOptions() { MaxDegreeOfParallelism = Environment.ProcessorCount }, (ele) =>
                 {
                     int detectorInd;
-                    FaceDetector detector;
+                    FaceDetectionProvider detector;
                     lock (countLocker)
                     {
                         count++;
@@ -120,7 +123,7 @@ namespace EyeGazeGen
                         detector = detectors[detectorInd];
                     }
 
-                    using (VMat frame = Core.Cv.ImgRead(ele.File))
+                    using (Mat frame = Core.Cv.ImgRead(ele.File))
                     {
                         if (frame != null && !frame.IsEmpty)
                         {
@@ -133,7 +136,7 @@ namespace EyeGazeGen
                                     {
                                         if (Math.Abs(face.LandmarkTransformVector[2]) < 7500 && face.LeftEye != null && face.RightEye != null)
                                         {
-                                            var rod = face.SolveLookScreenVector(ele.Point, ScreenProperties, Flandmark.UnitPerMM).ToArray();
+                                            var rod = face.SolveLookScreenVector(ele.Point, ScreenProperties).ToArray();
 
                                             var filename = $"{ele.Index},{rod[0]},{rod[1]},{rod[2]}.jpg";
                                             FileNode eyeFileLeft = dirLeft.GetFile(filename);
@@ -142,25 +145,25 @@ namespace EyeGazeGen
                                             FileNode eyeFileRight2 = dirRight2.GetFile(filename);
                                             FileNode eyeFileFace = dirFace.GetFile(filename);
 
-                                            using (VMat roi = face.LeftEye.RoiCropByPercent(frame, 0.25))
+                                            using (Mat roi = face.LeftEye.RoiCropByPercent(frame, 0.25))
                                                 Core.Cv.ImgWrite(eyeFileLeft, roi, 92);
 
-                                            using (VMat roi = face.LeftEye.RoiCropByPercent(frame, 0.5))
+                                            using (Mat roi = face.LeftEye.RoiCropByPercent(frame, 0.5))
                                                 Core.Cv.ImgWrite(eyeFileLeft2, roi, 92);
 
-                                            using (VMat roi = face.RightEye.RoiCropByPercent(frame, 0.25))
+                                            using (Mat roi = face.RightEye.RoiCropByPercent(frame, 0.25))
                                                 Core.Cv.ImgWrite(eyeFileRight, roi, 92);
 
-                                            using (VMat roi = face.RightEye.RoiCropByPercent(frame, 0.5))
+                                            using (Mat roi = face.RightEye.RoiCropByPercent(frame, 0.5))
                                                 Core.Cv.ImgWrite(eyeFileRight2, roi, 92);
 
-                                            using (VMat roi = face.ROI(frame))
+                                            using (Mat roi = face.ROI(frame))
                                                 Core.Cv.ImgWrite(eyeFileFace, roi, 92);
                                         }
                                     }
                                 }
                             }
-                            catch(Exception ex)
+                            catch (Exception ex)
                             {
                                 Logger.Error(ex.ToString());
                             }
@@ -169,7 +172,7 @@ namespace EyeGazeGen
                     Logger.Log($"Extracted [{count}/{model.Elements.Count}]");
                 });
 
-                foreach(var d in detectors)
+                foreach (var d in detectors)
                     d.Dispose();
             }
             else

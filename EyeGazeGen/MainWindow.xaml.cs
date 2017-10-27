@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,11 +26,11 @@ namespace EyeGazeGen
     /// <summary>
     /// MainWindow.xaml에 대한 상호 작용 논리
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : System.Windows.Window
     {
         EyeGazeModelRecorder recorder;
-        FaceDetector detector;
-        VMat frame;
+        FaceDetectionProvider detector;
+        Mat frame;
 
         public MainWindow()
         {
@@ -37,7 +38,8 @@ namespace EyeGazeGen
 
             Vision.Core.Init(new Vision.Windows.WindowsCore());
 
-            detector = new FaceDetector(new FaceDetectorXmlLoader());
+            //detector = new FaceDetector(new FaceDetectorXmlLoader());
+            detector = new OpenFaceDetector();
 
             UpdateLib();
 
@@ -121,7 +123,7 @@ namespace EyeGazeGen
         }
 
         int offset = 0;
-        private void Recorder_FrameReady(object sender, VMat e)
+        private void Recorder_FrameReady(object sender, Mat e)
         {
             if (frame != null)
             {
@@ -136,11 +138,11 @@ namespace EyeGazeGen
                 frame = e.Clone();
                 FaceRect[] rect = detector.Detect(frame);
                 foreach (FaceRect r in rect)
-                    r.Draw(frame, 1, true);
+                    r.Draw(frame, 2, true, true);
                 frame.DrawText(0, 50, $"fps:{Profiler.Get("fps").ToString().PadRight(2)} wpfFPS:{Profiler.Get("wpfFPS").ToString().PadRight(2)} recorded:{((recorder == null) ? 0 : recorder.CaptureCount)}");
                 if (recorder.IsPaused)
                 {
-                    frame.DrawText(-offset, 50, "PAUSED-PAUSED-PAUSED-PAUSED-PAUSED-PAUSED-PAUSED-PAUSED-PAUSED", Scalar.BgrBlue);
+                    frame.DrawText(-offset, 50, "PAUSED-PAUSED-PAUSED-PAUSED-PAUSED-PAUSED-PAUSED-PAUSED-PAUSED-PAUSED-PAUSED-PAUSED-PAUSED-PAUSED-PAUSED-PAUSED-PAUSED", Vision.Scalar.BgrBlue);
                     offset += 2;
                     offset = offset % (26 * 7);
                 }
@@ -264,10 +266,7 @@ namespace EyeGazeGen
             {
                 string path = LibItemSource[selInd];
 
-                EyeGazeModel model = new EyeGazeModel(new DirectoryNode(path));
-
-                ModelViewer viewer = new ModelViewer(this, model);
-                viewer.Show();
+                OpenModel(new DirectoryNode(path));
             }
         }
 
@@ -277,11 +276,23 @@ namespace EyeGazeGen
         {
             if(fbd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                EyeGazeModel model = new EyeGazeModel(new DirectoryNode(fbd.SelectedPath, true));
-
-                ModelViewer viewer = new ModelViewer(this, model);
-                viewer.Show();
+                OpenModel(new DirectoryNode(fbd.SelectedPath, true));
             }
+        }
+
+        private void OpenModel(DirectoryNode node)
+        {
+            Task.Factory.StartNew(() => 
+            {
+                EyeGazeModel model = new EyeGazeModel(node);
+                FaceDetectionProvider prov = new OpenFaceDetector();
+
+                Dispatcher.Invoke(() =>
+                {
+                    ModelViewer viewer = new ModelViewer(this, model, prov);
+                    viewer.Show();
+                });
+            });
         }
 
         private void UpdateLib()

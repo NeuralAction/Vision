@@ -123,14 +123,16 @@ namespace Vision.Windows
 
         protected override void InternalUnZip(FileNode zipfile, DirectoryNode outputdir, bool overwrite)
         {
-            var zip = ZipFile.Open(zipfile.AbosolutePath, ZipArchiveMode.Read);
-            foreach (var item in zip.Entries)
+            using (var zip = ZipFile.Open(zipfile.AbosolutePath, ZipArchiveMode.Read))
             {
-                var abs = PathCombine(outputdir.AbosolutePath, item.FullName);
-                if (abs.EndsWith("\\") || abs.EndsWith("/"))
-                    CreateDirectory(abs, true);
-                else
-                    item.ExtractToFile(abs, overwrite);
+                foreach (var item in zip.Entries)
+                {
+                    var abs = PathCombine(outputdir.AbosolutePath, item.FullName);
+                    if (abs.EndsWith("\\") || abs.EndsWith("/"))
+                        CreateDirectory(abs, true);
+                    else
+                        item.ExtractToFile(abs, overwrite);
+                }
             }
         }
     }

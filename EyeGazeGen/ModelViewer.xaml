@@ -6,12 +6,11 @@
         xmlns:local="clr-namespace:EyeGazeGen"
         mc:Ignorable="d"
         Title="ModelViewer" MinWidth="420" MinHeight="320" Height="432" Width="729">
-    <Grid>
+    <Grid x:Name="Grid">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="120"/>
         </Grid.ColumnDefinitions>
-        <local:ModelViewerControl x:Name="viewControl"/>
         <Grid Grid.Column="1">
             <StackPanel>
                 <Button Content="Create Eyes Model" Height="30" x:Name="Bt_Create_EyesModel" Click="Bt_Create_EyesModel_Click"/>

@@ -67,6 +67,11 @@ namespace Vision
             {
                 return new Point(_x, _y);
             }
+            set
+            {
+                _x = value.X;
+                _y = value.Y;
+            }
         }
 
         public Size Size
@@ -74,6 +79,11 @@ namespace Vision
             get
             {
                 return new Size(_width, _height);
+            }
+            set
+            {
+                _width = value.Width;
+                _height = value.Height;
             }
         }
 

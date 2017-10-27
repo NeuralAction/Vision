@@ -134,6 +134,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SharpFace\OpenCvSharp\src\OpenCvSharp\OpenCvSharp.csproj">
+      <Project>{658C140F-2E73-4E22-80A7-F05DF0A83318}</Project>
+      <Name>OpenCvSharp</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Vision.Windows\Vision.Windows.csproj">
       <Project>{15e57a3f-8b2f-46f0-a717-34b308307b1d}</Project>
       <Name>Vision.Windows</Name>
