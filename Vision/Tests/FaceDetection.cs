@@ -270,6 +270,13 @@ namespace Vision.Tests
                 case 'h':
                     GazeSmooth = !GazeSmooth;
                     break;
+                case 'j':
+                    GazeDetector.DetectMode++;
+                    GazeDetector.DetectMode = (EyeGazeDetectMode)((int)GazeDetector.DetectMode % Enum.GetNames(typeof(EyeGazeDetectMode)).Length);
+                    break;
+                case 'k':
+                    GazeDetector.UseModification = !GazeDetector.UseModification;
+                    break;
                 case '1':
                     FaceProvider = FaceDetector;
                     break;
@@ -497,7 +504,7 @@ namespace Vision.Tests
                 var detectionTime = Profiler.Get("DetectionALL");
                 string demo = $"DetectFPS: {Profiler.Get("FaceFPS")} ({detectionTime.ToString("0.00")}ms/{(1000 / detectionTime).ToString("0.00")}fps)\n" +
                     $"Frame: {frameOk}/{frameMax} ({((double)frameOk / frameMax * 100).ToString("0.00")}%)\n" +
-                    $"LndSmt: {SmoothLandmarks} GzSmt: {GazeSmooth}";
+                    $"LndSmt: {SmoothLandmarks} GzSmt: {GazeSmooth} GzMode: {GazeDetector.DetectMode}";
                 mat.DrawText(50, 50, demo, Scalar.BgrGreen);
                 mat.DrawText(50, 400 + 250 * Math.Pow(Math.Sin(2 * Math.PI * yoffset), 3), "HELLO WORLD");
                 mat.DrawText(50, mat.Height - 50, $"DrawFPS: {Profiler.Get("DrawFPS")}", Scalar.BgrGreen);

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenCvSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -93,7 +94,7 @@ namespace EyeExtract
                     LandmarkSolve = true,
                     MaxFaceSize = 200,
                     MaxSize = 400,
-                    Interpolation = Interpolation.Cubic
+                    Interpolation = InterpolationFlags.Cubic
                 };
 
                 int id = 0;
@@ -101,7 +102,7 @@ namespace EyeExtract
                 {
                     if (Storage.IsImage(file))
                     {
-                        using (VMat mat = Core.Cv.ImgRead(file))
+                        using (Mat mat = Core.Cv.ImgRead(file))
                         {
                             var rects = detector.Detect(mat);
                             if (rects != null && rects.Length > 0)
@@ -111,7 +112,7 @@ namespace EyeExtract
                                 {
                                     if (face.LeftEye != null)
                                     {
-                                        using (VMat eye = face.LeftEye.RoiCropByPercent(mat))
+                                        using (Mat eye = face.LeftEye.RoiCropByPercent(mat))
                                             Core.Cv.ImgWrite(parent.GetFile($"{id},{caption}.jpg"), eye, 92);
                                     }
                                 }
@@ -121,10 +122,10 @@ namespace EyeExtract
                                     {
                                         var filename = $"{id},{caption}.jpg";
 
-                                        using (VMat eye = face.LeftEye.RoiCropByPercent(mat))
+                                        using (Mat eye = face.LeftEye.RoiCropByPercent(mat))
                                             Core.Cv.ImgWrite(parentLeft.GetFile(filename), eye, 92);
 
-                                        using (VMat eye = face.RightEye.RoiCropByPercent(mat))
+                                        using (Mat eye = face.RightEye.RoiCropByPercent(mat))
                                             Core.Cv.ImgWrite(parentRight.GetFile(filename), eye, 92);
                                     }
                                 }

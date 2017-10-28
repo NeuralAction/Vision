@@ -82,8 +82,7 @@ namespace EyeTestApp
                     service = new EyeGazeService();
                     service.GazeDetector.ClipToBound = true;
                     service.GazeDetector.UseSmoothing = gazeSmooth;
-                    service.FaceDetector.SmoothLandmarks = faceSmooth;
-                    service.FaceDetector.SmoothVectors = faceSmooth;
+                    ((OpenFaceDetector)service.FaceDetector).UseSmooth = faceSmooth;
                     service.GazeTracked += Service_GazeTracked;
                     service.FaceTracked += Service_FaceTracked;
                     service.Clicked += Service_Clicked;
@@ -203,8 +202,7 @@ namespace EyeTestApp
         {
             if (service != null)
             {
-                service.FaceDetector.SmoothLandmarks = true;
-                service.FaceDetector.SmoothVectors = true;
+                ((OpenFaceDetector)service.FaceDetector).UseSmooth = true;
             }
         }
 
@@ -212,8 +210,7 @@ namespace EyeTestApp
         {
             if (service != null)
             {
-                service.FaceDetector.SmoothLandmarks = false;
-                service.FaceDetector.SmoothVectors = false;
+                ((OpenFaceDetector)service.FaceDetector).UseSmooth = false;
             }
         }
 

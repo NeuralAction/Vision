@@ -43,7 +43,7 @@ namespace Vision.Detection
 
         public EyeGazeDetector GazeDetector { get; set; }
         public EyeOpenDetector OpenDetector { get; set; }
-        public FaceDetector FaceDetector { get; set; }
+        public FaceDetectionProvider FaceDetector { get; set; }
         public ScreenProperties ScreenProperties { get; set; }
         public bool SmoothOpen { get; set; } = true;
         public bool IsLeftClicking { get; protected set; } = false;
@@ -53,35 +53,23 @@ namespace Vision.Detection
         Task FaceTask;
         Task GazeTask;
 
-        public EyeGazeService(FaceDetectorXmlLoader loader, ScreenProperties screen)
+        public EyeGazeService(OpenFaceModelLoader loader, ScreenProperties screen)
         {
             ScreenProperties = screen;
 
             GazeDetector = new EyeGazeDetector(ScreenProperties);
 
-            FaceDetector = new FaceDetector(loader)
+            FaceDetector = new OpenFaceDetector()
             {
-                EyesDetectCascade = false,
-                EyesDetectLandmark = true,
-                EyesMaxFactor = 0.8,
-                EyesMinFactor = 0.2,
-                EyesScaleFactor = 1.2,
-                FaceMaxFactor = 1,
-                FaceMinFactor = 0.15,
-                FaceScaleFactor = 1.2,
                 Interpolation = InterpolationFlags.Cubic,
-                LandmarkDetect = true,
-                LandmarkSolve = true,
-                MaxFaceSize = 320,
                 MaxSize = 320,
-                SmoothLandmarks = true,
-                SmoothVectors = true
+                UseSmooth = true,
             };
 
             OpenDetector = new EyeOpenDetector();
         }
 
-        public EyeGazeService(ScreenProperties screen): this(new FaceDetectorXmlLoader(), screen)
+        public EyeGazeService(ScreenProperties screen): this(OpenFaceModelLoader.Default, screen)
         {
 
         }
@@ -91,7 +79,7 @@ namespace Vision.Detection
 
         }
 
-        public EyeGazeService() : this(new FaceDetectorXmlLoader(), ScreenProperties.CreatePixelScreen(new Size(1920,1080)))
+        public EyeGazeService() : this(OpenFaceModelLoader.Default, ScreenProperties.CreatePixelScreen(new Size(1920,1080)))
         {
 
         }

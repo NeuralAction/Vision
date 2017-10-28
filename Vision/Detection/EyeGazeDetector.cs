@@ -30,7 +30,7 @@ namespace Vision.Detection
     {
         public const int ImageSize = 60;
         public const int ImageSizeEx = 60;
-        public const int ImageSizeFace = 224;
+        public const int ImageSizeFace = 120;
         public const int FaceSizeFace = 224;
         public const double AngleMul = 1;
         //public const double DefaultSensitiveX = 1.85;
@@ -141,8 +141,8 @@ namespace Vision.Detection
                             result = DetectBothEyes(left, right);
                         break;
                     case EyeGazeDetectMode.Face:
-                        using (Mat left = face.LeftEye.RoiCropByPercent(frame, .5))
-                        using (Mat right = face.RightEye.RoiCropByPercent(frame, .5))
+                        using (Mat left = face.LeftEye.RoiCropByPercent(frame, .25))
+                        using (Mat right = face.RightEye.RoiCropByPercent(frame, .25))
                         using (Mat faceRoi = face.ROI(frame))
                             result = DetectFace(faceRoi, left, right);
                         break;
