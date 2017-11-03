@@ -114,6 +114,7 @@ namespace Vision.Tests
         int index = -1;
         Capture capture;
 
+        bool fullscreen = false;
         object renderLock = new object();
         double yoffset = 0;
         int frameMax = 0;
@@ -247,7 +248,19 @@ namespace Vision.Tests
                     Profiler.End("Draw");
 
                     Profiler.Start("imshow");
-                    Core.Cv.ImgShow("camera", mat);
+                    if (fullscreen)
+                    {
+                        var leftTop = LayoutHelper.ResizePoint(new Point(0, 0), ScreenProperties.PixelSize, mat.Size().ToSize(), Stretch.Uniform);
+                        var rightBot = LayoutHelper.ResizePoint(new Point(ScreenProperties.PixelSize.Width - 1, ScreenProperties.PixelSize.Height - 1), ScreenProperties.PixelSize, mat.Size().ToSize(), Stretch.Uniform);
+                        using (Mat m = new Mat(mat, new Rect(leftTop, rightBot).ToCvRect()))
+                        {
+                            Core.Cv.ImgShow("camera", m);
+                        }
+                    }
+                    else
+                    {
+                        Core.Cv.ImgShow("camera", mat);
+                    }
                     Profiler.End("imshow");
                 }
             }
@@ -285,6 +298,19 @@ namespace Vision.Tests
                     break;
                 case ' ':
                     Core.Cv.WaitKey(0);
+                    break;
+                case '`':
+                    fullscreen = !fullscreen;
+                    if (fullscreen)
+                    {
+                        Cv2.DestroyAllWindows();
+                        Cv2.NamedWindow("camera", WindowMode.Normal);
+                        Cv2.SetWindowProperty("camera", WindowProperty.Fullscreen, 1);
+                    }
+                    else
+                    {
+                        Cv2.DestroyAllWindows();
+                    }
                     break;
                 default:
                     break;
@@ -428,22 +454,29 @@ namespace Vision.Tests
                         //Slove Unit Test
                         var scrPt = new Point(960, 0);
 
-                        var rod = face.SolveLookScreenRodrigues(scrPt, ScreenProperties);
-                        var vec = face.SolveLookScreenVector(scrPt, ScreenProperties);
-                        var rodPt = face.SolveRayScreenRodrigues(rod, ScreenProperties);
-                        var vecPt = face.SolveRayScreenVector(vec, ScreenProperties);
+                        try
+                        {
+                            var rod = face.SolveLookScreenRodrigues(scrPt, ScreenProperties);
+                            var vec = face.SolveLookScreenVector(scrPt, ScreenProperties);
+                            var rodPt = face.SolveRayScreenRodrigues(rod, ScreenProperties);
+                            var vecPt = face.SolveRayScreenVector(vec, ScreenProperties);
+                            faceVecPlot.Step(vec);
+
+                            if (Point.EucludianDistance(rodPt, scrPt) > 0.01)
+                            {
+                                Logger.Error(this, $"SolveLook/RayScreen Rodrigues Test Fails / target: {scrPt}, result: {rodPt}");
+                            }
+                            if (Point.EucludianDistance(vecPt, scrPt) > 0.01)
+                            {
+                                Logger.Error(this, $"SolveLook/RayScreen Vector Test Fails / target: {scrPt}, result: {vecPt}");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Error(this, "SloveLook/RayScreen Test Fails\n" + ex);
+                        }
 
                         facePosePlot.Step(new Point3D(face.LandmarkTransformVector));
-                        faceVecPlot.Step(vec);
-
-                        if (Point.EucludianDistance(rodPt, scrPt) > 0.01)
-                        {
-                            Logger.Error(this, $"SolveLook/RayScreen Rodrigues Test Fails / target: {scrPt}, result: {rodPt}");
-                        }
-                        if (Point.EucludianDistance(vecPt, scrPt) > 0.01)
-                        {
-                            Logger.Error(this, $"SolveLook/RayScreen Vector Test Fails / target: {scrPt}, result: {vecPt}");
-                        }
 
                         List<Point3D> rays = new List<Point3D>()
                         {

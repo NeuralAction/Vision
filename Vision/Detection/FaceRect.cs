@@ -38,7 +38,7 @@ namespace Vision.Detection
                 return null;
             }
         }
-        public EyeGazeInfo Info { get; set; }
+        public EyeGazeInfo GazeInfo { get; set; }
 
         public Point[] Landmarks { get; set; }
         public double[] LandmarkTransformVector { get; set; }
@@ -116,6 +116,12 @@ namespace Vision.Detection
                         $"rv:{rv[0].ToString("0.0").PadRight(5)},{rv[1].ToString("0.0").PadRight(5)},{rv[2].ToString("0.0").PadRight(5)}";
                     frame.DrawText(X, Y + Height + 35, msg, Scalar.BgrWhite);
                     Profiler.End("FaceRectProject");
+
+                    if (GazeInfo != null)
+                    {
+                        var pt = GazeInfo.Vector * (Width / 2);
+                        frame.DrawLine(start_origin, start_origin - new Point(pt.X, pt.Y), Scalar.BgrYellow, 2, LineTypes.AntiAlias);
+                    }
                 }
             }
         }

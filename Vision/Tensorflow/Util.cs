@@ -69,13 +69,14 @@ namespace Vision.Tensorflow
                         imgBuf = imgBuf / 255.0f;
                         break;
                     case NormalizeMode.CenterZero:
-                        imgBuf = (imgBuf - imgBuf.Average()) / (float)Statistics.StandardDeviation(imgBuf);
+                        imgBuf.Subtract(imgBuf.Average(), imgBuf);
+                        imgBuf.Divide((float)Statistics.StandardDeviation(imgBuf), imgBuf);
                         break;
                     default:
                         throw new NotImplementedException("unknown one");
                 }
 
-                buffer = imgBuf.ToArray();
+                buffer = imgBuf.Storage.AsArray();
             }
             TFTensor tensor = TFTensor.FromBuffer(new TFShape(shape), buffer, 0, buffer.Length);
 

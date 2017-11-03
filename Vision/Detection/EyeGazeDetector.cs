@@ -31,7 +31,7 @@ namespace Vision.Detection
         public const int ImageSize = 60;
         public const int ImageSizeEx = 60;
         public const int ImageSizeFace = 120;
-        public const int FaceSizeFace = 224;
+        public const int FaceSizeFace = 120;
         public const double AngleMul = 1;
         //public const double DefaultSensitiveX = 1.85;
         //public const double DefaultSensitiveY = 2;
@@ -125,10 +125,10 @@ namespace Vision.Detection
 
             Profiler.Start("GazeDetect");
 
+            Point result = new Point(0,0);
             Point pt = new Point(0, 0);
             lock (ModelLocker)
             {
-                Point result;
                 switch (DetectMode)
                 {
                     case EyeGazeDetectMode.LeftOnly:
@@ -158,7 +158,11 @@ namespace Vision.Detection
                     y = (y + OffsetY) * SensitiveY;
                 }
 
-                Vector<double> vec = CreateVector.Dense(new double[] { x, y, -1 });
+                var vecPt = new Point(x, y);
+                if (UseSmoothing)
+                    vecPt = kalman.Calculate(vecPt);
+
+                Vector<double> vec = CreateVector.Dense(new double[] { vecPt.X, vecPt.Y, -1 });
                 pt = face.SolveRayScreenVector(new Point3D(vec.ToArray()), properties);
             }
 
@@ -168,8 +172,11 @@ namespace Vision.Detection
                 pt.Y = Util.Clamp(pt.Y, 0, ScreenProperties.PixelSize.Height);
             }
 
-            if (UseSmoothing)
-                pt = kalman.Calculate(pt);
+            face.GazeInfo = new EyeGazeInfo()
+            {
+                ScreenPoint = pt,
+                Vector = new Point3D(result.X, result.Y, -1),
+            };
 
             Profiler.End("GazeDetect");
             return pt;

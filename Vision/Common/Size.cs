@@ -27,6 +27,12 @@ namespace Vision
             Height = height;
         }
 
+        public Size(Point leftop, Point rightbot)
+        {
+            Width = rightbot.X - leftop.X;
+            Height = rightbot.Y - leftop.Y;
+        }
+
         public OpenCvSharp.Size ToCvSize()
         {
             return new OpenCvSharp.Size((int)Width, (int)Height);
