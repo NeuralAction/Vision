@@ -183,7 +183,10 @@ namespace Vision.Detection
             tempVec = tempVec + CreateVector.DenseOfArray(LandmarkTransformVector);
 
             if (tempVec[2] > 0.001)
-                throw new ArgumentException("vector cannot be solve xD");
+            {
+                //throw new ArgumentException("vector cannot be solve xD");
+                Logger.Error("Wrong Vector try to solve");
+            }
 
             var tempScr = properties.ToScreenCoordinate(unitPermm, new Point3D(tempVec.ToArray()));
             //tempScr.X = properties.PixelSize.Width - Util.FixZero(tempScr.X);
