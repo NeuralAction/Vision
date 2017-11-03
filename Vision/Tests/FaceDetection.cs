@@ -534,7 +534,12 @@ namespace Vision.Tests
                 yoffset %= 1;
 
                 //draw texts
-                var detectionTime = Profiler.Get("DetectionALL");
+                double detectionTime;
+                var detectFps = Profiler.Get("DetectionALL");
+                if (double.IsInfinity(detectFps) || detectFps == 0)
+                    detectionTime = 10000000000;
+                else
+                    detectionTime = detectFps;
                 string demo = $"DetectFPS: {Profiler.Get("FaceFPS")} ({detectionTime.ToString("0.00")}ms/{(1000 / detectionTime).ToString("0.00")}fps)\n" +
                     $"Frame: {frameOk}/{frameMax} ({((double)frameOk / frameMax * 100).ToString("0.00")}%)\n" +
                     $"LndSmt: {SmoothLandmarks} GzSmt: {GazeSmooth} GzMode: {GazeDetector.DetectMode}";
