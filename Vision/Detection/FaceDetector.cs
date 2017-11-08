@@ -12,6 +12,7 @@ namespace Vision.Detection
     public abstract class FaceDetectionProvider : IDisposable
     {
         public abstract double UnitPerMM { get; }
+        public abstract bool UseSmooth { get; set; }
 
         /// <summary>
         /// Detect faces in full image. Return empty array when nothing found.
@@ -66,7 +67,7 @@ namespace Vision.Detection
         public InterpolationFlags Interpolation { get; set; } = InterpolationFlags.Cubic;
 
         public override double UnitPerMM => 1;
-        public bool UseSmooth
+        public override bool UseSmooth
         {
             get => Detector.InVideo;
             set { Detector.InVideo = value; }
@@ -233,7 +234,12 @@ namespace Vision.Detection
         public bool SmoothLandmarks { get; set; } = false;
         public bool SmoothVectors { get; set; } = false;
         public bool ClampVectors { get; set; } = true;
-        
+        public override bool UseSmooth
+        {
+            get => SmoothLandmarks && SmoothVectors;
+            set => SmoothVectors = SmoothLandmarks = value;
+        }
+
         public InterpolationFlags Interpolation { get; set; } = InterpolationFlags.Nearest;
 
         CascadeClassifier FaceCascade;

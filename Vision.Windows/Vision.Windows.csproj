@@ -102,10 +102,6 @@
       <Project>{7a473bf1-ae5d-47ff-878e-e49112561ca3}</Project>
       <Name>SharpFace.Windows</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SharpFace\SharpFace\SharpFace.csproj">
-      <Project>{b3a225b9-1a79-4330-9b4e-a3c4e07bbeab}</Project>
-      <Name>SharpFace</Name>
-    </ProjectReference>
     <ProjectReference Include="..\TensorFlowSharp\TensorFlowSharp.Windows\TensorFlowSharp.Windows.csproj">
       <Project>{9a5fc834-a8df-4410-a21d-cf60b4fcacb7}</Project>
       <Name>TensorFlowSharp.Windows</Name>

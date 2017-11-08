@@ -125,6 +125,7 @@ namespace Vision.Detection
 
             Profiler.Start("GazeDetect");
 
+            Point vecPt = null;
             Point result = new Point(0,0);
             Point pt = new Point(0, 0);
             lock (ModelLocker)
@@ -158,7 +159,7 @@ namespace Vision.Detection
                     y = (y + OffsetY) * SensitiveY;
                 }
 
-                var vecPt = new Point(x, y);
+                vecPt = new Point(x, y);
                 if (UseSmoothing)
                     vecPt = kalman.Calculate(vecPt);
 
@@ -175,7 +176,7 @@ namespace Vision.Detection
             face.GazeInfo = new EyeGazeInfo()
             {
                 ScreenPoint = pt,
-                Vector = new Point3D(result.X, result.Y, -1),
+                Vector = new Point3D(vecPt.X, vecPt.Y, -1),
             };
 
             Profiler.End("GazeDetect");

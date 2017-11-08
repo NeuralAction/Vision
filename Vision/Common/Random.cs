@@ -8,11 +8,18 @@ namespace Vision
 {
     public class Random
     {
-        private System.Random rnd = new System.Random((int)(DateTime.UtcNow.TimeOfDay.TotalMilliseconds));
+        public static Random R { get; private set; } = new Random();
+
+        System.Random rnd = new System.Random((int)(DateTime.UtcNow.TimeOfDay.TotalMilliseconds));
 
         public Random()
         {
 
+        }
+
+        public int NextInt(int min, int max)
+        {
+            return rnd.Next(min, max);
         }
 
         public double NextDouble(double min, double max)

@@ -103,23 +103,33 @@ namespace Vision.Detection
 
         private void Capture_FrameReady(object sender, FrameArgs e)
         {
-            var faceRect = FaceDetector.Detect(e.Mat);
-
             if(e.Mat != null && !e.Mat.IsEmpty)
             {
-                e.MatDispose = false;
-                StartFace(e.Mat);
+                StartFace(e.Mat.Clone());
             }
 
             FrameCaptured?.Invoke(this, e);
         }
         
+        private void TaskWait(Task t)
+        {
+            if (t != null)
+            {
+                if(!t.IsCanceled || !t.IsCompleted || !t.IsFaulted)
+                {
+                    t.Wait();
+                }
+
+                if(t.Exception != null)
+                {
+                    Logger.Error(this, t.Exception);
+                }
+            }
+        }
+
         private void StartFace(Mat mat)
         {
-            if(FaceTask != null)
-            {
-                FaceTask.Wait();
-            }
+            TaskWait(FaceTask);
 
             FaceTask = Task.Factory.StartNew(() =>
             {
@@ -134,10 +144,7 @@ namespace Vision.Detection
 
         private void StartGaze(FaceRect[] face, Mat frame)
         {
-            if(GazeTask != null)
-            {
-                GazeTask.Wait();
-            }
+            TaskWait(GazeTask);
 
             GazeTask = Task.Factory.StartNew(() =>
             {

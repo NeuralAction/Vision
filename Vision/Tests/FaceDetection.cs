@@ -271,7 +271,7 @@ namespace Vision.Tests
                     Core.Cv.CloseAllWindows();
                     e.Break = true;
                     break;
-                case 'l':
+                case 'd':
                     LandmarkDetect = !LandmarkDetect;
                     break;
                 case 's':
@@ -298,6 +298,30 @@ namespace Vision.Tests
                     break;
                 case ' ':
                     Core.Cv.WaitKey(0);
+                    break;
+                case 't':
+                    GazeDetector.SensitiveX -= 0.02;
+                    break;
+                case 'y':
+                    GazeDetector.SensitiveX += 0.02;
+                    break;
+                case 'u':
+                    GazeDetector.SensitiveY -= 0.02;
+                    break;
+                case 'i':
+                    GazeDetector.SensitiveY += 0.02;
+                    break;
+                case 'o':
+                    GazeDetector.OffsetX -= 0.02;
+                    break;
+                case 'p':
+                    GazeDetector.OffsetX += 0.02;
+                    break;
+                case '[':
+                    GazeDetector.OffsetY -= 0.02;
+                    break;
+                case ']':
+                    GazeDetector.OffsetY += 0.02;
                     break;
                 case '`':
                     fullscreen = !fullscreen;
@@ -542,7 +566,7 @@ namespace Vision.Tests
                     detectionTime = detectFps;
                 string demo = $"DetectFPS: {Profiler.Get("FaceFPS")} ({detectionTime.ToString("0.00")}ms/{(1000 / detectionTime).ToString("0.00")}fps)\n" +
                     $"Frame: {frameOk}/{frameMax} ({((double)frameOk / frameMax * 100).ToString("0.00")}%)\n" +
-                    $"LndSmt: {SmoothLandmarks} GzSmt: {GazeSmooth} GzMode: {GazeDetector.DetectMode}";
+                    $"LndSmt: {SmoothLandmarks} GzSmt: {GazeSmooth} GzMode: {GazeDetector.DetectMode} GzMod: Sx:{GazeDetector.SensitiveX} Sy:{GazeDetector.SensitiveY} Ox:{GazeDetector.OffsetX} Oy:{GazeDetector.OffsetY}";
                 mat.DrawText(50, 50, demo, Scalar.BgrGreen);
                 mat.DrawText(50, 400 + 250 * Math.Pow(Math.Sin(2 * Math.PI * yoffset), 3), "HELLO WORLD");
                 mat.DrawText(50, mat.Height - 50, $"DrawFPS: {Profiler.Get("DrawFPS")}", Scalar.BgrGreen);

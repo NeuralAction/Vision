@@ -120,7 +120,7 @@ namespace Vision.Detection
                     if (GazeInfo != null)
                     {
                         var pt = GazeInfo.Vector * (Width / 2);
-                        frame.DrawLine(start_origin, start_origin - new Point(pt.X, pt.Y), Scalar.BgrYellow, 2, LineTypes.AntiAlias);
+                        frame.DrawLine(start_origin, start_origin + new Point(pt.X, pt.Y), Scalar.BgrYellow, 2, LineTypes.AntiAlias);
                     }
                 }
             }
