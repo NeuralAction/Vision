@@ -9,20 +9,41 @@ namespace Vision.Detection
 {
     public enum CalibratingState
     {
-        Begin,
-        End,
         Point,
         Wait,
-        Sample,
+        SampleWait,
+        Sample
     }
 
     public class CalibratingArgs : EventArgs
     {
         public CalibratingState State { get; set; }
+        public Point Data { get; set; }
 
-        public CalibratingArgs(CalibratingState s)
+        public CalibratingArgs(CalibratingState s, Point data = null)
         {
             State = s;
+            Data = data;
+        }
+    }
+
+    public class CalibratedArgs : EventArgs
+    {
+        public Dictionary<Point3D, CalibratingPushData> Data { get; set; }
+
+        public CalibratedArgs(Dictionary<Point3D, CalibratingPushData> data)
+        {
+            Data = data;
+        }
+    }
+
+    public class CalibratingPushData
+    {
+        public FaceRect Face { get; set; }
+
+        public CalibratingPushData(FaceRect face)
+        {
+            Face = face;
         }
     }
 
@@ -30,20 +51,28 @@ namespace Vision.Detection
     {
         public double Interval { get; set; } = 1000;
         public double WaitInterval { get; set; } = 300;
-        public double SampleInterval { get; set; } = 150;
+        public double SampleWaitInterval { get; set; } = 150;
+        public double SampleInterval { get; set; } = 100;
 
         public int GridHeight { get; set; } = 6;
         public int GridWidth { get; set; } = 10;
         public int SampleCount { get; set; } = 7;
 
+        public bool IsStarted { get; set; } = false;
+
+        public ScreenProperties Screen { get; set; }
+
         public event EventHandler<CalibratingArgs> Calibarting;
+        public event EventHandler CalibrateBegin;
+        public event EventHandler<CalibratedArgs> Calibrated;
 
         Task calibTask;
         CancellationTokenSource tokenSource;
+        CalibratingPushData lastData;
 
-        public EyeGazeCalibrater()
+        public EyeGazeCalibrater(ScreenProperties screen)
         {
-
+            Screen = screen;
         }
 
         public Point Apply(Point pt)
@@ -51,9 +80,29 @@ namespace Vision.Detection
             return pt;
         }
 
+        public void Push(CalibratingPushData data)
+        {
+            if (IsStarted)
+            {
+                lastData = data;
+            }
+        }
+
         public void Start()
         {
+            if(Calibarting == null)
+            {
+                Logger.Throw("Calibrating callback must be used");
+            }
+
+            if(IsStarted || (calibTask != null && (!calibTask.IsCanceled || !calibTask.IsCompleted || !calibTask.IsFaulted)))
+            {
+                Logger.Throw("already started");
+            }
+
+            IsStarted = true;
             tokenSource = new CancellationTokenSource();
+
             calibTask = Task.Factory.StartNew(() =>
             {
                 var token = tokenSource.Token;
@@ -61,13 +110,15 @@ namespace Vision.Detection
                 if (token.IsCancellationRequested)
                     return;
 
-                Dictionary<Point, Point> labelResultDict = new Dictionary<Point, Point>();
-                bool[] calibed = new bool[GridWidth * GridHeight];
+                var labelResultDict = new Dictionary<Point3D, CalibratingPushData>();
+                var calibed = new bool[GridWidth * GridHeight];
 
-                Calibarting.Invoke(this, new CalibratingArgs(CalibratingState.Begin));
+                CalibrateBegin.Invoke(this, EventArgs.Empty);
 
                 for (int i = 0; i < calibed.Length; i++)
                 {
+                    token.ThrowIfCancellationRequested();
+
                     int targetIndex = 1;
                     while (true)
                     {
@@ -79,10 +130,53 @@ namespace Vision.Detection
                         }
                     }
 
+                    double x = (double)(targetIndex % GridWidth) / (GridWidth - 1);
+                    x = x * Screen.PixelSize.Width;
+
+                    double y = Math.Floor((double)targetIndex / GridWidth) / (GridHeight - 1);
+                    y = y * Screen.PixelSize.Height;
+
+                    var targetPoint = new Point(x, y);
+
+                    Calibarting.Invoke(this, new CalibratingArgs(CalibratingState.Point, targetPoint));
+                    Task.Delay((int)Interval).Wait();
+                    token.ThrowIfCancellationRequested();
+
+                    Calibarting.Invoke(this, new CalibratingArgs(CalibratingState.Wait, targetPoint));
+                    Task.Delay((int)WaitInterval).Wait();
+                    token.ThrowIfCancellationRequested();
+
+                    for (int sampling = 0; sampling < SampleCount; sampling++)
+                    {
+                        Calibarting.Invoke(this, new CalibratingArgs(CalibratingState.SampleWait, targetPoint));
+                        Task.Delay((int)SampleWaitInterval).Wait();
+                        token.ThrowIfCancellationRequested();
+
+                        if (lastData == null || lastData.Face.GazeInfo == null)
+                        {
+                            Logger.Error("data is not sented... maybe machine is too slow");
+                            while (lastData == null || lastData.Face.GazeInfo == null)
+                            {
+                                token.ThrowIfCancellationRequested();
+                                Task.Delay(500).Wait();
+                                Logger.Error("gaze not captured");
+                            }
+                        }
+                        
+                        Calibarting.Invoke(this, new CalibratingArgs(CalibratingState.Sample, targetPoint));
+                        Task.Delay((int)SampleInterval).Wait();
+                        token.ThrowIfCancellationRequested();
+
+                        var targetVec = lastData.Face.SolveLookScreenVector(targetPoint, Screen);
+                        labelResultDict.Add(targetVec, lastData);
+                        Logger.Log(this, $"Calibrating {targetPoint} ({i+1}/{calibed.Length}) [{sampling+1}/{SampleCount}] - {targetVec} : {lastData.Face.GazeInfo.Vector}");
+                    }
+
                     calibed[targetIndex] = true;
                 }
 
-                Calibarting.Invoke(this, new CalibratingArgs(CalibratingState.End));
+                Logger.Log(this, "Calibrated");
+                Calibrated.Invoke(this, new CalibratedArgs(labelResultDict));
             });
         }
 
@@ -90,14 +184,23 @@ namespace Vision.Detection
         {
             if(calibTask != null)
             {
-                tokenSource.Cancel();
-                
-                calibTask.Wait();
+                tokenSource.Cancel(false);
+
+                try
+                {
+                    calibTask.Wait();
+                }
+                catch (OperationCanceledException ex)
+                {
+
+                }
 
                 tokenSource.Dispose();
 
                 tokenSource = null;
                 calibTask = null;
+
+                IsStarted = false;
             }
         }
     }

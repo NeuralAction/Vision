@@ -33,6 +33,7 @@ namespace Vision.Tests
         private FaceDetector FaceDetector { get; set; }
         private OpenFaceDetector OpenFaceDetector { get; set; }
 
+        public EyeGazeCalibrater GazeCalibrater { get; set; }
         public EyeGazeDetector GazeDetector { get; set; }
         public EyeOpenDetector OpenDetector { get; set; }
         public ScreenProperties ScreenProperties { get; set; }
@@ -124,6 +125,7 @@ namespace Vision.Tests
         FaceRect[] rect = null;
         Queue<Point> trail = new Queue<Point>();
         PointKalmanFilter filter = new PointKalmanFilter();
+        CalibratingArgs calibratingArgs;
 
         List<UIObject> UiList = new List<UIObject>();
         Point3DLinePlot facePosePlot;
@@ -160,8 +162,14 @@ namespace Vision.Tests
             };
             FaceDetector = new FaceDetector(faceXml, eyeXml);
             FaceProvider = OpenFaceDetector;
+
             GazeDetector = new EyeGazeDetector(ScreenProperties);
             OpenDetector = new EyeOpenDetector();
+
+            GazeCalibrater = new EyeGazeCalibrater(ScreenProperties);
+            GazeCalibrater.Calibarting += GazeCalibrater_Calibarting;
+            GazeCalibrater.CalibrateBegin += GazeCalibrater_CalibrateBegin;
+            GazeCalibrater.Calibrated += GazeCalibrater_Calibrated;
         }
 
         public FaceDetectionTests(string filePath, string faceXml, string eyeXml, FileNode flandmarkModel) : this(faceXml, eyeXml, flandmarkModel)
@@ -250,8 +258,8 @@ namespace Vision.Tests
                     Profiler.Start("imshow");
                     if (fullscreen)
                     {
-                        var leftTop = LayoutHelper.ResizePoint(new Point(0, 0), ScreenProperties.PixelSize, mat.Size().ToSize(), Stretch.Uniform);
-                        var rightBot = LayoutHelper.ResizePoint(new Point(ScreenProperties.PixelSize.Width - 1, ScreenProperties.PixelSize.Height - 1), ScreenProperties.PixelSize, mat.Size().ToSize(), Stretch.Uniform);
+                        var leftTop = ScreenToMat(mat, new Point(0, 0));
+                        var rightBot = ScreenToMat(mat, new Point(ScreenProperties.PixelSize.Width - 1, ScreenProperties.PixelSize.Height - 1));
                         using (Mat m = new Mat(mat, new Rect(leftTop, rightBot).ToCvRect()))
                         {
                             Core.Cv.ImgShow("camera", m);
@@ -323,6 +331,13 @@ namespace Vision.Tests
                 case ']':
                     GazeDetector.OffsetY += 0.02;
                     break;
+                case 'c':
+                    if(!GazeCalibrater.IsStarted && DetectGaze)
+                        GazeCalibrater.Start();
+                    break;
+                case 'v':
+                    GazeCalibrater.Stop();
+                    break;
                 case '`':
                     fullscreen = !fullscreen;
                     if (fullscreen)
@@ -341,7 +356,7 @@ namespace Vision.Tests
             }
         }
 
-        public void FaceDetectProc(Mat mat)
+        private void FaceDetectProc(Mat mat)
         {
             Profiler.Count("FaceFPS");
 
@@ -365,7 +380,7 @@ namespace Vision.Tests
             FaceDetectionTask = null;
         }
 
-        public void GazeDetectProc(Mat mat, FaceRect[] rect)
+        private void GazeDetectProc(Mat mat, FaceRect[] rect)
         {
             if (rect != null && rect.Length > 0 && DetectGaze)
             {
@@ -376,10 +391,8 @@ namespace Vision.Tests
                     info.X = Util.Clamp(info.X, 0, ScreenProperties.PixelSize.Width);
                     info.Y = Util.Clamp(info.Y, 0, ScreenProperties.PixelSize.Height);
 
-                    info = LayoutHelper.ResizePoint(info, ScreenProperties.PixelSize, mat.Size().ToSize(), Stretch.Uniform);
+                    info = ScreenToMat(mat, info);
 
-                    if (GazeSmooth)
-                        info = filter.Calculate(info);
                     lock (renderLock)
                     {
                         trail.Enqueue(info);
@@ -410,6 +423,9 @@ namespace Vision.Tests
                 this.rect = rect;
             }
 
+            if(rect != null && rect.Length > 0)
+                GazeCalibrater.Push(new CalibratingPushData(rect[0]));
+
             Profiler.End("DetectionALL");
 
             Detected?.Invoke(this, new FaceDetectedArgs(mat, rect));
@@ -417,6 +433,27 @@ namespace Vision.Tests
             mat.Dispose();
         }
 
+        private void GazeCalibrater_Calibrated(object sender, CalibratedArgs e)
+        {
+            Logger.Log(this, "Calibrated");
+        }
+
+        private void GazeCalibrater_CalibrateBegin(object sender, EventArgs e)
+        {
+            Logger.Log(this, "Calibrate begin");
+        }
+
+        private void GazeCalibrater_Calibarting(object sender, CalibratingArgs e)
+        {
+            calibratingArgs = e;
+        }
+
+        private Point ScreenToMat(Mat mat, Point onScreen)
+        {
+            return LayoutHelper.ResizePoint(onScreen, ScreenProperties.PixelSize, mat.Size().ToSize(), Stretch.Uniform);
+        }
+
+        Point preCalibPt;
         public void Draw(Mat mat)
         {
             lock (renderLock)
@@ -425,12 +462,9 @@ namespace Vision.Tests
 
                 Core.Cv.DrawLine(mat, new Point(0, mat.Height / 2), new Point(mat.Width, mat.Height / 2), Scalar.BgrBlack);
                 Core.Cv.DrawLine(mat, new Point(mat.Width/2, 0), new Point(mat.Width/2, mat.Height), Scalar.BgrBlack);
-
-                var stretch = Stretch.Uniform;
-                var scrSize = ScreenProperties.PixelSize;
-                var matSize = mat.Size().ToSize();
-                var pt1 = LayoutHelper.ResizePoint(new Point(0, 0), scrSize, matSize, stretch);
-                var pt4 = LayoutHelper.ResizePoint(new Point(scrSize.Width, scrSize.Height), scrSize, matSize, stretch);
+                
+                var pt1 = ScreenToMat(mat, new Point(0, 0));
+                var pt4 = ScreenToMat(mat, new Point(ScreenProperties.PixelSize.Width, ScreenProperties.PixelSize.Height));
                 Core.Cv.DrawRectangle(mat, new Rect(pt1, pt4), Scalar.BgrMagenta);
 
                 //update face
@@ -520,8 +554,37 @@ namespace Vision.Tests
                             var tempPt = face.SolveRayScreenVector(ray, ScreenProperties);
                             tempPt.X = Util.Clamp(tempPt.X, 0, ScreenProperties.PixelSize.Width);
                             tempPt.Y = Util.Clamp(tempPt.Y, 0, ScreenProperties.PixelSize.Height);
-                            tempPt = LayoutHelper.ResizePoint(tempPt, ScreenProperties.PixelSize, mat.Size().ToSize(), Stretch.Uniform);
+                            tempPt = ScreenToMat(mat, tempPt);
                             Core.Cv.DrawCircle(mat, tempPt, 4, Scalar.BgrCyan, -1);
+                        }
+                    }
+
+                    if (GazeCalibrater.IsStarted && calibratingArgs != null)
+                    {
+                        var calibPt = ScreenToMat(mat, calibratingArgs.Data);
+                        switch (calibratingArgs.State)
+                        {
+                            case CalibratingState.Point:
+                                if (preCalibPt == null)
+                                {
+                                    preCalibPt = ScreenToMat(mat, new Point(ScreenProperties.PixelSize.Width / 2, ScreenProperties.PixelSize.Height / 2));
+                                }
+                                preCalibPt = preCalibPt + (calibPt - preCalibPt) / 3;
+                                mat.DrawCircle(preCalibPt, 15, Scalar.BgrGreen, -1, LineTypes.AntiAlias);
+                                break;
+                            case CalibratingState.Wait:
+                                preCalibPt = calibPt;
+                                mat.DrawCircle(calibPt, 15, Scalar.BgrYellow, -1, LineTypes.AntiAlias);
+                                break;
+                            case CalibratingState.SampleWait:
+                                mat.DrawCircle(calibPt, 15, Scalar.BgrOrange, -1, LineTypes.AntiAlias);
+                                break;
+                            case CalibratingState.Sample:
+                                mat.DrawCircle(calibPt, 15, Scalar.BgrRed, -1, LineTypes.AntiAlias);
+                                break;
+                            default:
+                                Logger.Throw("unknow state");
+                                break;
                         }
                     }
 

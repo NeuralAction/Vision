@@ -8,15 +8,16 @@ namespace Vision
 {
     public class Scalar
     {
-        public static Scalar BgrWhite => new Scalar(255, 255, 255);
-        public static Scalar BgrGray => new Scalar(128, 128, 128);
-        public static Scalar BgrBlack => new Scalar(0, 0, 0);
-        public static Scalar BgrRed => new Scalar(0, 0, 255);
-        public static Scalar BgrGreen => new Scalar(0, 255, 0);
-        public static Scalar BgrBlue => new Scalar(255, 0, 0);
-        public static Scalar BgrMagenta => new Scalar(255, 0, 255);
-        public static Scalar BgrYellow => new Scalar(0, 255, 255);
-        public static Scalar BgrCyan => new Scalar(255, 255, 0);
+        public static Scalar BgrWhite = new Scalar(255, 255, 255);
+        public static Scalar BgrGray = new Scalar(128, 128, 128);
+        public static Scalar BgrBlack = new Scalar(0, 0, 0);
+        public static Scalar BgrRed = new Scalar(0, 0, 255);
+        public static Scalar BgrGreen = new Scalar(0, 255, 0);
+        public static Scalar BgrBlue = new Scalar(255, 0, 0);
+        public static Scalar BgrMagenta = new Scalar(255, 0, 255);
+        public static Scalar BgrYellow = new Scalar(0, 255, 255);
+        public static Scalar BgrCyan = new Scalar(255, 255, 0);
+        public static Scalar BgrOrange = new Scalar(0, 165, 255);
 
         private static Random rand = new Vision.Random();
 

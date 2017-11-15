@@ -27,6 +27,26 @@ namespace Vision
             return Math.Sqrt(X*X+Y*Y);
         }
 
+        public static Point operator +(Point a, double b)
+        {
+            return new Point(a.X + b, a.Y + b);
+        }
+
+        public static Point operator *(Point a, double b)
+        {
+            return new Point(a.X * b, a.Y * b);
+        }
+
+        public static Point operator *(double a, Point b)
+        {
+            return b * a;
+        }
+
+        public static Point operator /(Point a, double b)
+        {
+            return new Point(a.X / b, a.Y / b);
+        }
+
         public static Point operator +(Point a, Point b)
         {
             return new Point(a.X + b.X, a.Y + b.Y);

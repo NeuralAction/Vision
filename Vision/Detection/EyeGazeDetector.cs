@@ -33,10 +33,6 @@ namespace Vision.Detection
         public const int ImageSizeFace = 120;
         public const int FaceSizeFace = 120;
         public const double AngleMul = 1;
-        //public const double DefaultSensitiveX = 1.85;
-        //public const double DefaultSensitiveY = 2;
-        //public const double DefaultOffsetX = 0.02;
-        //public const double DefaultOffsetY = -0.12;
         public const double DefaultSensitiveX = 1;
         public const double DefaultSensitiveY = 1;
         public const double DefaultOffsetX = 0;
@@ -75,7 +71,7 @@ namespace Vision.Detection
         public double OffsetX { get; set; } = DefaultOffsetX;
         public double SensitiveY { get; set; } = DefaultSensitiveY;
         public double OffsetY { get; set; } = DefaultOffsetY;
-
+        
         public ScreenProperties ScreenProperties { get; set; }
 
         public EyeGazeDetectMode DetectMode { get; set; } = EyeGazeDetectMode.Both;

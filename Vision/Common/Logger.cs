@@ -24,6 +24,11 @@ namespace Vision
             Stopwatch.Start();
         }
 
+        public static void Log(object obj)
+        {
+            Log(obj.ToString());
+        }
+
         public static void Log(string message)
         {
             WriteLine(string.Format("{0}[LOG] {1}", TimeStamp, message));
@@ -52,6 +57,22 @@ namespace Vision
         public static void Error(object sender, Exception ex)
         {
             Error(sender, ex.ToString());
+        }
+
+        public static void Throw(string message)
+        {
+            WriteLine(string.Format("{0}[ERR] {1}", TimeStamp, message));
+            throw new Exception(message);
+        }
+
+        public static void Throw(object sender, string message)
+        {
+            Throw(sender.ToString() + " - " + message);
+        }
+
+        public static void Throw(object sender, Exception ex)
+        {
+            Throw(sender, ex.ToString());
         }
 
         public static string Print(Vector<double> vec)
