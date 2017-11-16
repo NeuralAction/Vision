@@ -439,6 +439,7 @@ namespace Vision.Tests
         {
             Logger.Log(this, "Calibrated");
             var mSize = new Size(500, 500);
+            var errorList = new List<double>();
             using(Mat m = MatTool.New(mSize, MatType.CV_8UC3))
             {
                 m.DrawRectangle(new Rect(0, 0, m.Width, m.Height), Scalar.BgrWhite, -1);
@@ -451,22 +452,33 @@ namespace Vision.Tests
                     var key = new Point(key3d.X, key3d.Y);
                     pt.X *= key.X;
                     pt.Y *= key.Y;
-                    ptDist.X *= item.Value.Face.GazeInfo.Vector.X;
-                    ptDist.Y *= item.Value.Face.GazeInfo.Vector.Y;
+                    var gazeVec = item.Value.Face.GazeInfo.Vector;
+                    ptDist.X *= gazeVec.X;
+                    ptDist.Y *= gazeVec.Y;
                     pt += mSize.Center;
                     ptDist += mSize.Center;
+                    var errorDiff = key - new Point(gazeVec.X, gazeVec.Y);
+                    var error = Math.Sqrt(Math.Pow(errorDiff.X, 2) + Math.Pow(errorDiff.Y, 2));
+                    errorList.Add(error);
                     m.DrawArrow(pt, ptDist, Scalar.BgrBlue, 1, LineTypes.AntiAlias);
                 }
 
-                using(Mat frame = MatTool.New(mSize + 100, MatType.CV_8UC3))
+                var errorAvg = errorList.Average();
+                Core.Cv.DrawText(m, $"mean error:{errorAvg}\nmean error(cm):{errorAvg * 50}", new Point(10,25), HersheyFonts.HersheyPlain, 1, Scalar.BgrBlue, 1);
+
+                var frameMargin = new Point(25, 25);
+                var frameSize = mSize;
+                frameSize.Width += frameMargin.Y * 2;
+                frameSize.Height += frameMargin.Y * 2;
+                using (Mat frame = MatTool.New(frameSize, MatType.CV_8UC3))
                 {
                     frame.DrawRectangle(new Rect(0, 0, frame.Width, frame.Height), new Scalar(64, 64, 64), -1);
-                    Core.Cv.DrawMatAlpha(frame, m, new Point(50, 50));
+                    Core.Cv.DrawMatAlpha(frame, m, frameMargin);
                     while (true)
                     {
                         Core.Cv.ImgShow("calib_result", frame);
                         var c = Core.Cv.WaitKey(100);
-                        if (c == ' ')
+                        if (c != 255)
                         {
                             Core.Cv.CloseWindow("calib_result");
                             break;
@@ -499,8 +511,8 @@ namespace Vision.Tests
                 Profiler.Count("DrawFPS");
 
                 Core.Cv.DrawLine(mat, new Point(0, mat.Height / 2), new Point(mat.Width, mat.Height / 2), Scalar.BgrBlack);
-                Core.Cv.DrawLine(mat, new Point(mat.Width/2, 0), new Point(mat.Width/2, mat.Height), Scalar.BgrBlack);
-                
+                Core.Cv.DrawLine(mat, new Point(mat.Width / 2, 0), new Point(mat.Width / 2, mat.Height), Scalar.BgrBlack);
+
                 var pt1 = ScreenToMat(mat, new Point(0, 0));
                 var pt4 = ScreenToMat(mat, new Point(ScreenProperties.PixelSize.Width, ScreenProperties.PixelSize.Height));
                 Core.Cv.DrawRectangle(mat, new Rect(pt1, pt4), Scalar.BgrMagenta);
@@ -587,7 +599,7 @@ namespace Vision.Tests
                             new Point3D(0, -0.05, -1),
                         };
 
-                        foreach(var ray in rays)
+                        foreach (var ray in rays)
                         {
                             var tempPt = face.SolveRayScreenVector(ray, ScreenProperties);
                             tempPt.X = Util.Clamp(tempPt.X, 0, ScreenProperties.PixelSize.Width);

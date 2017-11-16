@@ -117,7 +117,8 @@ namespace Vision.Detection
 
                 for (int i = 0; i < calibed.Length; i++)
                 {
-                    token.ThrowIfCancellationRequested();
+                    if (token.IsCancellationRequested)
+                        return;
 
                     int targetIndex = 1;
                     while (true)
@@ -141,24 +142,28 @@ namespace Vision.Detection
 
                     Calibarting.Invoke(this, new CalibratingArgs(CalibratingState.Point, targetPoint));
                     Task.Delay((int)Interval).Wait();
-                    token.ThrowIfCancellationRequested();
+                    if (token.IsCancellationRequested)
+                        return;
 
                     Calibarting.Invoke(this, new CalibratingArgs(CalibratingState.Wait, targetPoint));
                     Task.Delay((int)WaitInterval).Wait();
-                    token.ThrowIfCancellationRequested();
+                    if (token.IsCancellationRequested)
+                        return;
 
                     for (int sampling = 0; sampling < SampleCount; sampling++)
                     {
                         Calibarting.Invoke(this, new CalibratingArgs(CalibratingState.SampleWait, targetPoint));
                         Task.Delay((int)SampleWaitInterval).Wait();
-                        token.ThrowIfCancellationRequested();
+                        if (token.IsCancellationRequested)
+                            return;
 
                         if (lastData == null || lastData.Face.GazeInfo == null)
                         {
                             Logger.Error("data is not sented... maybe machine is too slow");
                             while (lastData == null || lastData.Face.GazeInfo == null)
                             {
-                                token.ThrowIfCancellationRequested();
+                                if (token.IsCancellationRequested)
+                                    return;
                                 Task.Delay(500).Wait();
                                 Logger.Error("gaze not captured");
                             }
@@ -166,7 +171,8 @@ namespace Vision.Detection
                         
                         Calibarting.Invoke(this, new CalibratingArgs(CalibratingState.Sample, targetPoint));
                         Task.Delay((int)SampleInterval).Wait();
-                        token.ThrowIfCancellationRequested();
+                        if (token.IsCancellationRequested)
+                            return;
 
                         var targetVec = lastData.Face.SolveLookScreenVector(targetPoint, Screen);
                         labelResultDict.Add(targetVec, lastData);
@@ -189,14 +195,7 @@ namespace Vision.Detection
             {
                 tokenSource.Cancel(false);
 
-                try
-                {
-                    calibTask.Wait();
-                }
-                catch (OperationCanceledException ex)
-                {
-
-                }
+                calibTask.Wait();
 
                 tokenSource.Dispose();
 

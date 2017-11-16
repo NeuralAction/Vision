@@ -8,8 +8,8 @@ namespace Vision
 {
     public class Size
     {
-        public double Width { get; set; }
-        public double Height { get; set; }
+        public double Width;
+        public double Height;
 
         public Point Center => new Point(Width / 2, Height / 2);
 

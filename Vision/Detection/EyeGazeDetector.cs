@@ -33,10 +33,10 @@ namespace Vision.Detection
         public const int ImageSizeFace = 120;
         public const int FaceSizeFace = 120;
         public const double AngleMul = 1;
-        public const double DefaultSensitiveX = 1;
-        public const double DefaultSensitiveY = 1;
-        public const double DefaultOffsetX = 0;
-        public const double DefaultOffsetY = 0;
+        public const double DefaultSensitiveX = 0.8;
+        public const double DefaultSensitiveY = 1.12;
+        public const double DefaultOffsetX = -0.1;
+        public const double DefaultOffsetY = 0.06;
 
         public readonly static ManifestResource ModelResourceExtend = new ManifestResource("Vision.Detection", "frozen_gazeEx.pb");
         public readonly static ManifestResource ModelResourceSingle = new ManifestResource("Vision.Detection", "frozen_gaze.pb");
@@ -74,7 +74,7 @@ namespace Vision.Detection
         
         public ScreenProperties ScreenProperties { get; set; }
 
-        public EyeGazeDetectMode DetectMode { get; set; } = EyeGazeDetectMode.Both;
+        public EyeGazeDetectMode DetectMode { get; set; } = EyeGazeDetectMode.Face;
 
         Session sess;
         Session sessEx;

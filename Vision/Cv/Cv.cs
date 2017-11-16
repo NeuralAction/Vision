@@ -142,7 +142,7 @@ namespace Vision.Cv
             foreach (var line in lines)
             {
                 Cv2.PutText(img, line, pt.ToCvPoint(), fontFace, fontScale, color.ToCvScalar(), thickness, lineType, bottomLeftOrigin);
-                pt.Y += 35;
+                pt.Y += 18 * fontScale;
             }
         }
 
