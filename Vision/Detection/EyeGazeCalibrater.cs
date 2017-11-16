@@ -95,7 +95,7 @@ namespace Vision.Detection
                 Logger.Throw("Calibrating callback must be used");
             }
 
-            if(IsStarted || (calibTask != null && (!calibTask.IsCanceled || !calibTask.IsCompleted || !calibTask.IsFaulted)))
+            if(IsStarted || (calibTask != null && (!calibTask.IsCanceled && !calibTask.IsCompleted && !calibTask.IsFaulted)))
             {
                 Logger.Throw("already started");
             }
@@ -122,7 +122,8 @@ namespace Vision.Detection
                     int targetIndex = 1;
                     while (true)
                     {
-                        var ind = Random.R.NextInt(0, calibed.Length - 1);
+                        var ind = Random.R.NextInt(0, calibed.Length);
+                        ind = Math.Min(ind, calibed.Length - 1);    
                         if (!calibed[ind])
                         {
                             targetIndex = ind;
@@ -177,11 +178,13 @@ namespace Vision.Detection
 
                 Logger.Log(this, "Calibrated");
                 Calibrated.Invoke(this, new CalibratedArgs(labelResultDict));
+                IsStarted = false;
             });
         }
 
         public void Stop()
         {
+            IsStarted = false;
             if(calibTask != null)
             {
                 tokenSource.Cancel(false);
@@ -199,8 +202,6 @@ namespace Vision.Detection
 
                 tokenSource = null;
                 calibTask = null;
-
-                IsStarted = false;
             }
         }
     }

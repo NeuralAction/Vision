@@ -8,8 +8,8 @@ namespace Vision
 {
     public class Point
     {
-        public double X { get; set; }
-        public double Y { get; set; }
+        public double X;
+        public double Y;
 
         public Point(double X, double Y)
         {
@@ -55,6 +55,11 @@ namespace Vision
         public static Point operator - (Point a, Point b)
         {
             return new Point(a.X - b.X, a.Y - b.Y);
+        }
+
+        public static Point Rotate(Point pt, double alpha)
+        {
+            throw new NotImplementedException();
         }
 
         public static double EucludianDistance(Point a, Point b)

@@ -236,6 +236,11 @@ namespace Vision.Cv
             Core.Cv.DrawRectangle(self, rect, color, thickness, lineType, shift);
         }
 
+        public static void DrawArrow(this Mat self, Point start, Point end, Scalar color, double thickness = 1, LineTypes lineType = LineTypes.Link8, double tipSize = 0.1, int shift = 0)
+        {
+            Core.Cv.DrawArrow(self, start, end, color, thickness, lineType, tipSize, shift);
+        }
+
         public static void DrawCircle(this Mat self, Point center, double radius, Scalar color, double thickness = 1, LineTypes lineType = LineTypes.Link8, int shift = 0)
         {
             Core.Cv.DrawCircle(self, center, radius, color, thickness, lineType, shift);

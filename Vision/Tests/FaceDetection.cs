@@ -170,6 +170,8 @@ namespace Vision.Tests
             GazeCalibrater.Calibarting += GazeCalibrater_Calibarting;
             GazeCalibrater.CalibrateBegin += GazeCalibrater_CalibrateBegin;
             GazeCalibrater.Calibrated += GazeCalibrater_Calibrated;
+            GazeCalibrater.GridWidth = 6;
+            GazeCalibrater.GridHeight = 4;
         }
 
         public FaceDetectionTests(string filePath, string faceXml, string eyeXml, FileNode flandmarkModel) : this(faceXml, eyeXml, flandmarkModel)
@@ -436,6 +438,42 @@ namespace Vision.Tests
         private void GazeCalibrater_Calibrated(object sender, CalibratedArgs e)
         {
             Logger.Log(this, "Calibrated");
+            var mSize = new Size(500, 500);
+            using(Mat m = MatTool.New(mSize, MatType.CV_8UC3))
+            {
+                m.DrawRectangle(new Rect(0, 0, m.Width, m.Height), Scalar.BgrWhite, -1);
+
+                foreach (var item in e.Data)
+                {
+                    var pt = mSize.Center;
+                    var ptDist = pt.Clone();
+                    var key3d = item.Key * (-1 / item.Key.Z);
+                    var key = new Point(key3d.X, key3d.Y);
+                    pt.X *= key.X;
+                    pt.Y *= key.Y;
+                    ptDist.X *= item.Value.Face.GazeInfo.Vector.X;
+                    ptDist.Y *= item.Value.Face.GazeInfo.Vector.Y;
+                    pt += mSize.Center;
+                    ptDist += mSize.Center;
+                    m.DrawArrow(pt, ptDist, Scalar.BgrBlue, 1, LineTypes.AntiAlias);
+                }
+
+                using(Mat frame = MatTool.New(mSize + 100, MatType.CV_8UC3))
+                {
+                    frame.DrawRectangle(new Rect(0, 0, frame.Width, frame.Height), new Scalar(64, 64, 64), -1);
+                    Core.Cv.DrawMatAlpha(frame, m, new Point(50, 50));
+                    while (true)
+                    {
+                        Core.Cv.ImgShow("calib_result", frame);
+                        var c = Core.Cv.WaitKey(100);
+                        if (c == ' ')
+                        {
+                            Core.Cv.CloseWindow("calib_result");
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         private void GazeCalibrater_CalibrateBegin(object sender, EventArgs e)
@@ -629,7 +667,8 @@ namespace Vision.Tests
                     detectionTime = detectFps;
                 string demo = $"DetectFPS: {Profiler.Get("FaceFPS")} ({detectionTime.ToString("0.00")}ms/{(1000 / detectionTime).ToString("0.00")}fps)\n" +
                     $"Frame: {frameOk}/{frameMax} ({((double)frameOk / frameMax * 100).ToString("0.00")}%)\n" +
-                    $"LndSmt: {SmoothLandmarks} GzSmt: {GazeSmooth} GzMode: {GazeDetector.DetectMode} GzMod: Sx:{GazeDetector.SensitiveX} Sy:{GazeDetector.SensitiveY} Ox:{GazeDetector.OffsetX} Oy:{GazeDetector.OffsetY}";
+                    $"LndSmt: {SmoothLandmarks} GzSmt: {GazeSmooth} GzMode: {GazeDetector.DetectMode}\n" +
+                    $"GzMod: Sx:{GazeDetector.SensitiveX} Sy:{GazeDetector.SensitiveY} Ox:{GazeDetector.OffsetX} Oy:{GazeDetector.OffsetY}";
                 mat.DrawText(50, 50, demo, Scalar.BgrGreen);
                 mat.DrawText(50, 400 + 250 * Math.Pow(Math.Sin(2 * Math.PI * yoffset), 3), "HELLO WORLD");
                 mat.DrawText(50, mat.Height - 50, $"DrawFPS: {Profiler.Get("DrawFPS")}", Scalar.BgrGreen);

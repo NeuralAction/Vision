@@ -11,6 +11,8 @@ namespace Vision
         public double Width { get; set; }
         public double Height { get; set; }
 
+        public Point Center => new Point(Width / 2, Height / 2);
+
         public Size(double all)
         {
             Width = Height = all;
@@ -31,6 +33,11 @@ namespace Vision
         {
             Width = rightbot.X - leftop.X;
             Height = rightbot.Y - leftop.Y;
+        }
+
+        public static Size operator +(Size s, double d)
+        {
+            return new Size(s.Width + d, s.Height + d);
         }
 
         public OpenCvSharp.Size ToCvSize()

@@ -103,6 +103,11 @@ namespace Vision.Cv
             Cv2.Rectangle(self, rect.ToCvRect(), color.ToCvScalar(), (int)thickness, lineType, shift);
         }
 
+        public void DrawArrow(Mat self, Point start, Point end, Scalar color, double thickness = 1, LineTypes lineTypes = LineTypes.Link8, double tipLength = 0.1, int shift = 0)
+        {
+            Cv2.ArrowedLine(self, start.ToCvPoint(), end.ToCvPoint(), color.ToCvScalar(), (int)thickness, lineTypes, shift, tipLength);
+        }
+
         public void DrawCircle(Mat img, Point center, double radius, Scalar color, double thickness = 1, LineTypes lineType = LineTypes.Link8, int shift = 0)
         {
             Cv2.Circle(img,
