@@ -1,18 +1,16 @@
 # Vision
-Libraries(OpenCV, TensorFlow, IO, etc) binding project for Xamarin
+A computer vision library written in **C#** / **Xamarin** providing bindings to [**OpenCV**](https://opencv.org/), 
+[**Tensorflow**](https://www.tensorflow.org/) and **crossplatform IO**.
 
-# Feutures (in progress)
-## Abstract Layer
-OpenCV Abstract Layer</br>
-TensorFlow Abstract Layer</br>
-Native OS Abastarct Layer (Storage, Audio, Video etc)</br>
+# Main Features
+- [x] Abstractions around **OpenCV**
+- [x] Abstractions around **Tensorflow**
+- [x] Platform abstraction layer (Files, Audio, Video, etc...)
 
-## CV
-Full OpenCV Accessability</br>
-Cascade Object Detection</br>
-Facial Feuture Detection</br>
+## OpenCV layer
+- [x] Cascade object detection
+- [x] Face detection
 
-## Tensorflow
-Full Tensorflow Accessability</br>
-Easy Data Sharing Between OpenCV</br>
-Model Import</br>
+## Tensorflow layer
+- [x] Data sharing between OpenCV
+- [x] Model imports
