@@ -19,13 +19,13 @@ This library is work in progress aggressivly at this point. API structure is not
 - [x] Abstractions around **Tensorflow**
 - [x] Platform abstraction layer (Files, Audio, Video, etc...)
 
-### OpenCV layer
-- [x] Face detection ([Tadas/OpenFace](https://github.com/TadasBaltrusaitis/OpenFace))
+### OpenCV Features
+- [x] Face tracking ([Tadas/OpenFace](https://github.com/TadasBaltrusaitis/OpenFace))
 - [x] Cascade object detection
 - [x] Some examples of openCV
 - [x] Cross platform webcam I/O
 
-### Tensorflow layer
+### Tensorflow Features
 - [x] Data sharing between OpenCV
 - [x] Input image normalization
 - [x] GPU acceleration supports
