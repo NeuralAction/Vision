@@ -309,6 +309,12 @@ namespace Vision.Tests
                 case ' ':
                     Core.Cv.WaitKey(0);
                     break;
+                case 'r':
+                    GazeDetector.SensitiveX = 1;
+                    GazeDetector.SensitiveY = 1;
+                    GazeDetector.OffsetX = 0;
+                    GazeDetector.OffsetY = 0;
+                    break;
                 case 't':
                     GazeDetector.SensitiveX -= 0.02;
                     break;

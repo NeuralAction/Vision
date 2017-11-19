@@ -63,10 +63,11 @@ namespace Vision.Tensorflow
                 switch (mode)
                 {
                     case NormalizeMode.ZeroMean:
-                        imgBuf = imgBuf / 127.5f - 1.0f;
+                        imgBuf.Divide(127.5f, imgBuf);
+                        imgBuf.Subtract(1.0f, imgBuf);
                         break;
                     case NormalizeMode.ZeroOne:
-                        imgBuf = imgBuf / 255.0f;
+                        imgBuf.Divide(255.0f, imgBuf);
                         break;
                     case NormalizeMode.CenterZero:
                         imgBuf.Subtract(imgBuf.Average(), imgBuf);

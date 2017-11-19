@@ -30,8 +30,8 @@ namespace Vision.Detection
     {
         public const int ImageSize = 60;
         public const int ImageSizeEx = 60;
-        public const int ImageSizeFace = 120;
-        public const int FaceSizeFace = 120;
+        public const int ImageSizeFace = 60;
+        public const int FaceSizeFace = 60;
         public const double AngleMul = 1;
         public const double DefaultSensitiveX = 0.8;
         public const double DefaultSensitiveY = 1.12;
