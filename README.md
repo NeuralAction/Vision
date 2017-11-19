@@ -1,7 +1,7 @@
 # Vision
 A eye gaze tracking library based on computer vision and neural network. 
 
-This library is work in progress aggressivly at this point. API structure is not stable now.
+This library is work in progress aggressivly at this point. API structure is not stable now. And this project is personal project for competition. I will open source my model training code after compet.
 
 ## Demo
 ![](Web/gazedemo.gif)
