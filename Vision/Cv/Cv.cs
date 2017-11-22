@@ -126,7 +126,34 @@ namespace Vision.Cv
                 (int)Math.Round(thickness), lineType, shift);
         }
 
-        public void DrawText(Mat img, string text, Point org, HersheyFonts fontFace, double fontScale, Scalar color, int thickness = 1, LineTypes lineType = LineTypes.AntiAlias, bool bottomLeftOrigin = false)
+        public double GetFontSize(HersheyFonts fontFace, double fontScale = 1)
+        {
+            var size = 0.0;
+
+            switch (fontFace)
+            {
+                case HersheyFonts.HersheyPlain:
+                    size = 12;
+                    break;
+                case HersheyFonts.HersheyComplexSmall:
+                    size = 25;
+                    break;
+                case HersheyFonts.HersheySimplex:
+                case HersheyFonts.HersheyDuplex:
+                case HersheyFonts.HersheyComplex:
+                case HersheyFonts.HersheyTriplex:
+                case HersheyFonts.HersheyScriptSimplex:
+                case HersheyFonts.HersheyScriptComplex:
+                case HersheyFonts.Italic:
+                default:
+                    size = 30;
+                    break;
+            }
+
+            return size * fontScale;
+        }
+
+        public void DrawText(Mat img, string text, Point org, HersheyFonts fontFace, double fontScale, Scalar color, int thickness = 1, LineTypes lineType = LineTypes.AntiAlias, bool bottomLeftOrigin = false, double fontLinesMargin = 1.25)
         {
             string[] lines;
             if (text.Contains("\n"))
@@ -142,7 +169,7 @@ namespace Vision.Cv
             foreach (var line in lines)
             {
                 Cv2.PutText(img, line, pt.ToCvPoint(), fontFace, fontScale, color.ToCvScalar(), thickness, lineType, bottomLeftOrigin);
-                pt.Y += 18 * fontScale;
+                pt.Y += GetFontSize(fontFace, fontScale) * fontLinesMargin;
             }
         }
 

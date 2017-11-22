@@ -95,9 +95,9 @@ namespace Vision
 
     public class Point3D
     {
-        public double X { get; set; }
-        public double Y { get; set; }
-        public double Z { get; set; }
+        public double X;
+        public double Y;
+        public double Z;
 
         public Point3D(double X, double Y, double Z)
         {

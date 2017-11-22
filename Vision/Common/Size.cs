@@ -44,5 +44,10 @@ namespace Vision
         {
             return new OpenCvSharp.Size((int)Width, (int)Height);
         }
+
+        public Size Clone()
+        {
+            return (Size)MemberwiseClone();
+        }
     }
 }

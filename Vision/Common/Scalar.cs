@@ -49,6 +49,17 @@ namespace Vision
             return new Scalar(rand.NextDouble(0, 255), rand.NextDouble(0, 255), rand.NextDouble(0, 255));
         }
 
+        public static Scalar Blend(Scalar a, double alphaA, Scalar b, double alphaB)
+        {
+            var aMul = alphaA / (alphaA + alphaB);
+            var bMul = alphaB / (alphaA + alphaB);
+            return new Scalar(
+                a.Value1 * aMul + b.Value1 * bMul,
+                a.Value2 * aMul + b.Value2 * bMul,
+                a.Value3 * aMul + b.Value3 * bMul,
+                a.Value4 * aMul + b.Value4 * bMul);
+        }
+
         public static explicit operator OpenCvSharp.Scalar(Scalar s)
         {
             return s.ToCvScalar();

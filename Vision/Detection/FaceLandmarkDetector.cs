@@ -86,8 +86,8 @@ namespace Vision.Detection
                 double[] translation_vector;
                 Core.Cv.SolvePnP(model_points, image_points, camera_matrix, dist_coeffs, out rotation_vector, out translation_vector);
 
-                face.LandmarkRotationVector = rotation_vector;
-                face.LandmarkTransformVector = translation_vector;
+                face.LandmarkRotation = new Point3D(rotation_vector);
+                face.LandmarkTransform = new Point3D(translation_vector);
                 face.LandmarkDistCoeffs = dist_coeffs;
                 face.LandmarkCameraMatrix = camera_matrix;
             }

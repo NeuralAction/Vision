@@ -19,19 +19,22 @@ namespace Vision.Detection
     {
         public CalibratingState State { get; set; }
         public Point Data { get; set; }
+        public double Percent { get; set; }
 
-        public CalibratingArgs(CalibratingState s, Point data = null)
+        public CalibratingArgs(CalibratingState s, Point data = null, double percent = 0)
         {
             State = s;
             Data = data;
+            Percent = percent;
         }
     }
 
     public class CalibratedArgs : EventArgs
     {
         public Dictionary<Point3D, CalibratingPushData> Data { get; set; }
+        public CancellationToken Token { get; set; }
 
-        public CalibratedArgs(Dictionary<Point3D, CalibratingPushData> data)
+        public CalibratedArgs(Dictionary<Point3D, CalibratingPushData> data, CancellationToken token)
         {
             Data = data;
         }
@@ -139,20 +142,23 @@ namespace Vision.Detection
                     y = y * Screen.PixelSize.Height;
 
                     var targetPoint = new Point(x, y);
+                    var calibPercent = (double)i / calibed.Length;
 
-                    Calibarting.Invoke(this, new CalibratingArgs(CalibratingState.Point, targetPoint));
+                    Calibarting.Invoke(this, new CalibratingArgs(CalibratingState.Point, targetPoint, calibPercent));
                     Task.Delay((int)Interval).Wait();
                     if (token.IsCancellationRequested)
                         return;
 
-                    Calibarting.Invoke(this, new CalibratingArgs(CalibratingState.Wait, targetPoint));
+                    Calibarting.Invoke(this, new CalibratingArgs(CalibratingState.Wait, targetPoint, calibPercent));
                     Task.Delay((int)WaitInterval).Wait();
                     if (token.IsCancellationRequested)
                         return;
 
                     for (int sampling = 0; sampling < SampleCount; sampling++)
                     {
-                        Calibarting.Invoke(this, new CalibratingArgs(CalibratingState.SampleWait, targetPoint));
+                        var samplePercent = calibPercent + ((double)(sampling + 1) / SampleCount) * (1.0 / calibed.Length);
+
+                        Calibarting.Invoke(this, new CalibratingArgs(CalibratingState.SampleWait, targetPoint, samplePercent));
                         Task.Delay((int)SampleWaitInterval).Wait();
                         if (token.IsCancellationRequested)
                             return;
@@ -169,7 +175,7 @@ namespace Vision.Detection
                             }
                         }
                         
-                        Calibarting.Invoke(this, new CalibratingArgs(CalibratingState.Sample, targetPoint));
+                        Calibarting.Invoke(this, new CalibratingArgs(CalibratingState.Sample, targetPoint, samplePercent));
                         Task.Delay((int)SampleInterval).Wait();
                         if (token.IsCancellationRequested)
                             return;
@@ -183,7 +189,7 @@ namespace Vision.Detection
                 }
 
                 Logger.Log(this, "Calibrated");
-                Calibrated.Invoke(this, new CalibratedArgs(labelResultDict));
+                Calibrated.Invoke(this, new CalibratedArgs(labelResultDict, token));
                 IsStarted = false;
             });
         }

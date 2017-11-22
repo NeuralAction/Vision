@@ -61,6 +61,7 @@
     <Compile Include="Cv\LinePlot.cs" />
     <Compile Include="Cv\RotationMatrixTransform.cs" />
     <Compile Include="Detection\EyeGazeCalibrater.cs" />
+    <Compile Include="Detection\EyeGazeCalibrationLog.cs" />
     <Compile Include="Detection\EyeGazeDetector.cs" />
     <Compile Include="Detection\EyeGazeService.cs" />
     <Compile Include="Detection\EyeOpenDetector.cs" />

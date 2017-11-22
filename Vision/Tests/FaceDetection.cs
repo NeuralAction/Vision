@@ -444,51 +444,24 @@ namespace Vision.Tests
         private void GazeCalibrater_Calibrated(object sender, CalibratedArgs e)
         {
             Logger.Log(this, "Calibrated");
-            var mSize = new Size(500, 500);
-            var errorList = new List<double>();
-            using(Mat m = MatTool.New(mSize, MatType.CV_8UC3))
+
+            EyeGazeCalibrationLog logger = new EyeGazeCalibrationLog(e.Data);
+            logger.Save();
+
+            using (Mat frame = logger.Plot(ScreenProperties))
             {
-                m.DrawRectangle(new Rect(0, 0, m.Width, m.Height), Scalar.BgrWhite, -1);
+                var savepath = logger.File.AbosolutePath;
+                savepath = savepath.Replace(".clb", ".jpg");
+                Core.Cv.ImgWrite(savepath, frame);
 
-                foreach (var item in e.Data)
+                while (true)
                 {
-                    var pt = mSize.Center;
-                    var ptDist = pt.Clone();
-                    var key3d = item.Key * (-1 / item.Key.Z);
-                    var key = new Point(key3d.X, key3d.Y);
-                    pt.X *= key.X;
-                    pt.Y *= key.Y;
-                    var gazeVec = item.Value.Face.GazeInfo.Vector;
-                    ptDist.X *= gazeVec.X;
-                    ptDist.Y *= gazeVec.Y;
-                    pt += mSize.Center;
-                    ptDist += mSize.Center;
-                    var errorDiff = key - new Point(gazeVec.X, gazeVec.Y);
-                    var error = Math.Sqrt(Math.Pow(errorDiff.X, 2) + Math.Pow(errorDiff.Y, 2));
-                    errorList.Add(error);
-                    m.DrawArrow(pt, ptDist, Scalar.BgrBlue, 1, LineTypes.AntiAlias);
-                }
-
-                var errorAvg = errorList.Average();
-                Core.Cv.DrawText(m, $"mean error:{errorAvg}\nmean error(cm):{errorAvg * 50}", new Point(10,25), HersheyFonts.HersheyPlain, 1, Scalar.BgrBlue, 1);
-
-                var frameMargin = new Point(25, 25);
-                var frameSize = mSize;
-                frameSize.Width += frameMargin.Y * 2;
-                frameSize.Height += frameMargin.Y * 2;
-                using (Mat frame = MatTool.New(frameSize, MatType.CV_8UC3))
-                {
-                    frame.DrawRectangle(new Rect(0, 0, frame.Width, frame.Height), new Scalar(64, 64, 64), -1);
-                    Core.Cv.DrawMatAlpha(frame, m, frameMargin);
-                    while (true)
+                    Core.Cv.ImgShow("calib_result", frame);
+                    var c = Core.Cv.WaitKey(10);
+                    if (c != 255 || e.Token.IsCancellationRequested)
                     {
-                        Core.Cv.ImgShow("calib_result", frame);
-                        var c = Core.Cv.WaitKey(100);
-                        if (c != 255)
-                        {
-                            Core.Cv.CloseWindow("calib_result");
-                            break;
-                        }
+                        Core.Cv.CloseWindow("calib_result");
+                        return;
                     }
                 }
             }
@@ -615,9 +588,11 @@ namespace Vision.Tests
                         }
                     }
 
+                    // calibrating draw
                     if (GazeCalibrater.IsStarted && calibratingArgs != null)
                     {
                         var calibPt = ScreenToMat(mat, calibratingArgs.Data);
+                        Scalar color;
                         switch (calibratingArgs.State)
                         {
                             case CalibratingState.Point:
@@ -625,23 +600,27 @@ namespace Vision.Tests
                                 {
                                     preCalibPt = ScreenToMat(mat, new Point(ScreenProperties.PixelSize.Width / 2, ScreenProperties.PixelSize.Height / 2));
                                 }
-                                preCalibPt = preCalibPt + (calibPt - preCalibPt) / 3;
-                                mat.DrawCircle(preCalibPt, 15, Scalar.BgrGreen, -1, LineTypes.AntiAlias);
+                                calibPt = preCalibPt = preCalibPt + (calibPt - preCalibPt) / 3;
+                                color = Scalar.BgrGreen;
                                 break;
                             case CalibratingState.Wait:
                                 preCalibPt = calibPt;
-                                mat.DrawCircle(calibPt, 15, Scalar.BgrYellow, -1, LineTypes.AntiAlias);
+                                color = Scalar.BgrYellow;
                                 break;
                             case CalibratingState.SampleWait:
-                                mat.DrawCircle(calibPt, 15, Scalar.BgrOrange, -1, LineTypes.AntiAlias);
+                                color = Scalar.BgrOrange;
                                 break;
                             case CalibratingState.Sample:
-                                mat.DrawCircle(calibPt, 15, Scalar.BgrRed, -1, LineTypes.AntiAlias);
+                                color = Scalar.BgrRed;
                                 break;
                             default:
+                                color = null;
                                 Logger.Throw("unknow state");
                                 break;
                         }
+                        mat.DrawCircle(calibPt, 15, color, -1, LineTypes.AntiAlias);
+                        Core.Cv.DrawText(mat, $"{(calibratingArgs.Percent * 100).ToString("0.00")}%", 
+                            new Point(calibPt.X + 20, calibPt.Y + Core.Cv.GetFontSize(HersheyFonts.HersheyPlain) / 2), HersheyFonts.HersheyPlain, 1, color, 2);
                     }
 
                     if (frameMax > 300)

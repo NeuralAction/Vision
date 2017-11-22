@@ -155,8 +155,8 @@ namespace Vision.Detection
             }
             face.Landmarks = convertedLandmark;
 
-            face.LandmarkTransformVector = Detector.Transform;
-            face.LandmarkRotationVector = Detector.RodriguesRotation;
+            face.LandmarkTransform = new Point3D(Detector.Transform);
+            face.LandmarkRotation = new Point3D(Detector.RodriguesRotation);
             face.LandmarkDistCoeffs = new double[4] { 0, 0, 0, 0 };
             face.LandmarkCameraMatrix = MatTool.CameraMatrixArray(Detector.FocalX * scale, Detector.FocalY * scale, Detector.CenterX * scale, Detector.CenterY * scale);
             face.UnitPerMM = UnitPerMM;
@@ -448,12 +448,12 @@ namespace Vision.Detection
             {
                 if (vectorInverted)
                 {
-                    face.LandmarkTransformVector = TranslateFilter.Clone().Calculate(face.LandmarkTransformVector);
+                    face.LandmarkTransform = new Point3D(TranslateFilter.Clone().Calculate(face.LandmarkTransformVector));
                     vectorInverted = false;
                 }
                 else
                 {
-                    face.LandmarkTransformVector = TranslateFilter.Calculate(face.LandmarkTransformVector);
+                    face.LandmarkTransform = new Point3D(TranslateFilter.Calculate(face.LandmarkTransformVector));
                 }
             }
         }

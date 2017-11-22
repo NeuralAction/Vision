@@ -41,8 +41,13 @@ namespace Vision.Detection
         public EyeGazeInfo GazeInfo { get; set; }
 
         public Point[] Landmarks { get; set; }
-        public double[] LandmarkTransformVector { get; set; }
-        public double[] LandmarkRotationVector { get; set; }
+
+        public double[] LandmarkTransformVector => LandmarkTransform.ToArray();
+        public Point3D LandmarkTransform { get; set; }
+
+        public double[] LandmarkRotationVector => LandmarkRotation.ToArray();
+        public Point3D LandmarkRotation { get; set; }
+
         public double[,] LandmarkCameraMatrix { get; set; }
         public double[] LandmarkDistCoeffs { get; set; }
 
@@ -184,7 +189,6 @@ namespace Vision.Detection
 
             if (tempVec[2] > 0.001)
             {
-                //throw new ArgumentException("vector cannot be solve xD");
                 Logger.Error("Wrong Vector try to solve");
             }
 
