@@ -101,6 +101,11 @@ namespace Vision
             set { SetRectangle(value); }
         }
 
+        public Rect()
+        {
+
+        }
+
         public Rect(double x, double y, double width, double height)
         {
             _x = x;

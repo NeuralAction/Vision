@@ -29,6 +29,7 @@ namespace Vision.Detection
         {
             Storage.FixPathChars(file);
 
+            Data = new Dictionary<Point3D, CalibratingPushData>();
             File = file;
 
             if (File.IsExist)
@@ -116,15 +117,16 @@ namespace Vision.Detection
                     while (!reader.EndOfStream)
                     {
                         var line = reader.ReadLine();
-                        try
-                        {
-                            LoadLine(line);
-                        }
-                        catch (Exception ex)
-                        {
-                            Logger.Error(this, $"Error on {File}:{lineCount}");
-                            Logger.Error(this, ex);
-                        }
+                        LoadLine(line);
+                        //try
+                        //{
+                        //    LoadLine(line);
+                        //}
+                        //catch (Exception ex)
+                        //{
+                        //    Logger.Error(this, $"Error on {File}:{lineCount}");
+                        //    Logger.Error(this, ex);
+                        //}
                         lineCount++;
                     }
                 }
@@ -161,10 +163,36 @@ namespace Vision.Detection
         private void LoadLog(string content)
         {
             var spl = content.Split('|');
+
             var splKey = spl[0].Split(',');
-            var key = new Point3D(ToDoubleArray(splKey));
-            var splData = spl[1].Split(',');
-            throw new NotImplementedException("WIP");
+            var readedKey = new Point3D(ToDoubleArray(splKey));
+
+            var splTemp = spl[1].Split(',');
+            var splData = ToDoubleArray(splTemp);
+
+            var splGaze = Indexing(splData, 0, 3);
+            var readedGaze = new Point3D(splGaze);
+
+            var splTrans = Indexing(splData, 3, 6);
+            var readedTrans = new Point3D(splTrans);
+
+            var splRot = Indexing(splData, 6, 9);
+            var readedRot = new Point3D(splRot);
+
+            var readedPushData = new CalibratingPushData
+            (
+                new FaceRect(new Rect(), null)
+                {
+                    GazeInfo = new EyeGazeInfo()
+                    {
+                        Vector = readedGaze
+                    },
+                    LandmarkTransform = readedTrans,
+                    LandmarkRotation = readedRot
+                }
+            );
+
+            Data.Add(readedKey, readedPushData);
         }
 
         private T[] Indexing<T>(T[] arr, int start, int end)
