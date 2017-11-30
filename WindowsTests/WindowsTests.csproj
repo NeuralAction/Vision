@@ -100,6 +100,18 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SharpFace\OpenCvSharp\src\OpenCvSharp.Windows\OpenCvSharp.Windows.csproj">
+      <Project>{d7856971-d877-4cb1-a08c-c2a763ebfad1}</Project>
+      <Name>OpenCvSharp.Windows</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SharpFace\SharpFace.Windows\SharpFace.Windows.csproj">
+      <Project>{7a473bf1-ae5d-47ff-878e-e49112561ca3}</Project>
+      <Name>SharpFace.Windows</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TensorFlowSharp\TensorFlowSharp.Windows\TensorFlowSharp.Windows.csproj">
+      <Project>{9a5fc834-a8df-4410-a21d-cf60b4fcacb7}</Project>
+      <Name>TensorFlowSharp.Windows</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Vision.Windows\Vision.Windows.csproj">
       <Project>{15e57a3f-8b2f-46f0-a717-34b308307b1d}</Project>
       <Name>Vision.Windows</Name>

@@ -21,6 +21,9 @@ namespace Vision.Detection
 
         public void SuffleData()
         {
+            TestData.Clear();
+            TrainData.Clear();
+
             foreach (var item in RawData)
             {
                 if (Random.R.NextDouble(0, 1) < TestRatio)
@@ -35,20 +38,18 @@ namespace Vision.Detection
         }
 
         public abstract void Train();
-        public abstract void Apply(FaceRect face);
+        public abstract void Apply(FaceRect face, ScreenProperties screen);
     }
 
     public class LinearEyeGazeCalibratorEngine : EyeGazeCalibratorEngineBase
     {
-        LinearCalculator X = new LinearCalculator();
-        LinearCalculator Y = new LinearCalculator();
+        public LinearRegression X { get; set; } = new LinearRegression();
+        public LinearRegression Y { get; set; } = new LinearRegression();
 
-        public double LearningRate { get; set; } = 0.01;
-        public double Epoch { get; set; } = 50;
-
-        public override void Apply(FaceRect face)
+        public override void Apply(FaceRect face, ScreenProperties screen)
         {
-            throw new Exception();
+            face.GazeInfo.Vector = Apply(face.GazeInfo.Vector);
+            face.GazeInfo.UpdateScreenPoint(face, screen);
         }
 
         public Point3D Apply(Point3D vec)
@@ -63,40 +64,19 @@ namespace Vision.Detection
         {
             CheckError();
 
-            var train = TrainData.Values.ToArray();
-            var label = TrainData.Keys.ToArray();
-            var lr = LearningRate;
-            for (int e = 0; e < Epoch; e++)
+            var trainX = new Point[RawData.Count];
+            var trainY = new Point[RawData.Count];
+            int i = 0;
+            foreach (var item in RawData)
             {
-                for (int i = 0; i < train.Length; i++)
-                {
-                    int ind1 = Random.R.NextInt(0, train.Length);
-                    int ind2 = -1;
-                    while (true)
-                    {
-                        ind2 = Random.R.NextInt(0, train.Length);
-                        if (ind1 != ind2)
-                            break;
-                    }
-                    var train1 = train[ind1].Face.GazeInfo.Vector;
-                    train1 = EyeGazeInfo.ToGazeVector(train1);
-                    var train2 = train[ind2].Face.GazeInfo.Vector;
-                    train2 = EyeGazeInfo.ToGazeVector(train2);
-                    var label1 = EyeGazeInfo.ToGazeVector(label[ind1]);
-                    var label2 = EyeGazeInfo.ToGazeVector(label[ind2]);
-                    if (train1.X != train2.X && train1.Y != train2.Y)
-                    {
-                        var newX = X.Fit(lr, train1.X, label1.X, train2.X, label2.X);
-                        var newY = Y.Fit(lr, train1.Y, label1.Y, train2.Y, label2.Y);
-                        X.Assign(newX);
-                        Y.Assign(newY);
-                    }
-                }
-                lr *= 0.9;
-                Logger.Log(this, X.ToString());
-                Logger.Log(this, Y.ToString());
-                Logger.Log(this, $"Lr:{lr}");
+                var label = EyeGazeInfo.ToGazeVector(item.Key);
+                var train = EyeGazeInfo.ToGazeVector(item.Value.Face.GazeInfo.Vector);
+                trainX[i] = new Point(train.X, label.X);
+                trainY[i] = new Point(train.Y, label.Y);
+                i++;
             }
+            X.Train(trainX);
+            Y.Train(trainY);
 
             CheckError();
         }
@@ -109,7 +89,8 @@ namespace Vision.Detection
                 var input = EyeGazeInfo.ToGazeVector(item.Value.Face.GazeInfo.Vector);
                 var x = X.Predict(input.X);
                 var y = Y.Predict(input.Y);
-                var error = Math.Sqrt(Math.Pow(x - item.Key.X, 2) + Math.Pow(y - item.Key.Y, 2));
+                var key = EyeGazeInfo.ToGazeVector(item.Key);
+                var error = Math.Sqrt(Math.Pow(x - key.X, 2) + Math.Pow(y - key.Y, 2));
                 errors.Add(error);
             }
             var errAvg = errors.Average();
@@ -121,20 +102,24 @@ namespace Vision.Detection
         }
     }
 
-    public class LinearCalculator
+    public class LinearRegression
     {
-        public double A = 1;
-        public double B = 0; 
+        //ref: https://machinelearningmastery.com/implement-simple-linear-regression-scratch-python/
 
-        public LinearCalculator()
+        public double A { get; set; } = 1;
+        public double B { get; set; } = 0;
+
+        public void Train(Point[] train)
         {
-
-        }
-
-        public LinearCalculator(double a, double b)
-        {
-            A = a;
-            B = b;
+            var xs = new double[train.Length];
+            var ys = new double[train.Length];
+            for (int i = 0; i < train.Length; i++)
+            {
+                xs[i] = train[i].X;
+                ys[i] = train[i].Y;
+            }
+            A = Covariance(xs, ys) / Variance(xs);
+            B = ys.Average() - A * xs.Average();
         }
 
         public double Predict(double x)
@@ -142,25 +127,29 @@ namespace Vision.Detection
             return A * x + B;
         }
 
-        public LinearCalculator Fit(double lr, double x1, double y1, double x2, double y2)
+        private double Covariance(double[] x, double[] y)
         {
-            double newA, newB, retA = 0, retB = 0;
-            newA = (y1 - y2) / (x1 - x2);
-            newB = y1 - newA * x1;
-            retA = A + (newA - A) * lr;
-            retB = B + (newB - B) * lr;
-            return new LinearCalculator(retA, retB);
+            double covar = 0.0, meanX = x.Average(), meanY = y.Average();
+            for (int i = 0; i < x.Length; i++)
+            {
+                covar += (x[i] - meanX) * (y[i] - meanY);
+            }
+            return covar;
         }
 
-        public void Assign(LinearCalculator c)
+        private double Variance(double[] x)
         {
-            A = c.A;
-            B = c.B;
+            double mean = x.Average(), sum = 0;
+            foreach (var item in x)
+            {
+                sum += Math.Pow(item - mean, 2);
+            }
+            return sum;
         }
 
         public override string ToString()
         {
-            return $"f(x)={A}*x+{B}";
+            return $"y = {A} * x + {B}";
         }
     }
 }

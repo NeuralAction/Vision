@@ -8,6 +8,11 @@ namespace Vision
 {
     public class Size
     {
+        public static Size operator +(Size s, double d)
+        {
+            return new Size(s.Width + d, s.Height + d);
+        }
+
         public double Width;
         public double Height;
 
@@ -35,11 +40,6 @@ namespace Vision
             Height = rightbot.Y - leftop.Y;
         }
 
-        public static Size operator +(Size s, double d)
-        {
-            return new Size(s.Width + d, s.Height + d);
-        }
-
         public OpenCvSharp.Size ToCvSize()
         {
             return new OpenCvSharp.Size((int)Width, (int)Height);
@@ -47,7 +47,7 @@ namespace Vision
 
         public Size Clone()
         {
-            return (Size)MemberwiseClone();
+            return new Size(Width, Height);
         }
     }
 }

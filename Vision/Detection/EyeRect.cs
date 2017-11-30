@@ -92,7 +92,10 @@ namespace Vision.Detection
 
         public EyeRect Clone()
         {
-            return (EyeRect)MemberwiseClone();
+            return new EyeRect(Parent, this)
+            {
+                OpenData = OpenData?.Clone()
+            };
         }
     }
 }

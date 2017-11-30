@@ -32,8 +32,7 @@ namespace Vision.Tests
         public FaceDetectionProvider FaceProvider { get; set; }
         private FaceDetector FaceDetector { get; set; }
         private OpenFaceDetector OpenFaceDetector { get; set; }
-
-        public EyeGazeCalibrater GazeCalibrater { get; set; }
+        
         public EyeGazeDetector GazeDetector { get; set; }
         public EyeOpenDetector OpenDetector { get; set; }
         public ScreenProperties ScreenProperties { get; set; }
@@ -164,14 +163,10 @@ namespace Vision.Tests
             FaceProvider = OpenFaceDetector;
 
             GazeDetector = new EyeGazeDetector(ScreenProperties);
+            GazeDetector.Calibrator.Calibarting += GazeCalibrater_Calibarting;
+            GazeDetector.Calibrator.CalibrateBegin += GazeCalibrater_CalibrateBegin;
+            GazeDetector.Calibrator.Calibrated += GazeCalibrater_Calibrated;
             OpenDetector = new EyeOpenDetector();
-
-            GazeCalibrater = new EyeGazeCalibrater(ScreenProperties);
-            GazeCalibrater.Calibarting += GazeCalibrater_Calibarting;
-            GazeCalibrater.CalibrateBegin += GazeCalibrater_CalibrateBegin;
-            GazeCalibrater.Calibrated += GazeCalibrater_Calibrated;
-            GazeCalibrater.GridWidth = 6;
-            GazeCalibrater.GridHeight = 4;
         }
 
         public FaceDetectionTests(string filePath, string faceXml, string eyeXml, FileNode flandmarkModel) : this(faceXml, eyeXml, flandmarkModel)
@@ -340,11 +335,14 @@ namespace Vision.Tests
                     GazeDetector.OffsetY += 0.02;
                     break;
                 case 'c':
-                    if(!GazeCalibrater.IsStarted && DetectGaze)
-                        GazeCalibrater.Start();
+                    if(!GazeDetector.Calibrator.IsStarted && DetectGaze)
+                        GazeDetector.Calibrator.Start(ScreenProperties);
                     break;
                 case 'v':
-                    GazeCalibrater.Stop();
+                    GazeDetector.Calibrator.Stop();
+                    break;
+                case 'b':
+                    GazeDetector.Calibrator.Start(ScreenProperties, false);
                     break;
                 case '`':
                     fullscreen = !fullscreen;
@@ -431,9 +429,6 @@ namespace Vision.Tests
                 this.rect = rect;
             }
 
-            if(rect != null && rect.Length > 0)
-                GazeCalibrater.Push(new CalibratingPushData(rect[0]));
-
             Profiler.End("DetectionALL");
 
             Detected?.Invoke(this, new FaceDetectedArgs(mat, rect));
@@ -448,7 +443,7 @@ namespace Vision.Tests
             EyeGazeCalibrationLog logger = new EyeGazeCalibrationLog(e.Data);
             logger.Save();
 
-            using (Mat frame = logger.Plot(ScreenProperties))
+            using (Mat frame = logger.Plot(ScreenProperties, GazeDetector.Calibrator))
             {
                 var savepath = logger.File.AbosolutePath;
                 savepath = savepath.Replace(".clb", ".jpg");
@@ -589,7 +584,7 @@ namespace Vision.Tests
                     }
 
                     // calibrating draw
-                    if (GazeCalibrater.IsStarted && calibratingArgs != null)
+                    if (GazeDetector.Calibrator.IsStarted && calibratingArgs != null)
                     {
                         var calibPt = ScreenToMat(mat, calibratingArgs.Data);
                         Scalar color;

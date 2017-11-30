@@ -51,6 +51,13 @@ namespace Vision.Cv
         }
 
         protected abstract void InternalImgShow(string name, Mat img);
+        public char ImgShow(string name, Mat img, int duration, bool closeThis = false)
+        {
+            ImgShow(name, img);
+            var ret = Core.Cv.WaitKey(duration);
+            Core.Cv.CloseWindow(name);
+            return ret;
+        }
         public void ImgShow(string name, Mat img)
         {
             try

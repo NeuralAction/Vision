@@ -65,7 +65,7 @@ namespace Vision.Detection
 
         public bool ClipToBound { get; set; } = false;
         public bool UseSmoothing { get; set; } = false;
-
+        
         public bool UseModification { get; set; } = true;
         public double SensitiveX { get; set; } = DefaultSensitiveX;
         public double OffsetX { get; set; } = DefaultOffsetX;
@@ -73,6 +73,9 @@ namespace Vision.Detection
         public double OffsetY { get; set; } = DefaultOffsetY;
         
         public ScreenProperties ScreenProperties { get; set; }
+
+        public bool UseCalibrator { get; set; } = true;
+        public EyeGazeCalibrater Calibrator { get; set; }
 
         public EyeGazeDetectMode DetectMode { get; set; } = EyeGazeDetectMode.Face;
 
@@ -91,6 +94,8 @@ namespace Vision.Detection
             sess = new Session(ModelGraphSingle);
             sessEx = new Session(ModelGraphExtend);
             sessFace = new Session(ModelGraphFace);
+
+            Calibrator = new EyeGazeCalibrater();
         }
 
         public Point Detect(FaceRect face, Mat frame)
@@ -175,8 +180,12 @@ namespace Vision.Detection
                 Vector = new Point3D(vecPt.X, vecPt.Y, -1),
             };
 
+            Calibrator.Push(new CalibratingPushData(face));
+            if (UseCalibrator)
+                Calibrator.Apply(face, ScreenProperties);
+
             Profiler.End("GazeDetect");
-            return pt;
+            return face.GazeInfo.ScreenPoint;
         }
 
         private Point DetectFace(Mat face, Mat left, Mat right)

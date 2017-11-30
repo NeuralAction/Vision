@@ -42,6 +42,11 @@ namespace Vision.Detection
             Open = openPercent;
         }
 
+        public EyeOpenData Clone()
+        {
+            return new EyeOpenData(Open, Close);
+        }
+
         private void Update()
         {
             IsOpen = _open > _close;

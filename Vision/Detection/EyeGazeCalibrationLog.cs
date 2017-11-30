@@ -12,6 +12,7 @@ namespace Vision.Detection
     public class EyeGazeCalibrationLog
     {
         public int Version { get; set; } = 1;
+        public double UnitPerMM { get; set; } = 1;
         public FileNode File { get; set; }
         public Dictionary<Point3D, CalibratingPushData> Data { get; set; }
 
@@ -34,6 +35,40 @@ namespace Vision.Detection
 
             if (File.IsExist)
                 Load();
+        }
+
+        public Mat Plot(ScreenProperties screen, EyeGazeCalibrater calib)
+        {
+            var pre = new Point3D[Data.Count];
+
+            using (var plot = Plot(screen))
+            {
+                int i = 0;
+                foreach (var item in Data)
+                {
+                    pre[i] = item.Value.Face.GazeInfo.Vector;
+                    calib.Apply(item.Value.Face, screen);
+                    i++;
+                }
+
+                using (var newPlot = Plot(screen))
+                {
+                    i = 0;
+                    foreach (var item in Data)
+                    {
+                        item.Value.Face.GazeInfo.Vector = pre[i];
+                        item.Value.Face.GazeInfo.UpdateScreenPoint(item.Value.Face, screen);
+                        i++;
+                    }
+
+                    var fontsize = Core.Cv.GetFontSize(HersheyFonts.HersheyComplexSmall, 0.5);
+                    var show = MatTool.New(new Size(plot.Width * 2, plot.Height), MatType.CV_8UC3);
+                    Core.Cv.DrawMatAlpha(show, plot, new Point(0, 0));
+                    Core.Cv.DrawMatAlpha(show, newPlot, new Point(plot.Width, 0));
+
+                    return show;
+                }
+            }
         }
 
         public Mat Plot(ScreenProperties screen)
@@ -75,7 +110,8 @@ namespace Vision.Detection
                     var errorDiff = key - new Point(gazeVec.X, gazeVec.Y);
                     var error = Math.Sqrt(Math.Pow(errorDiff.X, 2) + Math.Pow(errorDiff.Y, 2));
                     errorList.Add(error);
-                    errorMM.Add(Math.Abs(screen.Origin.Z - item.Value.Face.LandmarkTransform.Z / item.Value.Face.UnitPerMM) * error / 10);
+                    var mmDist = item.Value.Face.LandmarkTransform.Z / item.Value.Face.UnitPerMM;
+                    errorMM.Add(Math.Abs(screen.Origin.Z - mmDist) * error / 10);
                 }
 
                 var errorMax = errorList.Max();
@@ -93,13 +129,13 @@ namespace Vision.Detection
                     m.DrawArrow(pt, ptDist, color, 1, LineTypes.AntiAlias, 0.15);
                 }
 
-                Core.Cv.DrawText(m, 
+                Core.Cv.DrawText(m,
                     $"Mean error: {errorAvg.ToString("0.000")}\n" +
                     $"Mean error(cm): {errorMMAvg.ToString("0.00")}\n" +
                     $"Mean error(degree): {(Math.Atan(errorAvg) / Math.PI * 180).ToString("0.00")}\n" +
                     $"Samples: {errorList.Count}",
                     new Point(10, 25), HersheyFonts.HersheyComplexSmall, 0.5, Scalar.BgrBlack, 1);
-                
+
                 frame.DrawRectangle(new Rect(0, 0, frame.Width, frame.Height), new Scalar(64, 64, 64), -1);
                 Core.Cv.DrawMatAlpha(frame, m, frameMargin);
             }
@@ -109,24 +145,27 @@ namespace Vision.Detection
 
         public void Load()
         {
-            using(Stream stream = File.Open())
+            using (Stream stream = File.Open())
             {
-                using(StreamReader reader = new StreamReader(stream))
+                using (StreamReader reader = new StreamReader(stream))
                 {
                     var lineCount = 1;
                     while (!reader.EndOfStream)
                     {
                         var line = reader.ReadLine();
+#if DEBUG
                         LoadLine(line);
-                        //try
-                        //{
-                        //    LoadLine(line);
-                        //}
-                        //catch (Exception ex)
-                        //{
-                        //    Logger.Error(this, $"Error on {File}:{lineCount}");
-                        //    Logger.Error(this, ex);
-                        //}
+#else
+                        try
+                        {
+                            LoadLine(line);
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Error(this, $"Error on {File}:{lineCount}");
+                            Logger.Error(this, ex);
+                        }
+#endif
                         lineCount++;
                     }
                 }
@@ -139,7 +178,7 @@ namespace Vision.Detection
             if (!IsComment(trim))
             {
                 var spl = trim.Split(new[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
-                if(spl.Length == 2)
+                if (spl.Length == 2)
                 {
                     var command = spl[0].ToLower();
                     var content = spl[1];
@@ -151,6 +190,10 @@ namespace Vision.Detection
                             break;
                         case "log":
                             LoadLog(content);
+                            break;
+                        case "unitMM":
+                            UnitPerMM = Convert.ToDouble(spl[1]);
+                            Logger.Log(this, $"unitPerMM = {UnitPerMM}");
                             break;
                         default:
                             Logger.Error(this, $"Unknown command {command}");
@@ -183,6 +226,7 @@ namespace Vision.Detection
             (
                 new FaceRect(new Rect(), null)
                 {
+                    UnitPerMM = UnitPerMM,
                     GazeInfo = new EyeGazeInfo()
                     {
                         Vector = readedGaze
@@ -217,7 +261,7 @@ namespace Vision.Detection
 
         private bool IsComment(string line)
         {
-            if(line.Length > 1)
+            if (line.Length > 1)
                 return line[0] == '/' && line[1] == '/';
             return false;
         }
