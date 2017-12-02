@@ -130,7 +130,7 @@ namespace Vision.Android
         {
             System.Threading.Thread.Sleep(duration);
 
-            return (char)0;
+            return (char)255;
         }
 
         public override void CloseWindow(string name)
