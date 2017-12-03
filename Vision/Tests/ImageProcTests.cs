@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenCvSharp.Native;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,7 +23,7 @@ namespace Vision.Tests
             {
                 c.FrameReady += C_FrameReady;
                 c.Start();
-                c.Join();
+                c.Wait();
             }
         }
 

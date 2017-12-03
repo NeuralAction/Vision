@@ -3,9 +3,7 @@ using Android.Graphics;
 using Android.Util;
 using Android.Widget;
 using App = Android.App;
-using OpenCV.Android;
-using OpenCV.Core;
-using OpenCV.ImgProc;
+using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +18,6 @@ namespace Vision.Android
         public static AndroidCv Cv { get { return (AndroidCv)Core.Cv; } }
 
         public Context AppContext { get; set; }
-        private LoaderCallback LoaderCallback;
         private ImageView imageView;
         private App.Activity activity;
 
@@ -32,105 +29,9 @@ namespace Vision.Android
             this.imageView = imageView;
             this.activity = activity;
 
-            LoaderCallback = new LoaderCallback();
-            LoaderCallback.ManagerConnected += LoaderCallback_ManagerConnected;
-
-            LoadAssambly();
-        }
-
-        private void LoaderCallback_ManagerConnected(object sender, int e)
-        {
-            switch (e)
-            {
-                case LoaderCallbackInterface.Success:
-                    Logger.Log(this, "OpenCV loaded successfully");
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        public void LoadAssambly()
-        {
-            if (!OpenCVLoader.InitDebug())
-            {
-                Logger.Log(this, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
-                OpenCVLoader.InitAsync(OpenCVLoader.OpencvVersion300, AppContext, LoaderCallback);
-            }
-            else
-            {
-                Logger.Log(this, "OpenCV library found inside package. Using it!");
-                LoaderCallback_ManagerConnected (this, LoaderCallbackInterface.Success);
-            }
-        }
-
-        protected override string GetBuildInformation()
-        {
-            return OpenCV.Core.Core.BuildInformation;
-        }
-
-        public override void ConvertColor(VMat src, VMat output, ColorConversion convertMode)
-        {
-            Imgproc.CvtColor((Mat)src.Object, (Mat)output.Object, (int)convertMode);
-        }
-
-        public override void DrawCircle(VMat img, Point center, double radius, Scalar color, double thickness = 1, LineType lineType = LineType.Link8, int shift = 0)
-        {
-            Imgproc.Circle((Mat)img.Object, new OpenCV.Core.Point(center.X, center.Y), (int)Math.Round(radius), new OpenCV.Core.Scalar(color.Value1, color.Value2, color.Value3, color.Value4), (int)Math.Round(thickness), (int)lineType, shift);
-        }
-
-        public override void DrawEllipse(VMat img, Point center, Size axes, double angle, double startAngle, double endAngle, Scalar color, double thickness = 1, LineType lineType = LineType.Link8, int shift = 0)
-        {
-            Imgproc.Ellipse((Mat)img.Object, new OpenCV.Core.Point(center.X, center.Y), new OpenCV.Core.Size(axes.Width, axes.Height), angle, startAngle, endAngle, new OpenCV.Core.Scalar(color.Value1, color.Value2, color.Value3, color.Value4), (int)Math.Round(thickness), (int)lineType, shift);
-        }
-
-        public override void DrawLine(VMat img, Point start, Point end, Scalar color, int thickness = 1, LineType lineType = LineType.Link8, int shift = 0)
-        {
-            Imgproc.Line(img.ToCvMat(), start.ToCvPoint(), end.ToCvPoint(), color.ToCvScalar(), thickness, (int)lineType, shift);
-        }
-
-        public override void DrawText(VMat img, string text, Point org, FontFace fontFace, double fontScale, Scalar color, int thickness = 1, LineType lineType = LineType.Link8, bool bottomLeftOrigin = false)
-        {
-            Imgproc.PutText((Mat)img.Object, text, new OpenCV.Core.Point(org.X, org.Y), (int)fontFace, fontScale,
-                new OpenCV.Core.Scalar(color.Value1, color.Value2, color.Value3, color.Value4), thickness, (int)lineType, bottomLeftOrigin);
-        }
-
-        public override void EqualizeHistogram(VMat input, VMat output)
-        {
-            Imgproc.EqualizeHist((Mat)input.Object, (Mat)output.Object);
-        }
-
-        public override void Transpose(VMat input, VMat output)
-        {
-            OpenCV.Core.Core.Transpose((Mat)input.Object, (Mat)output.Object);
-        }
-
-        protected override void InternalImgShow(string name, VMat img)
-        {
-            if(imageView != null)
-            {
-                Bitmap bit = Bitmap.CreateBitmap((int)img.Width, (int)img.Height, Bitmap.Config.Argb8888);
-
-                VMat mat = VMat.New();
-
-                img.ConvertColor(mat, ColorConversion.BgrToRgb);
-
-                Utils.MatToBitmap((Mat)mat.Object, bit);
-
-                activity.RunOnUiThread(() =>
-                {
-                    imageView.SetImageBitmap(bit);
-                });
-
-                mat.Dispose();
-            }
-        }
-
-        public override char WaitKey(int duration)
-        {
-            System.Threading.Thread.Sleep(duration);
-
-            return (char)255;
+            OpenCvSharp.Android.NativeBinding.Init(context, activity, imageView);
+            SharpFace.Android.Native.Init();
+            SharpFace.NativeTest.Test();
         }
 
         public override void CloseWindow(string name)
@@ -148,239 +49,19 @@ namespace Vision.Android
 
         }
 
-        public override void Canny(VMat Input, VMat output, double thresold1, double thresold2, int apertureSize = 3, bool L2gradient = false)
+        protected override void InternalImgShow(string name, Mat img)
         {
-            OpenCV.ImgProc.Imgproc.Canny((Mat)Input.Object, (Mat)output.Object, thresold1, thresold2, apertureSize, L2gradient);
+            Cv2.ImShow(name, img);
         }
 
-        public override void ProjectPoints(List<Point3D> objectPoints, double[] rvec, double[] tvec, double[,] cameraMatrix, double[] distCoeffs, out Point[] imagePoints, out double[,] jacobian)
+        protected override void InternalImgWrite(string name, Mat img, int quality)
         {
-            Point3[] objpoints_buffer = new Point3[objectPoints.Count];
-            for (int i = 0; i < objectPoints.Count; i++)
-            {
-                var pt = objectPoints[i];
-                objpoints_buffer[i] = new Point3(pt.X, pt.Y, pt.Z);
-            }
-
-            using (MatOfPoint3f objpoints = new MatOfPoint3f(objpoints_buffer))
-            using (Mat rvecMat = Converter.ToCvMat(3, 1, rvec))
-            using (Mat tvecMat = Converter.ToCvMat(3, 1, tvec))
-            using (Mat cameraMatrixMat = Converter.ToCvMat(3, 3, cameraMatrix))
-            using (MatOfDouble distCoeffsMat = new MatOfDouble(distCoeffs))
-            using (MatOfPoint2f imgpoints = new MatOfPoint2f())
-            using (Mat jacobianMat = new Mat())
-            {
-                OpenCV.Calib3d.Calib3d.ProjectPoints(objpoints, rvecMat, tvecMat, cameraMatrixMat, distCoeffsMat, imgpoints, jacobianMat, 0);
-
-                OpenCV.Core.Point[] ret = imgpoints.ToArray();
-                imagePoints = new Point[ret.Length];
-                for (int i = 0; i < ret.Length; i++)
-                {
-                    imagePoints[i] = new Point(ret[i].X, ret[i].Y);
-                }
-                jacobian = null;
-            }
+            Cv2.ImWrite(name, img, new ImageEncodingParam(ImwriteFlags.JpegQuality, quality));
         }
 
-        public override void SolvePnP(List<Point3D> model_points, List<Point> image_point, double[,] cameraMatrix, double[] distCoeffs, out double[] rvec, out double[] tvec)
+        protected override Mat InternalImgRead(string path)
         {
-            Point3[] modelpt_buffer = new Point3[model_points.Count];
-            for(int i=0; i<model_points.Count; i++)
-            {
-                var pt = model_points[i];
-                modelpt_buffer[i] = new Point3(pt.X, pt.Y, pt.Z);
-            }
-            OpenCV.Core.Point[] imagept_buffer = new OpenCV.Core.Point[image_point.Count];
-            for (int i = 0; i < imagept_buffer.Length; i++)
-            {
-                var pt = image_point[i];
-                imagept_buffer[i] = new OpenCV.Core.Point(pt.X, pt.Y);
-            }
-
-            using (MatOfPoint3f modelpt = new MatOfPoint3f(modelpt_buffer))
-            using (MatOfPoint2f imagept = new MatOfPoint2f(imagept_buffer))
-            using (Mat cameraMatrixMat = Converter.ToCvMat(3, 3, cameraMatrix))
-            using (MatOfDouble distCoeffsMat = new MatOfDouble(distCoeffs))
-            using (Mat rvecMat = new Mat())
-            using (Mat tvecMat = new Mat())
-            {
-                OpenCV.Calib3d.Calib3d.SolvePnP(modelpt, imagept, cameraMatrixMat, distCoeffsMat, rvecMat, tvecMat);
-
-                rvec = new double[3];
-                rvecMat.Get(0, 0, rvec);
-                tvec = new double[3];
-                tvecMat.Get(0, 0, tvec);
-            }
-        }
-
-        public override void Resize(VMat input, VMat dist, Size size, double fx = 0, double fy = 0, Interpolation inter = Interpolation.Linear)
-        {
-            Imgproc.Resize((Mat)input.Object, (Mat)dist.Object, new OpenCV.Core.Size(size.Width, size.Height), fx, fy, (int)inter);
-        }
-
-        protected override Cv.CLAHE CreateCLAHE(double clip, Size gridSize)
-        {
-            return new AndroidCLAHE(clip, gridSize);
-        }
-
-        protected override Capture CreateCapture(int index)
-        {
-            return new AndroidCapture(index);
-        }
-
-        protected override Capture CreateCapture(string filePath)
-        {
-            return new AndroidCapture(filePath);
-        }
-
-        protected override CascadeClassifier CreateCascadeClassifier(string filePath)
-        {
-            return new AndroidCascadeClassifier(filePath);
-        }
-
-        protected override VMat CreateMat()
-        {
-            return new AndroidMat();
-        }
-
-        protected override VMat CreateMat(Size size)
-        {
-            return new AndroidMat(size);
-        }
-
-        protected override VMat CreateMat(Size size, MatType type)
-        {
-            return new AndroidMat(size, type);
-        }
-
-        protected override VMat CreateMat(VMat mat, Rect rect)
-        {
-            return new AndroidMat(mat, rect);
-        }
-
-        protected override VMat InternalImgRead(string path)
-        {
-            return new AndroidMat(OpenCV.ImgCodecs.Imgcodecs.Imread(path));
-        }
-
-        protected override void InternalImgWrite(string name, VMat img, int quality)
-        {
-            using (MatOfInt mat = new MatOfInt())
-            {
-                mat.Put(0, 0, new int[] { OpenCV.ImgCodecs.Imgcodecs.ImwriteJpegQuality, quality });
-                OpenCV.ImgCodecs.Imgcodecs.Imwrite(name, (Mat)img.Object, mat);
-            }
-        }
-
-        protected override int GetNumThreads()
-        {
-            return OpenCV.Core.Core.NumThreads;
-        }
-
-        protected override void SetNumThreads(int t)
-        {
-            OpenCV.Core.Core.NumThreads = t;
-        }
-
-        protected override bool GetUseOptimized()
-        {
-            return true;
-        }
-
-        protected override void SetUseOptimized(bool b)
-        {
-            //
-        }
-
-        protected override VMat CreateMat(Size size, MatType type, Array buffer)
-        {
-            Type at = buffer.GetType().GetElementType();
-            if (at != typeof(double))
-                throw new NotImplementedException();
-
-            if(buffer.Rank == 1)
-            {
-                double[] arr = (double[])buffer;
-                return Converter.ToCvMat((int)size.Width, (int)size.Height, arr).ToVMat();
-            }
-            else if(buffer.Rank == 2)
-            {
-                double[,] arr = (double[,])buffer;
-                return Converter.ToCvMat((int)size.Width, (int)size.Height, arr).ToVMat();
-            }
-            else
-            {
-                throw new ArgumentException();
-            }
-        }
-
-        public override void DrawRectangle(VMat img, Rect rect, Scalar color, int thickness = 1, LineType lineType = LineType.Link8, int shift = 0)
-        {
-            OpenCV.ImgProc.Imgproc.Rectangle(img.ToCvMat(), new OpenCV.Core.Point(rect.X, rect.Y), new OpenCV.Core.Point(rect.X + rect.Width, rect.Y + rect.Height), color.ToCvScalar(), thickness, (int)lineType, shift);
-        }
-
-        public override void WarpPerspective(VMat src, VMat dst, VMat transform, Size dsize, Interpolation flags = Interpolation.Linear, BorderTypes borderMode = BorderTypes.Constant, Scalar borderValue = null)
-        {
-            OpenCV.ImgProc.Imgproc.WarpPerspective(src.ToCvMat(), dst.ToCvMat(), transform.ToCvMat(), dsize.ToCvSize(), (int)flags, (int)borderMode, borderValue.ToCvScalar());
-        }
-
-        public override VMat Mul(VMat left, VMat right)
-        {
-            return left.ToCvMat().Mul(right.ToCvMat()).ToVMat();
-        }
-
-        public override void Mul(VMat output, VMat left, VMat right)
-        {
-            OpenCV.Core.Core.Multiply(left.ToCvMat(), right.ToCvMat(), output.ToCvMat());
-        }
-
-        public override VMat Inv(VMat input)
-        {
-            return input.ToCvMat().Inv().ToVMat();
-        }
-
-        public override void Inv(VMat input, VMat output)
-        {
-            OpenCV.Core.Core.Invert(input.ToCvMat(), output.ToCvMat());
-        }
-
-        public override VMat Transpose(VMat input)
-        {
-            return input.ToCvMat().T().ToVMat();
-        }
-
-        public override void Rodrigues(double[] vector, out double[,] matrix, out double[,] jacobian)
-        {
-            using (var mvec = Converter.ToCvMat(vector.Length, 1, vector))
-            using (var mmat = new OpenCV.Core.Mat(3, 3, MatType.CV_64FC1))
-            using (var mjac = new OpenCV.Core.Mat(3, 9, MatType.CV_64FC1))
-            {
-                OpenCV.Calib3d.Calib3d.Rodrigues(mvec, mmat, mjac);
-                var mmat_array = new double[9];
-                mmat.Get(0, 0, mmat_array);
-                var mjac_array = new double[27];
-                mjac.Get(0, 0, mjac_array);
-
-                matrix = Converter.ToMatrixArray(3, 3, mmat_array);
-                jacobian = Converter.ToMatrixArray(3, 9, mjac_array);
-            }
-        }
-
-        public override void Rodrigues(double[,] matrix, out double[] vector, out double[,] jacobian)
-        {
-            using (var mmat = Converter.ToCvMat(3, 3, matrix))
-            using (var mvec = new OpenCV.Core.Mat(3, 1, MatType.CV_64FC1))
-            using (var mjac = new OpenCV.Core.Mat(3, 9, MatType.CV_64FC1))
-            {
-                OpenCV.Calib3d.Calib3d.Rodrigues(mmat, mvec, mjac);
-                var mvec_array = new double[3];
-                mvec.Get(0, 0, mvec_array);
-                var mjac_array = new double[27];
-                mjac.Get(0, 0, mjac_array);
-
-                vector = mvec_array;
-                jacobian = Converter.ToMatrixArray(3, 9, mjac_array);
-            }
+            return Cv2.ImRead(path);
         }
     }
 }

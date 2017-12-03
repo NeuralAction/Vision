@@ -37,7 +37,7 @@ namespace Vision.Android
             }
         }
 
-        const int bufferlen = 16384;
+        const int bufferlen = 32000;
         public void UnZip()
         {
             try
@@ -60,22 +60,26 @@ namespace Vision.Android
                             }
                             else
                             {
-                                using (var fileOutputStream = new FileOutputStream(_location + entry.Name))
+                                var fileNode = new FileNode(_location + entry.Name, true);
+                                if (!fileNode.IsExist)
                                 {
-                                    byte[] buffer = new byte[bufferlen];
-                                    int bindex = 0;
-                                    int bcount = 0;
-                                    for (int i = zipInputStream.Read(); i != -1; i = zipInputStream.Read())
+                                    using (var fileOutputStream = new FileOutputStream(_location + entry.Name))
                                     {
-                                        if(bcount >= bufferlen)
+                                        byte[] buffer = new byte[bufferlen];
+                                        int bindex = 0;
+                                        int bcount = 0;
+                                        for (int i = zipInputStream.Read(); i != -1; i = zipInputStream.Read())
                                         {
-                                            fileOutputStream.Write(buffer, 0, bcount);
-                                            bcount = 0;
-                                            bindex = 0;
+                                            if (bcount >= bufferlen)
+                                            {
+                                                fileOutputStream.Write(buffer, 0, bcount);
+                                                bcount = 0;
+                                                bindex = 0;
+                                            }
+                                            buffer[bindex] = (byte)i;
+                                            bindex++;
+                                            bcount++;
                                         }
-                                        buffer[bindex] = (byte)i;
-                                        bindex++;
-                                        bcount++;
                                     }
                                 }
                             }

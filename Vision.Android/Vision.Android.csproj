@@ -93,17 +93,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AndroidCapture.cs" />
-    <Compile Include="AndroidCascadeClassifier.cs" />
-    <Compile Include="AndroidCLAHE.cs" />
     <Compile Include="AndroidCore.cs" />
     <Compile Include="AndroidCv.cs" />
-    <Compile Include="AndroidMat.cs" />
     <Compile Include="AndroidStorage.cs" />
-    <Compile Include="CameraPreviewCallback.cs" />
-    <Compile Include="Converter.cs" />
     <Compile Include="LimitedTaskScheduler.cs" />
-    <Compile Include="LoaderCallback.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ZipFile.cs" />
@@ -116,9 +109,21 @@
     <AndroidResource Include="Resources\Values\Strings.xml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\OpenCV.Binding\OpenCV.Binding.csproj">
-      <Project>{3675b5a0-535b-4cfb-b523-ed60837278b9}</Project>
-      <Name>OpenCV.Binding</Name>
+    <ProjectReference Include="..\SharpFace\OpenCvSharp\src\OpenCvSharp.Android\OpenCvSharp.Android.csproj">
+      <Project>{f94f9e8a-e239-45ea-9c61-c7855c8b6f25}</Project>
+      <Name>OpenCvSharp.Android</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SharpFace\OpenCvSharp\src\OpenCvSharp\OpenCvSharp.csproj">
+      <Project>{658c140f-2e73-4e22-80a7-f05df0a83318}</Project>
+      <Name>OpenCvSharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SharpFace\SharpFace.Android\SharpFace.Android.csproj">
+      <Project>{95a85f6a-f038-4cc1-8ac9-058a30921a0e}</Project>
+      <Name>SharpFace.Android</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SharpFace\SharpFace\SharpFace.csproj">
+      <Project>{b3a225b9-1a79-4330-9b4e-a3c4e07bbeab}</Project>
+      <Name>SharpFace</Name>
     </ProjectReference>
     <ProjectReference Include="..\TensorFlowSharp\TensorFlowSharp.Android\TensorFlowSharp.Android.csproj">
       <Project>{8d36690c-0079-4a33-915d-68d98b9a7117}</Project>

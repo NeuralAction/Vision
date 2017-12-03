@@ -84,7 +84,6 @@
   <ItemGroup>
     <Compile Include="Converter.cs" />
     <Compile Include="WindowsStorage.cs" />
-    <Compile Include="WindowsCapture.cs" />
     <Compile Include="WindowsCore.cs" />
     <Compile Include="WindowsCv.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

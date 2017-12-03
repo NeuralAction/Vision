@@ -12,6 +12,7 @@ using Vision.Detection;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using OpenCvSharp;
+using OpenCvSharp.Native;
 
 namespace Vision.Tests
 {
@@ -159,7 +160,7 @@ namespace Vision.Tests
             {
                 UseSmooth = true
             };
-            FaceDetector = new FaceDetector(faceXml, eyeXml);
+            FaceDetector = new FaceDetector(faceXml, eyeXml, flandmarkModel);
             FaceProvider = OpenFaceDetector;
 
             GazeDetector = new EyeGazeDetector(ScreenProperties);
@@ -206,7 +207,7 @@ namespace Vision.Tests
         public void Run()
         {
             capture.Start();
-            capture.Join();
+            capture.Wait();
         }
 
         private void UpdateGraph(double transX, double transZ)

@@ -54,7 +54,6 @@
     <Compile Include="Common\Util.cs" />
     <Compile Include="Cv\Converter.cs" />
     <Compile Include="Cv\MatTool.cs" />
-    <Compile Include="Cv\Capture.cs" />
     <Compile Include="Cv\CascadeClassifier.cs" />
     <Compile Include="Cv\Flandmark.cs" />
     <Compile Include="Cv\LibLBP.cs" />

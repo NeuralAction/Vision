@@ -24,14 +24,36 @@ namespace Vision.Cv
         public virtual bool UseOptimized { get => GetUseOptimized(); set => SetUseOptimized(value); }
 
         //Get
-        protected abstract string GetBuildInformation();
-        protected abstract int GetNumThreads();
-        protected abstract void SetNumThreads(int t);
-        protected abstract bool GetUseOptimized();
-        protected abstract void SetUseOptimized(bool b);
+        protected string GetBuildInformation()
+        {
+            return Cv2.GetBuildInformation();
+        }
+        protected int GetNumThreads()
+        {
+            return Cv2.GetNumThreads();
+        }
+        protected void SetNumThreads(int t)
+        {
+            Cv2.SetNumThreads(t);
+        }
+        protected bool GetUseOptimized()
+        {
+            return Cv2.UseOptimized();
+        }
+        protected void SetUseOptimized(bool b)
+        {
+            Cv2.SetUseOptimized(b);
+        }
 
-        internal protected abstract Capture CreateCapture(int index);
-        internal protected abstract Capture CreateCapture(string filePath);
+        public OpenCvSharp.Native.Capture CreateCapture(int index)
+        {
+            return OpenCvSharp.Native.NativeBindings.Kernal.NewCapture(index);
+        }
+
+        public OpenCvSharp.Native.Capture CreateCapture(string filePath)
+        {
+            return OpenCvSharp.Native.NativeBindings.Kernal.NewCapture(filePath);
+        }
 
         //Global Functions
         internal static void Init(Cv Context)
@@ -102,7 +124,10 @@ namespace Vision.Cv
 
         public abstract void CloseWindow(string name);
         public abstract void CloseAllWindows();
-        public abstract char WaitKey(int duration);
+        public char WaitKey(int duration)
+        {
+            return (char)Cv2.WaitKey(duration);
+        }
 
         //Draw
         public void DrawRectangle(Mat self, Rect rect, Scalar color, double thickness = 1, LineTypes lineType = LineTypes.Link8, int shift = 0)

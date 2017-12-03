@@ -13,12 +13,8 @@ namespace Vision.Windows
     {
         public WindowsCv()
         {
-
-        }
-
-        protected override string GetBuildInformation()
-        {
-            return Cv2.GetBuildInformation();
+            OpenCvSharp.Windows.NativeBindings.Init();
+            SharpFace.Windows.Native.Init();
         }
 
         public override void CloseAllWindows()
@@ -29,41 +25,6 @@ namespace Vision.Windows
         public override void CloseWindow(string name)
         {
             Cv2.DestroyWindow(name);
-        }
-
-        public override char WaitKey(int duration)
-        {
-            return (char)Cv2.WaitKey(duration);
-        }
-
-        protected override Capture CreateCapture(int index)
-        {
-            return new WindowsCapture(index);
-        }
-
-        protected override Capture CreateCapture(string filePath)
-        {
-            return new WindowsCapture(filePath);
-        }
-
-        protected override int GetNumThreads()
-        {
-            return Cv2.GetNumThreads();
-        }
-
-        protected override void SetNumThreads(int t)
-        {
-            Cv2.SetNumThreads(t);
-        }
-
-        protected override bool GetUseOptimized()
-        {
-            return Cv2.UseOptimized();
-        }
-
-        protected override void SetUseOptimized(bool b)
-        {
-            Cv2.SetUseOptimized(b);
         }
 
         protected override void InternalImgShow(string name, Mat img)

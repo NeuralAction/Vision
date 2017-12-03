@@ -1,4 +1,5 @@
 ﻿using OpenCvSharp;
+using OpenCvSharp.Native;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -106,7 +107,7 @@ namespace Vision.Tests
 
         public void Join()
         {
-            cap.Join();
+            cap.Wait();
         }
 
         InferenceResult[] inferences;

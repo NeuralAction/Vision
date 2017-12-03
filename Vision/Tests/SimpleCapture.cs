@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenCvSharp.Native;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,7 +19,7 @@ namespace Vision.Tests
             capture = Capture.New(0);
             capture.FrameReady += Capture_FrameReady;
             capture.Start();
-            capture.Join();
+            capture.Wait();
             capture.Dispose();
         }
 

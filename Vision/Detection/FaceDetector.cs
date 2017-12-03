@@ -246,19 +246,19 @@ namespace Vision.Detection
         CascadeClassifier EyesCascade;
         FaceLandmarkDetector Landmark;
 
-        public FaceDetector(string FaceXml, string EyesXml)
+        public FaceDetector(string FaceXml, string EyesXml, FileNode flandmark)
         {
             FaceCascade = new CascadeClassifier(FaceXml);
             EyesCascade = new CascadeClassifier(EyesXml);
-            Landmark = new FaceLandmarkDetector();
+            Landmark = new FaceLandmarkDetector(flandmark);
         }
 
-        public FaceDetector(FaceDetectorXmlLoader Loader) : this(Loader.FaceXmlPath, Loader.EyeXmlPath)
+        public FaceDetector(FaceDetectorXmlLoader Loader, FlandmarkModelLoader loader) : this(Loader.FaceXmlPath, Loader.EyeXmlPath, loader.Data)
         {
 
         }
 
-        public FaceDetector() : this(new FaceDetectorXmlLoader())
+        public FaceDetector() : this(new FaceDetectorXmlLoader(), new FlandmarkModelLoader())
         {
 
         }

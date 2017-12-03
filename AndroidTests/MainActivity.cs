@@ -5,14 +5,14 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using Android.OS;
-using Vision;
-using Vision.Tests;
-using Vision.Android;
 using System.Threading;
 using System.Diagnostics;
 using Android.Util;
 
+using Vision;
 using Vision.Cv;
+using Vision.Tests;
+using Vision.Android;
 using Vision.Detection;
 
 namespace AndroidTests
@@ -23,7 +23,7 @@ namespace AndroidTests
         int count = 1;
         int index = 1;
 
-        FaceDetection detection;
+        FaceDetectionTests detection;
         ScreenProperties screen = ScreenProperties.CreatePixelScreen(new Vision.Size(1080, 1920), 375);
         InceptionTests inception;
 
@@ -76,15 +76,9 @@ namespace AndroidTests
 
         private void Start()
         {
-            detection = new FaceDetection(index, detectorXml, flandModel);
+            detection = new FaceDetectionTests(index, detectorXml, flandModel);
             detection.ScreenProperties = screen;
             detection.DetectGaze = true;
-            detection.Detector.SmoothVectors = true;
-            detection.Detector.SmoothLandmarks = true;
-            detection.Detector.EyesDetectCascade = true;
-            detection.Detector.LandmarkDetect = true;
-            detection.Detector.LandmarkSolve = true;
-            detection.Detector.EyesDetectLandmark = true;
             detection.Start();
 
             //inception = new InceptionTests(index);

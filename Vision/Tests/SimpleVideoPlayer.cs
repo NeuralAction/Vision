@@ -1,4 +1,5 @@
 ﻿using OpenCvSharp;
+using OpenCvSharp.Native;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -26,34 +27,23 @@ namespace Vision.Tests
 
             using (Capture capture = Capture.New(path))
             {
-                Stopwatch sw = new Stopwatch();
-                sw.Start();
-                long lastMs = 0;
-
-                while (true)
+                capture.FrameReady += (o, arg) =>
                 {
-                    lastMs = sw.ElapsedMilliseconds;
-
-                    if (capture.IsOpened)
+                    if (arg.Mat != null && !arg.Mat.IsEmpty)
                     {
-                        using (Mat mat = capture.QueryFrame())
-                        {
-                            if (mat != null && !mat.IsEmpty)
-                            {
-                                Core.Cv.ImgShow(windowName, mat);
-                            }
-                        }
+                        Core.Cv.ImgShow(windowName, arg.Mat);
                     }
 
-                    char c = Core.Cv.WaitKey((int)Math.Max(1, Math.Min((1000 / capture.FPS) - (sw.ElapsedMilliseconds - lastMs), 1000)));
+                    char c = arg.LastKey;
 
                     if (c == 'e')
                     {
                         Core.Cv.CloseAllWindows();
-
                         return;
                     }
-                }
+                };
+                capture.Start();
+                capture.Wait();
             }
         }
     }
