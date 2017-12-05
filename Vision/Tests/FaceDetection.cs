@@ -36,7 +36,20 @@ namespace Vision.Tests
         
         public EyeGazeDetector GazeDetector { get; set; }
         public EyeOpenDetector OpenDetector { get; set; }
-        public ScreenProperties ScreenProperties { get; set; }
+
+        ScreenProperties _screen;
+        public ScreenProperties ScreenProperties
+        {
+            get => _screen;
+            set
+            {
+                _screen = value;
+                if(GazeDetector != null)
+                {
+                    GazeDetector.ScreenProperties = _screen;
+                }
+            }
+        }
         public bool DrawOn { get; set; } = true;
         public bool DetectGaze { get; set; } = false;
         public bool GazeSmooth { get; set; } = false;
@@ -233,8 +246,13 @@ namespace Vision.Tests
 
             if (mat != null && !mat.IsEmpty)
             {
-                if (FaceDetectionTask == null || FaceDetectionTask.IsFaulted || FaceDetectionTask.IsCanceled)
+                if (FaceDetectionTask == null || FaceDetectionTask.IsFaulted || FaceDetectionTask.IsCanceled || FaceDetectionTask.IsCompleted)
                 {
+                    if(FaceDetectionTask != null && FaceDetectionTask.Exception != null)
+                    {
+                        Logger.Error(this, FaceDetectionTask.Exception);
+                    }
+
                     Profiler.Start("DetectionALL");
 
                     Profiler.Start("DetectionFaceTaskStart");
@@ -373,11 +391,15 @@ namespace Vision.Tests
             Profiler.Start("DetectionGazeTaskStart");
             if(GazeDetectionTask != null)
             {
+                Profiler.Start("DetectionGazeTaskStart.Wait");
                 GazeDetectionTask.Wait();
+                Profiler.End("DetectionGazeTaskStart.Wait");
             }
-            
-            GazeDetectionTask = Task.Factory.StartNew(() => 
+
+            Profiler.Start("DetectionGazeTaskStart.Gap");
+            GazeDetectionTask = Task.Factory.StartNew(() =>
             {
+                Profiler.End("DetectionGazeTaskStart.Gap");
                 GazeDetectProc(mat, rect);
             });
             Profiler.End("DetectionGazeTaskStart");
@@ -453,7 +475,7 @@ namespace Vision.Tests
                 while (true)
                 {
                     Core.Cv.ImgShow("calib_result", frame);
-                    var c = Core.Cv.WaitKey(10);
+                    var c = Core.Cv.WaitKey(1);
                     if (c != 255 || e.Token.IsCancellationRequested)
                     {
                         Core.Cv.CloseWindow("calib_result");

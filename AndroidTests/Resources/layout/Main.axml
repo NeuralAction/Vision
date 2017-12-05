@@ -1,16 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <Button
-        android:id="@+id/MyButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/Hello" />
     <ImageView
         android:src="@android:drawable/ic_menu_gallery"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/imageView1" />
-</LinearLayout>
+    <HorizontalScrollView
+        android:minWidth="25px"
+        android:minHeight="25px"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/horizontalScrollView1"
+        android:layout_alignParentBottom="true">
+        <LinearLayout
+            android:orientation="horizontal"
+            android:minWidth="25px"
+            android:minHeight="25px"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/linearLayout1"
+            android:alpha="0.5">
+            <Button
+                android:id="@+id/MyButton"
+                android:text="Hi"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent" />
+            <Button
+                android:text="` Key"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:id="@+id/button7" />
+            <Button
+                android:text="Space"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:id="@+id/button3" />
+            <Button
+                android:text="G Key"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:id="@+id/button4" />
+            <Button
+                android:text="J Key"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:id="@+id/button5" />
+            <Button
+                android:text="C key"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:id="@+id/button1" />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:id="@+id/button2"
+                android:text="V Key" />
+            <Button
+                android:text="B Key"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:id="@+id/button6" />
+        </LinearLayout>
+    </HorizontalScrollView>
+</RelativeLayout>

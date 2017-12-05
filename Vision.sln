@@ -106,6 +106,7 @@ Global
 		Debug|arm64-v8a = Debug|arm64-v8a
 		Debug|armeabi = Debug|armeabi
 		Debug|armeabi-v7a = Debug|armeabi-v7a
+		Debug|Droid_Release = Debug|Droid_Release
 		Debug|None = Debug|None
 		Debug|Win_x64 = Debug|Win_x64
 		Debug|x64 = Debug|x64
@@ -117,6 +118,7 @@ Global
 		Release|arm64-v8a = Release|arm64-v8a
 		Release|armeabi = Release|armeabi
 		Release|armeabi-v7a = Release|armeabi-v7a
+		Release|Droid_Release = Release|Droid_Release
 		Release|None = Release|None
 		Release|Win_x64 = Release|Win_x64
 		Release|x64 = Release|x64
@@ -136,6 +138,8 @@ Global
 		{67F9D3A8-F71E-4428-913F-C37AE82CDB24}.Debug|armeabi.Build.0 = Debug|Any CPU
 		{67F9D3A8-F71E-4428-913F-C37AE82CDB24}.Debug|armeabi-v7a.ActiveCfg = Debug|Any CPU
 		{67F9D3A8-F71E-4428-913F-C37AE82CDB24}.Debug|armeabi-v7a.Build.0 = Debug|Any CPU
+		{67F9D3A8-F71E-4428-913F-C37AE82CDB24}.Debug|Droid_Release.ActiveCfg = Release|Any CPU
+		{67F9D3A8-F71E-4428-913F-C37AE82CDB24}.Debug|Droid_Release.Build.0 = Release|Any CPU
 		{67F9D3A8-F71E-4428-913F-C37AE82CDB24}.Debug|None.ActiveCfg = Debug|Any CPU
 		{67F9D3A8-F71E-4428-913F-C37AE82CDB24}.Debug|None.Build.0 = Debug|Any CPU
 		{67F9D3A8-F71E-4428-913F-C37AE82CDB24}.Debug|Win_x64.ActiveCfg = Debug|Any CPU
@@ -158,6 +162,8 @@ Global
 		{67F9D3A8-F71E-4428-913F-C37AE82CDB24}.Release|armeabi.Build.0 = Release|Any CPU
 		{67F9D3A8-F71E-4428-913F-C37AE82CDB24}.Release|armeabi-v7a.ActiveCfg = Release|Any CPU
 		{67F9D3A8-F71E-4428-913F-C37AE82CDB24}.Release|armeabi-v7a.Build.0 = Release|Any CPU
+		{67F9D3A8-F71E-4428-913F-C37AE82CDB24}.Release|Droid_Release.ActiveCfg = Release|Any CPU
+		{67F9D3A8-F71E-4428-913F-C37AE82CDB24}.Release|Droid_Release.Build.0 = Release|Any CPU
 		{67F9D3A8-F71E-4428-913F-C37AE82CDB24}.Release|None.ActiveCfg = Release|Any CPU
 		{67F9D3A8-F71E-4428-913F-C37AE82CDB24}.Release|None.Build.0 = Release|Any CPU
 		{67F9D3A8-F71E-4428-913F-C37AE82CDB24}.Release|Win_x64.ActiveCfg = Release|Any CPU
@@ -180,6 +186,8 @@ Global
 		{10CF2B9A-8340-4AD7-A998-8F05E7F038BE}.Debug|armeabi.Build.0 = Debug|Any CPU
 		{10CF2B9A-8340-4AD7-A998-8F05E7F038BE}.Debug|armeabi-v7a.ActiveCfg = Debug|Any CPU
 		{10CF2B9A-8340-4AD7-A998-8F05E7F038BE}.Debug|armeabi-v7a.Build.0 = Debug|Any CPU
+		{10CF2B9A-8340-4AD7-A998-8F05E7F038BE}.Debug|Droid_Release.ActiveCfg = Debug|Any CPU
+		{10CF2B9A-8340-4AD7-A998-8F05E7F038BE}.Debug|Droid_Release.Build.0 = Debug|Any CPU
 		{10CF2B9A-8340-4AD7-A998-8F05E7F038BE}.Debug|None.ActiveCfg = Debug|Any CPU
 		{10CF2B9A-8340-4AD7-A998-8F05E7F038BE}.Debug|None.Build.0 = Debug|Any CPU
 		{10CF2B9A-8340-4AD7-A998-8F05E7F038BE}.Debug|Win_x64.ActiveCfg = Debug|Any CPU
@@ -202,6 +210,8 @@ Global
 		{10CF2B9A-8340-4AD7-A998-8F05E7F038BE}.Release|armeabi.Build.0 = Release|Any CPU
 		{10CF2B9A-8340-4AD7-A998-8F05E7F038BE}.Release|armeabi-v7a.ActiveCfg = Release|Any CPU
 		{10CF2B9A-8340-4AD7-A998-8F05E7F038BE}.Release|armeabi-v7a.Build.0 = Release|Any CPU
+		{10CF2B9A-8340-4AD7-A998-8F05E7F038BE}.Release|Droid_Release.ActiveCfg = Release|Any CPU
+		{10CF2B9A-8340-4AD7-A998-8F05E7F038BE}.Release|Droid_Release.Build.0 = Release|Any CPU
 		{10CF2B9A-8340-4AD7-A998-8F05E7F038BE}.Release|None.ActiveCfg = Release|Any CPU
 		{10CF2B9A-8340-4AD7-A998-8F05E7F038BE}.Release|None.Build.0 = Release|Any CPU
 		{10CF2B9A-8340-4AD7-A998-8F05E7F038BE}.Release|Win_x64.ActiveCfg = Release|Any CPU
@@ -224,6 +234,7 @@ Global
 		{15E57A3F-8B2F-46F0-A717-34B308307B1D}.Debug|armeabi.Build.0 = Debug|Any CPU
 		{15E57A3F-8B2F-46F0-A717-34B308307B1D}.Debug|armeabi-v7a.ActiveCfg = Debug|Any CPU
 		{15E57A3F-8B2F-46F0-A717-34B308307B1D}.Debug|armeabi-v7a.Build.0 = Debug|Any CPU
+		{15E57A3F-8B2F-46F0-A717-34B308307B1D}.Debug|Droid_Release.ActiveCfg = Debug|Any CPU
 		{15E57A3F-8B2F-46F0-A717-34B308307B1D}.Debug|None.ActiveCfg = Debug|Any CPU
 		{15E57A3F-8B2F-46F0-A717-34B308307B1D}.Debug|None.Build.0 = Debug|Any CPU
 		{15E57A3F-8B2F-46F0-A717-34B308307B1D}.Debug|Win_x64.ActiveCfg = Debug|x64
@@ -246,6 +257,8 @@ Global
 		{15E57A3F-8B2F-46F0-A717-34B308307B1D}.Release|armeabi.Build.0 = Release|Any CPU
 		{15E57A3F-8B2F-46F0-A717-34B308307B1D}.Release|armeabi-v7a.ActiveCfg = Release|Any CPU
 		{15E57A3F-8B2F-46F0-A717-34B308307B1D}.Release|armeabi-v7a.Build.0 = Release|Any CPU
+		{15E57A3F-8B2F-46F0-A717-34B308307B1D}.Release|Droid_Release.ActiveCfg = Release|x64
+		{15E57A3F-8B2F-46F0-A717-34B308307B1D}.Release|Droid_Release.Build.0 = Release|x64
 		{15E57A3F-8B2F-46F0-A717-34B308307B1D}.Release|None.ActiveCfg = Release|Any CPU
 		{15E57A3F-8B2F-46F0-A717-34B308307B1D}.Release|None.Build.0 = Release|Any CPU
 		{15E57A3F-8B2F-46F0-A717-34B308307B1D}.Release|Win_x64.ActiveCfg = Release|x64
@@ -268,6 +281,7 @@ Global
 		{01E6624F-1ACE-4CC7-B3F9-82AD270AC503}.Debug|armeabi.Build.0 = Debug|Any CPU
 		{01E6624F-1ACE-4CC7-B3F9-82AD270AC503}.Debug|armeabi-v7a.ActiveCfg = Debug|Any CPU
 		{01E6624F-1ACE-4CC7-B3F9-82AD270AC503}.Debug|armeabi-v7a.Build.0 = Debug|Any CPU
+		{01E6624F-1ACE-4CC7-B3F9-82AD270AC503}.Debug|Droid_Release.ActiveCfg = Debug|Any CPU
 		{01E6624F-1ACE-4CC7-B3F9-82AD270AC503}.Debug|None.ActiveCfg = Debug|Any CPU
 		{01E6624F-1ACE-4CC7-B3F9-82AD270AC503}.Debug|None.Build.0 = Debug|Any CPU
 		{01E6624F-1ACE-4CC7-B3F9-82AD270AC503}.Debug|Win_x64.ActiveCfg = Debug|x64
@@ -290,6 +304,8 @@ Global
 		{01E6624F-1ACE-4CC7-B3F9-82AD270AC503}.Release|armeabi.Build.0 = Release|Any CPU
 		{01E6624F-1ACE-4CC7-B3F9-82AD270AC503}.Release|armeabi-v7a.ActiveCfg = Release|Any CPU
 		{01E6624F-1ACE-4CC7-B3F9-82AD270AC503}.Release|armeabi-v7a.Build.0 = Release|Any CPU
+		{01E6624F-1ACE-4CC7-B3F9-82AD270AC503}.Release|Droid_Release.ActiveCfg = Release|x64
+		{01E6624F-1ACE-4CC7-B3F9-82AD270AC503}.Release|Droid_Release.Build.0 = Release|x64
 		{01E6624F-1ACE-4CC7-B3F9-82AD270AC503}.Release|None.ActiveCfg = Release|Any CPU
 		{01E6624F-1ACE-4CC7-B3F9-82AD270AC503}.Release|None.Build.0 = Release|Any CPU
 		{01E6624F-1ACE-4CC7-B3F9-82AD270AC503}.Release|Win_x64.ActiveCfg = Release|x64
@@ -312,6 +328,8 @@ Global
 		{3675B5A0-535B-4CFB-B523-ED60837278B9}.Debug|armeabi.Build.0 = Debug|armeabi
 		{3675B5A0-535B-4CFB-B523-ED60837278B9}.Debug|armeabi-v7a.ActiveCfg = Debug|armeabi-v7a
 		{3675B5A0-535B-4CFB-B523-ED60837278B9}.Debug|armeabi-v7a.Build.0 = Debug|armeabi-v7a
+		{3675B5A0-535B-4CFB-B523-ED60837278B9}.Debug|Droid_Release.ActiveCfg = Debug|Any CPU
+		{3675B5A0-535B-4CFB-B523-ED60837278B9}.Debug|Droid_Release.Build.0 = Debug|Any CPU
 		{3675B5A0-535B-4CFB-B523-ED60837278B9}.Debug|None.ActiveCfg = Debug|None
 		{3675B5A0-535B-4CFB-B523-ED60837278B9}.Debug|None.Build.0 = Debug|None
 		{3675B5A0-535B-4CFB-B523-ED60837278B9}.Debug|Win_x64.ActiveCfg = Debug|Any CPU
@@ -334,6 +352,8 @@ Global
 		{3675B5A0-535B-4CFB-B523-ED60837278B9}.Release|armeabi.Build.0 = Release|armeabi
 		{3675B5A0-535B-4CFB-B523-ED60837278B9}.Release|armeabi-v7a.ActiveCfg = Release|armeabi-v7a
 		{3675B5A0-535B-4CFB-B523-ED60837278B9}.Release|armeabi-v7a.Build.0 = Release|armeabi-v7a
+		{3675B5A0-535B-4CFB-B523-ED60837278B9}.Release|Droid_Release.ActiveCfg = Release|Any CPU
+		{3675B5A0-535B-4CFB-B523-ED60837278B9}.Release|Droid_Release.Build.0 = Release|Any CPU
 		{3675B5A0-535B-4CFB-B523-ED60837278B9}.Release|None.ActiveCfg = Release|None
 		{3675B5A0-535B-4CFB-B523-ED60837278B9}.Release|None.Build.0 = Release|None
 		{3675B5A0-535B-4CFB-B523-ED60837278B9}.Release|Win_x64.ActiveCfg = Release|Any CPU
@@ -356,6 +376,7 @@ Global
 		{26CF7E47-6974-47A1-8060-A519F2447FDE}.Debug|armeabi.Build.0 = Debug|Any CPU
 		{26CF7E47-6974-47A1-8060-A519F2447FDE}.Debug|armeabi-v7a.ActiveCfg = Debug|Any CPU
 		{26CF7E47-6974-47A1-8060-A519F2447FDE}.Debug|armeabi-v7a.Build.0 = Debug|Any CPU
+		{26CF7E47-6974-47A1-8060-A519F2447FDE}.Debug|Droid_Release.ActiveCfg = Debug|Any CPU
 		{26CF7E47-6974-47A1-8060-A519F2447FDE}.Debug|None.ActiveCfg = Debug|Any CPU
 		{26CF7E47-6974-47A1-8060-A519F2447FDE}.Debug|None.Build.0 = Debug|Any CPU
 		{26CF7E47-6974-47A1-8060-A519F2447FDE}.Debug|Win_x64.ActiveCfg = Debug|x64
@@ -378,6 +399,8 @@ Global
 		{26CF7E47-6974-47A1-8060-A519F2447FDE}.Release|armeabi.Build.0 = Release|Any CPU
 		{26CF7E47-6974-47A1-8060-A519F2447FDE}.Release|armeabi-v7a.ActiveCfg = Release|Any CPU
 		{26CF7E47-6974-47A1-8060-A519F2447FDE}.Release|armeabi-v7a.Build.0 = Release|Any CPU
+		{26CF7E47-6974-47A1-8060-A519F2447FDE}.Release|Droid_Release.ActiveCfg = Release|x64
+		{26CF7E47-6974-47A1-8060-A519F2447FDE}.Release|Droid_Release.Build.0 = Release|x64
 		{26CF7E47-6974-47A1-8060-A519F2447FDE}.Release|None.ActiveCfg = Release|Any CPU
 		{26CF7E47-6974-47A1-8060-A519F2447FDE}.Release|None.Build.0 = Release|Any CPU
 		{26CF7E47-6974-47A1-8060-A519F2447FDE}.Release|Win_x64.ActiveCfg = Release|x64
@@ -406,6 +429,9 @@ Global
 		{24BB0C58-B1BB-4427-A9D3-5BD35C3F9D85}.Debug|armeabi-v7a.ActiveCfg = Debug|Any CPU
 		{24BB0C58-B1BB-4427-A9D3-5BD35C3F9D85}.Debug|armeabi-v7a.Build.0 = Debug|Any CPU
 		{24BB0C58-B1BB-4427-A9D3-5BD35C3F9D85}.Debug|armeabi-v7a.Deploy.0 = Debug|Any CPU
+		{24BB0C58-B1BB-4427-A9D3-5BD35C3F9D85}.Debug|Droid_Release.ActiveCfg = Debug|Any CPU
+		{24BB0C58-B1BB-4427-A9D3-5BD35C3F9D85}.Debug|Droid_Release.Build.0 = Debug|Any CPU
+		{24BB0C58-B1BB-4427-A9D3-5BD35C3F9D85}.Debug|Droid_Release.Deploy.0 = Debug|Any CPU
 		{24BB0C58-B1BB-4427-A9D3-5BD35C3F9D85}.Debug|None.ActiveCfg = Debug|Any CPU
 		{24BB0C58-B1BB-4427-A9D3-5BD35C3F9D85}.Debug|None.Build.0 = Debug|Any CPU
 		{24BB0C58-B1BB-4427-A9D3-5BD35C3F9D85}.Debug|None.Deploy.0 = Debug|Any CPU
@@ -439,6 +465,9 @@ Global
 		{24BB0C58-B1BB-4427-A9D3-5BD35C3F9D85}.Release|armeabi-v7a.ActiveCfg = Release|Any CPU
 		{24BB0C58-B1BB-4427-A9D3-5BD35C3F9D85}.Release|armeabi-v7a.Build.0 = Release|Any CPU
 		{24BB0C58-B1BB-4427-A9D3-5BD35C3F9D85}.Release|armeabi-v7a.Deploy.0 = Release|Any CPU
+		{24BB0C58-B1BB-4427-A9D3-5BD35C3F9D85}.Release|Droid_Release.ActiveCfg = Release|Any CPU
+		{24BB0C58-B1BB-4427-A9D3-5BD35C3F9D85}.Release|Droid_Release.Build.0 = Release|Any CPU
+		{24BB0C58-B1BB-4427-A9D3-5BD35C3F9D85}.Release|Droid_Release.Deploy.0 = Release|Any CPU
 		{24BB0C58-B1BB-4427-A9D3-5BD35C3F9D85}.Release|None.ActiveCfg = Release|Any CPU
 		{24BB0C58-B1BB-4427-A9D3-5BD35C3F9D85}.Release|None.Build.0 = Release|Any CPU
 		{24BB0C58-B1BB-4427-A9D3-5BD35C3F9D85}.Release|None.Deploy.0 = Release|Any CPU
@@ -466,6 +495,8 @@ Global
 		{A6E9A29F-E57F-42AA-824C-9581B2783E5F}.Debug|armeabi.Build.0 = Debug|Any CPU
 		{A6E9A29F-E57F-42AA-824C-9581B2783E5F}.Debug|armeabi-v7a.ActiveCfg = Debug|Any CPU
 		{A6E9A29F-E57F-42AA-824C-9581B2783E5F}.Debug|armeabi-v7a.Build.0 = Debug|Any CPU
+		{A6E9A29F-E57F-42AA-824C-9581B2783E5F}.Debug|Droid_Release.ActiveCfg = Debug|Any CPU
+		{A6E9A29F-E57F-42AA-824C-9581B2783E5F}.Debug|Droid_Release.Build.0 = Debug|Any CPU
 		{A6E9A29F-E57F-42AA-824C-9581B2783E5F}.Debug|None.ActiveCfg = Debug|Any CPU
 		{A6E9A29F-E57F-42AA-824C-9581B2783E5F}.Debug|None.Build.0 = Debug|Any CPU
 		{A6E9A29F-E57F-42AA-824C-9581B2783E5F}.Debug|Win_x64.ActiveCfg = Debug|Any CPU
@@ -488,6 +519,8 @@ Global
 		{A6E9A29F-E57F-42AA-824C-9581B2783E5F}.Release|armeabi.Build.0 = Release|Any CPU
 		{A6E9A29F-E57F-42AA-824C-9581B2783E5F}.Release|armeabi-v7a.ActiveCfg = Release|Any CPU
 		{A6E9A29F-E57F-42AA-824C-9581B2783E5F}.Release|armeabi-v7a.Build.0 = Release|Any CPU
+		{A6E9A29F-E57F-42AA-824C-9581B2783E5F}.Release|Droid_Release.ActiveCfg = Release|Any CPU
+		{A6E9A29F-E57F-42AA-824C-9581B2783E5F}.Release|Droid_Release.Build.0 = Release|Any CPU
 		{A6E9A29F-E57F-42AA-824C-9581B2783E5F}.Release|None.ActiveCfg = Release|Any CPU
 		{A6E9A29F-E57F-42AA-824C-9581B2783E5F}.Release|None.Build.0 = Release|Any CPU
 		{A6E9A29F-E57F-42AA-824C-9581B2783E5F}.Release|Win_x64.ActiveCfg = Release|Any CPU
@@ -510,6 +543,8 @@ Global
 		{8D36690C-0079-4A33-915D-68D98B9A7117}.Debug|armeabi.Build.0 = Debug|Any CPU
 		{8D36690C-0079-4A33-915D-68D98B9A7117}.Debug|armeabi-v7a.ActiveCfg = Debug|Any CPU
 		{8D36690C-0079-4A33-915D-68D98B9A7117}.Debug|armeabi-v7a.Build.0 = Debug|Any CPU
+		{8D36690C-0079-4A33-915D-68D98B9A7117}.Debug|Droid_Release.ActiveCfg = Debug|Any CPU
+		{8D36690C-0079-4A33-915D-68D98B9A7117}.Debug|Droid_Release.Build.0 = Debug|Any CPU
 		{8D36690C-0079-4A33-915D-68D98B9A7117}.Debug|None.ActiveCfg = Debug|Any CPU
 		{8D36690C-0079-4A33-915D-68D98B9A7117}.Debug|None.Build.0 = Debug|Any CPU
 		{8D36690C-0079-4A33-915D-68D98B9A7117}.Debug|Win_x64.ActiveCfg = Debug|x64
@@ -532,6 +567,8 @@ Global
 		{8D36690C-0079-4A33-915D-68D98B9A7117}.Release|armeabi.Build.0 = Release|Any CPU
 		{8D36690C-0079-4A33-915D-68D98B9A7117}.Release|armeabi-v7a.ActiveCfg = Release|Any CPU
 		{8D36690C-0079-4A33-915D-68D98B9A7117}.Release|armeabi-v7a.Build.0 = Release|Any CPU
+		{8D36690C-0079-4A33-915D-68D98B9A7117}.Release|Droid_Release.ActiveCfg = Release|Any CPU
+		{8D36690C-0079-4A33-915D-68D98B9A7117}.Release|Droid_Release.Build.0 = Release|Any CPU
 		{8D36690C-0079-4A33-915D-68D98B9A7117}.Release|None.ActiveCfg = Release|Any CPU
 		{8D36690C-0079-4A33-915D-68D98B9A7117}.Release|None.Build.0 = Release|Any CPU
 		{8D36690C-0079-4A33-915D-68D98B9A7117}.Release|Win_x64.ActiveCfg = Release|x64
@@ -554,6 +591,7 @@ Global
 		{F710D1C4-0C47-4F51-AA52-C20BFBE49E19}.Debug|armeabi.Build.0 = Debug|Any CPU
 		{F710D1C4-0C47-4F51-AA52-C20BFBE49E19}.Debug|armeabi-v7a.ActiveCfg = Debug|Any CPU
 		{F710D1C4-0C47-4F51-AA52-C20BFBE49E19}.Debug|armeabi-v7a.Build.0 = Debug|Any CPU
+		{F710D1C4-0C47-4F51-AA52-C20BFBE49E19}.Debug|Droid_Release.ActiveCfg = Debug|Any CPU
 		{F710D1C4-0C47-4F51-AA52-C20BFBE49E19}.Debug|None.ActiveCfg = Debug|Any CPU
 		{F710D1C4-0C47-4F51-AA52-C20BFBE49E19}.Debug|None.Build.0 = Debug|Any CPU
 		{F710D1C4-0C47-4F51-AA52-C20BFBE49E19}.Debug|Win_x64.ActiveCfg = Debug|x64
@@ -576,6 +614,8 @@ Global
 		{F710D1C4-0C47-4F51-AA52-C20BFBE49E19}.Release|armeabi.Build.0 = Release|Any CPU
 		{F710D1C4-0C47-4F51-AA52-C20BFBE49E19}.Release|armeabi-v7a.ActiveCfg = Release|Any CPU
 		{F710D1C4-0C47-4F51-AA52-C20BFBE49E19}.Release|armeabi-v7a.Build.0 = Release|Any CPU
+		{F710D1C4-0C47-4F51-AA52-C20BFBE49E19}.Release|Droid_Release.ActiveCfg = Release|x64
+		{F710D1C4-0C47-4F51-AA52-C20BFBE49E19}.Release|Droid_Release.Build.0 = Release|x64
 		{F710D1C4-0C47-4F51-AA52-C20BFBE49E19}.Release|None.ActiveCfg = Release|Any CPU
 		{F710D1C4-0C47-4F51-AA52-C20BFBE49E19}.Release|None.Build.0 = Release|Any CPU
 		{F710D1C4-0C47-4F51-AA52-C20BFBE49E19}.Release|Win_x64.ActiveCfg = Release|x64
@@ -598,6 +638,7 @@ Global
 		{9A5FC834-A8DF-4410-A21D-CF60B4FCACB7}.Debug|armeabi.Build.0 = Debug|Any CPU
 		{9A5FC834-A8DF-4410-A21D-CF60B4FCACB7}.Debug|armeabi-v7a.ActiveCfg = Debug|Any CPU
 		{9A5FC834-A8DF-4410-A21D-CF60B4FCACB7}.Debug|armeabi-v7a.Build.0 = Debug|Any CPU
+		{9A5FC834-A8DF-4410-A21D-CF60B4FCACB7}.Debug|Droid_Release.ActiveCfg = Debug|Any CPU
 		{9A5FC834-A8DF-4410-A21D-CF60B4FCACB7}.Debug|None.ActiveCfg = Debug|Any CPU
 		{9A5FC834-A8DF-4410-A21D-CF60B4FCACB7}.Debug|None.Build.0 = Debug|Any CPU
 		{9A5FC834-A8DF-4410-A21D-CF60B4FCACB7}.Debug|Win_x64.ActiveCfg = Debug|x64
@@ -620,6 +661,8 @@ Global
 		{9A5FC834-A8DF-4410-A21D-CF60B4FCACB7}.Release|armeabi.Build.0 = Release|Any CPU
 		{9A5FC834-A8DF-4410-A21D-CF60B4FCACB7}.Release|armeabi-v7a.ActiveCfg = Release|Any CPU
 		{9A5FC834-A8DF-4410-A21D-CF60B4FCACB7}.Release|armeabi-v7a.Build.0 = Release|Any CPU
+		{9A5FC834-A8DF-4410-A21D-CF60B4FCACB7}.Release|Droid_Release.ActiveCfg = Release|x64
+		{9A5FC834-A8DF-4410-A21D-CF60B4FCACB7}.Release|Droid_Release.Build.0 = Release|x64
 		{9A5FC834-A8DF-4410-A21D-CF60B4FCACB7}.Release|None.ActiveCfg = Release|Any CPU
 		{9A5FC834-A8DF-4410-A21D-CF60B4FCACB7}.Release|None.Build.0 = Release|Any CPU
 		{9A5FC834-A8DF-4410-A21D-CF60B4FCACB7}.Release|Win_x64.ActiveCfg = Release|x64
@@ -648,6 +691,9 @@ Global
 		{168FCD67-DF92-4905-A8F3-230856F9628E}.Debug|armeabi-v7a.ActiveCfg = Debug|Any CPU
 		{168FCD67-DF92-4905-A8F3-230856F9628E}.Debug|armeabi-v7a.Build.0 = Debug|Any CPU
 		{168FCD67-DF92-4905-A8F3-230856F9628E}.Debug|armeabi-v7a.Deploy.0 = Debug|Any CPU
+		{168FCD67-DF92-4905-A8F3-230856F9628E}.Debug|Droid_Release.ActiveCfg = Debug|Any CPU
+		{168FCD67-DF92-4905-A8F3-230856F9628E}.Debug|Droid_Release.Build.0 = Debug|Any CPU
+		{168FCD67-DF92-4905-A8F3-230856F9628E}.Debug|Droid_Release.Deploy.0 = Debug|Any CPU
 		{168FCD67-DF92-4905-A8F3-230856F9628E}.Debug|None.ActiveCfg = Debug|Any CPU
 		{168FCD67-DF92-4905-A8F3-230856F9628E}.Debug|None.Build.0 = Debug|Any CPU
 		{168FCD67-DF92-4905-A8F3-230856F9628E}.Debug|None.Deploy.0 = Debug|Any CPU
@@ -681,6 +727,9 @@ Global
 		{168FCD67-DF92-4905-A8F3-230856F9628E}.Release|armeabi-v7a.ActiveCfg = Release|Any CPU
 		{168FCD67-DF92-4905-A8F3-230856F9628E}.Release|armeabi-v7a.Build.0 = Release|Any CPU
 		{168FCD67-DF92-4905-A8F3-230856F9628E}.Release|armeabi-v7a.Deploy.0 = Release|Any CPU
+		{168FCD67-DF92-4905-A8F3-230856F9628E}.Release|Droid_Release.ActiveCfg = Release|Any CPU
+		{168FCD67-DF92-4905-A8F3-230856F9628E}.Release|Droid_Release.Build.0 = Release|Any CPU
+		{168FCD67-DF92-4905-A8F3-230856F9628E}.Release|Droid_Release.Deploy.0 = Release|Any CPU
 		{168FCD67-DF92-4905-A8F3-230856F9628E}.Release|None.ActiveCfg = Release|Any CPU
 		{168FCD67-DF92-4905-A8F3-230856F9628E}.Release|None.Build.0 = Release|Any CPU
 		{168FCD67-DF92-4905-A8F3-230856F9628E}.Release|None.Deploy.0 = Release|Any CPU
@@ -708,6 +757,7 @@ Global
 		{069A6736-7711-4805-8660-A267E713BC54}.Debug|armeabi.Build.0 = Debug|Any CPU
 		{069A6736-7711-4805-8660-A267E713BC54}.Debug|armeabi-v7a.ActiveCfg = Debug|Any CPU
 		{069A6736-7711-4805-8660-A267E713BC54}.Debug|armeabi-v7a.Build.0 = Debug|Any CPU
+		{069A6736-7711-4805-8660-A267E713BC54}.Debug|Droid_Release.ActiveCfg = Debug|Any CPU
 		{069A6736-7711-4805-8660-A267E713BC54}.Debug|None.ActiveCfg = Debug|Any CPU
 		{069A6736-7711-4805-8660-A267E713BC54}.Debug|None.Build.0 = Debug|Any CPU
 		{069A6736-7711-4805-8660-A267E713BC54}.Debug|Win_x64.ActiveCfg = Debug|x64
@@ -730,6 +780,8 @@ Global
 		{069A6736-7711-4805-8660-A267E713BC54}.Release|armeabi.Build.0 = Release|Any CPU
 		{069A6736-7711-4805-8660-A267E713BC54}.Release|armeabi-v7a.ActiveCfg = Release|Any CPU
 		{069A6736-7711-4805-8660-A267E713BC54}.Release|armeabi-v7a.Build.0 = Release|Any CPU
+		{069A6736-7711-4805-8660-A267E713BC54}.Release|Droid_Release.ActiveCfg = Release|x64
+		{069A6736-7711-4805-8660-A267E713BC54}.Release|Droid_Release.Build.0 = Release|x64
 		{069A6736-7711-4805-8660-A267E713BC54}.Release|None.ActiveCfg = Release|Any CPU
 		{069A6736-7711-4805-8660-A267E713BC54}.Release|None.Build.0 = Release|Any CPU
 		{069A6736-7711-4805-8660-A267E713BC54}.Release|Win_x64.ActiveCfg = Release|x64
@@ -750,6 +802,8 @@ Global
 		{69A8153D-4BA4-41DE-BB1E-C9F473FFD185}.Debug|arm64-v8a.ActiveCfg = Debug|x86
 		{69A8153D-4BA4-41DE-BB1E-C9F473FFD185}.Debug|armeabi.ActiveCfg = Debug|x86
 		{69A8153D-4BA4-41DE-BB1E-C9F473FFD185}.Debug|armeabi-v7a.ActiveCfg = Debug|x86
+		{69A8153D-4BA4-41DE-BB1E-C9F473FFD185}.Debug|Droid_Release.ActiveCfg = Debug|x86
+		{69A8153D-4BA4-41DE-BB1E-C9F473FFD185}.Debug|Droid_Release.Deploy.0 = Debug|x86
 		{69A8153D-4BA4-41DE-BB1E-C9F473FFD185}.Debug|None.ActiveCfg = Debug|x86
 		{69A8153D-4BA4-41DE-BB1E-C9F473FFD185}.Debug|Win_x64.ActiveCfg = Debug|x64
 		{69A8153D-4BA4-41DE-BB1E-C9F473FFD185}.Debug|Win_x64.Build.0 = Debug|x64
@@ -771,6 +825,9 @@ Global
 		{69A8153D-4BA4-41DE-BB1E-C9F473FFD185}.Release|arm64-v8a.ActiveCfg = Release|x86
 		{69A8153D-4BA4-41DE-BB1E-C9F473FFD185}.Release|armeabi.ActiveCfg = Release|x86
 		{69A8153D-4BA4-41DE-BB1E-C9F473FFD185}.Release|armeabi-v7a.ActiveCfg = Release|x86
+		{69A8153D-4BA4-41DE-BB1E-C9F473FFD185}.Release|Droid_Release.ActiveCfg = Release|x64
+		{69A8153D-4BA4-41DE-BB1E-C9F473FFD185}.Release|Droid_Release.Build.0 = Release|x64
+		{69A8153D-4BA4-41DE-BB1E-C9F473FFD185}.Release|Droid_Release.Deploy.0 = Release|x64
 		{69A8153D-4BA4-41DE-BB1E-C9F473FFD185}.Release|None.ActiveCfg = Release|x86
 		{69A8153D-4BA4-41DE-BB1E-C9F473FFD185}.Release|Win_x64.ActiveCfg = Release|x64
 		{69A8153D-4BA4-41DE-BB1E-C9F473FFD185}.Release|Win_x64.Build.0 = Release|x64
@@ -794,6 +851,7 @@ Global
 		{53852C57-3554-4A03-96DD-A2C993CE045C}.Debug|armeabi.Build.0 = Debug|Any CPU
 		{53852C57-3554-4A03-96DD-A2C993CE045C}.Debug|armeabi-v7a.ActiveCfg = Debug|Any CPU
 		{53852C57-3554-4A03-96DD-A2C993CE045C}.Debug|armeabi-v7a.Build.0 = Debug|Any CPU
+		{53852C57-3554-4A03-96DD-A2C993CE045C}.Debug|Droid_Release.ActiveCfg = Debug|Any CPU
 		{53852C57-3554-4A03-96DD-A2C993CE045C}.Debug|None.ActiveCfg = Debug|Any CPU
 		{53852C57-3554-4A03-96DD-A2C993CE045C}.Debug|None.Build.0 = Debug|Any CPU
 		{53852C57-3554-4A03-96DD-A2C993CE045C}.Debug|Win_x64.ActiveCfg = Debug|x64
@@ -816,6 +874,8 @@ Global
 		{53852C57-3554-4A03-96DD-A2C993CE045C}.Release|armeabi.Build.0 = Release|Any CPU
 		{53852C57-3554-4A03-96DD-A2C993CE045C}.Release|armeabi-v7a.ActiveCfg = Release|Any CPU
 		{53852C57-3554-4A03-96DD-A2C993CE045C}.Release|armeabi-v7a.Build.0 = Release|Any CPU
+		{53852C57-3554-4A03-96DD-A2C993CE045C}.Release|Droid_Release.ActiveCfg = Release|x64
+		{53852C57-3554-4A03-96DD-A2C993CE045C}.Release|Droid_Release.Build.0 = Release|x64
 		{53852C57-3554-4A03-96DD-A2C993CE045C}.Release|None.ActiveCfg = Release|Any CPU
 		{53852C57-3554-4A03-96DD-A2C993CE045C}.Release|None.Build.0 = Release|Any CPU
 		{53852C57-3554-4A03-96DD-A2C993CE045C}.Release|Win_x64.ActiveCfg = Release|x64
@@ -838,6 +898,7 @@ Global
 		{67E785F3-7A54-4E8D-9630-52261058E9DF}.Debug|armeabi.Build.0 = Debug|Any CPU
 		{67E785F3-7A54-4E8D-9630-52261058E9DF}.Debug|armeabi-v7a.ActiveCfg = Debug|Any CPU
 		{67E785F3-7A54-4E8D-9630-52261058E9DF}.Debug|armeabi-v7a.Build.0 = Debug|Any CPU
+		{67E785F3-7A54-4E8D-9630-52261058E9DF}.Debug|Droid_Release.ActiveCfg = Debug|Any CPU
 		{67E785F3-7A54-4E8D-9630-52261058E9DF}.Debug|None.ActiveCfg = Debug|Any CPU
 		{67E785F3-7A54-4E8D-9630-52261058E9DF}.Debug|None.Build.0 = Debug|Any CPU
 		{67E785F3-7A54-4E8D-9630-52261058E9DF}.Debug|Win_x64.ActiveCfg = Debug|x64
@@ -860,6 +921,8 @@ Global
 		{67E785F3-7A54-4E8D-9630-52261058E9DF}.Release|armeabi.Build.0 = Release|Any CPU
 		{67E785F3-7A54-4E8D-9630-52261058E9DF}.Release|armeabi-v7a.ActiveCfg = Release|Any CPU
 		{67E785F3-7A54-4E8D-9630-52261058E9DF}.Release|armeabi-v7a.Build.0 = Release|Any CPU
+		{67E785F3-7A54-4E8D-9630-52261058E9DF}.Release|Droid_Release.ActiveCfg = Release|x64
+		{67E785F3-7A54-4E8D-9630-52261058E9DF}.Release|Droid_Release.Build.0 = Release|x64
 		{67E785F3-7A54-4E8D-9630-52261058E9DF}.Release|None.ActiveCfg = Release|Any CPU
 		{67E785F3-7A54-4E8D-9630-52261058E9DF}.Release|None.Build.0 = Release|Any CPU
 		{67E785F3-7A54-4E8D-9630-52261058E9DF}.Release|Win_x64.ActiveCfg = Release|x64
@@ -882,6 +945,7 @@ Global
 		{E8DD5D4F-2C47-41DF-8F86-945831CB3EE7}.Debug|armeabi.Build.0 = Debug|Any CPU
 		{E8DD5D4F-2C47-41DF-8F86-945831CB3EE7}.Debug|armeabi-v7a.ActiveCfg = Debug|Any CPU
 		{E8DD5D4F-2C47-41DF-8F86-945831CB3EE7}.Debug|armeabi-v7a.Build.0 = Debug|Any CPU
+		{E8DD5D4F-2C47-41DF-8F86-945831CB3EE7}.Debug|Droid_Release.ActiveCfg = Debug|Any CPU
 		{E8DD5D4F-2C47-41DF-8F86-945831CB3EE7}.Debug|None.ActiveCfg = Debug|Any CPU
 		{E8DD5D4F-2C47-41DF-8F86-945831CB3EE7}.Debug|None.Build.0 = Debug|Any CPU
 		{E8DD5D4F-2C47-41DF-8F86-945831CB3EE7}.Debug|Win_x64.ActiveCfg = Debug|Any CPU
@@ -904,6 +968,8 @@ Global
 		{E8DD5D4F-2C47-41DF-8F86-945831CB3EE7}.Release|armeabi.Build.0 = Release|Any CPU
 		{E8DD5D4F-2C47-41DF-8F86-945831CB3EE7}.Release|armeabi-v7a.ActiveCfg = Release|Any CPU
 		{E8DD5D4F-2C47-41DF-8F86-945831CB3EE7}.Release|armeabi-v7a.Build.0 = Release|Any CPU
+		{E8DD5D4F-2C47-41DF-8F86-945831CB3EE7}.Release|Droid_Release.ActiveCfg = Release|Any CPU
+		{E8DD5D4F-2C47-41DF-8F86-945831CB3EE7}.Release|Droid_Release.Build.0 = Release|Any CPU
 		{E8DD5D4F-2C47-41DF-8F86-945831CB3EE7}.Release|None.ActiveCfg = Release|Any CPU
 		{E8DD5D4F-2C47-41DF-8F86-945831CB3EE7}.Release|None.Build.0 = Release|Any CPU
 		{E8DD5D4F-2C47-41DF-8F86-945831CB3EE7}.Release|Win_x64.ActiveCfg = Release|Any CPU
@@ -926,6 +992,7 @@ Global
 		{B3C1D403-0FDB-4B62-A663-13F74570BFE7}.Debug|armeabi.Build.0 = Debug|Any CPU
 		{B3C1D403-0FDB-4B62-A663-13F74570BFE7}.Debug|armeabi-v7a.ActiveCfg = Debug|Any CPU
 		{B3C1D403-0FDB-4B62-A663-13F74570BFE7}.Debug|armeabi-v7a.Build.0 = Debug|Any CPU
+		{B3C1D403-0FDB-4B62-A663-13F74570BFE7}.Debug|Droid_Release.ActiveCfg = Debug|Any CPU
 		{B3C1D403-0FDB-4B62-A663-13F74570BFE7}.Debug|None.ActiveCfg = Debug|Any CPU
 		{B3C1D403-0FDB-4B62-A663-13F74570BFE7}.Debug|None.Build.0 = Debug|Any CPU
 		{B3C1D403-0FDB-4B62-A663-13F74570BFE7}.Debug|Win_x64.ActiveCfg = Debug|x64
@@ -948,6 +1015,8 @@ Global
 		{B3C1D403-0FDB-4B62-A663-13F74570BFE7}.Release|armeabi.Build.0 = Release|Any CPU
 		{B3C1D403-0FDB-4B62-A663-13F74570BFE7}.Release|armeabi-v7a.ActiveCfg = Release|Any CPU
 		{B3C1D403-0FDB-4B62-A663-13F74570BFE7}.Release|armeabi-v7a.Build.0 = Release|Any CPU
+		{B3C1D403-0FDB-4B62-A663-13F74570BFE7}.Release|Droid_Release.ActiveCfg = Release|x64
+		{B3C1D403-0FDB-4B62-A663-13F74570BFE7}.Release|Droid_Release.Build.0 = Release|x64
 		{B3C1D403-0FDB-4B62-A663-13F74570BFE7}.Release|None.ActiveCfg = Release|Any CPU
 		{B3C1D403-0FDB-4B62-A663-13F74570BFE7}.Release|None.Build.0 = Release|Any CPU
 		{B3C1D403-0FDB-4B62-A663-13F74570BFE7}.Release|Win_x64.ActiveCfg = Release|x64
@@ -970,6 +1039,8 @@ Global
 		{B3A225B9-1A79-4330-9B4E-A3C4E07BBEAB}.Debug|armeabi.Build.0 = Debug|Any CPU
 		{B3A225B9-1A79-4330-9B4E-A3C4E07BBEAB}.Debug|armeabi-v7a.ActiveCfg = Debug|Any CPU
 		{B3A225B9-1A79-4330-9B4E-A3C4E07BBEAB}.Debug|armeabi-v7a.Build.0 = Debug|Any CPU
+		{B3A225B9-1A79-4330-9B4E-A3C4E07BBEAB}.Debug|Droid_Release.ActiveCfg = Debug|Any CPU
+		{B3A225B9-1A79-4330-9B4E-A3C4E07BBEAB}.Debug|Droid_Release.Build.0 = Debug|Any CPU
 		{B3A225B9-1A79-4330-9B4E-A3C4E07BBEAB}.Debug|None.ActiveCfg = Debug|Any CPU
 		{B3A225B9-1A79-4330-9B4E-A3C4E07BBEAB}.Debug|None.Build.0 = Debug|Any CPU
 		{B3A225B9-1A79-4330-9B4E-A3C4E07BBEAB}.Debug|Win_x64.ActiveCfg = Debug|Any CPU
@@ -992,6 +1063,8 @@ Global
 		{B3A225B9-1A79-4330-9B4E-A3C4E07BBEAB}.Release|armeabi.Build.0 = Release|Any CPU
 		{B3A225B9-1A79-4330-9B4E-A3C4E07BBEAB}.Release|armeabi-v7a.ActiveCfg = Release|Any CPU
 		{B3A225B9-1A79-4330-9B4E-A3C4E07BBEAB}.Release|armeabi-v7a.Build.0 = Release|Any CPU
+		{B3A225B9-1A79-4330-9B4E-A3C4E07BBEAB}.Release|Droid_Release.ActiveCfg = Release|Any CPU
+		{B3A225B9-1A79-4330-9B4E-A3C4E07BBEAB}.Release|Droid_Release.Build.0 = Release|Any CPU
 		{B3A225B9-1A79-4330-9B4E-A3C4E07BBEAB}.Release|None.ActiveCfg = Release|Any CPU
 		{B3A225B9-1A79-4330-9B4E-A3C4E07BBEAB}.Release|None.Build.0 = Release|Any CPU
 		{B3A225B9-1A79-4330-9B4E-A3C4E07BBEAB}.Release|Win_x64.ActiveCfg = Release|Any CPU
@@ -1008,6 +1081,7 @@ Global
 		{BDC1D107-DE17-4705-8E7B-CDDE8BFB2BF8}.Debug|arm64-v8a.ActiveCfg = Debug|Win32
 		{BDC1D107-DE17-4705-8E7B-CDDE8BFB2BF8}.Debug|armeabi.ActiveCfg = Debug|Win32
 		{BDC1D107-DE17-4705-8E7B-CDDE8BFB2BF8}.Debug|armeabi-v7a.ActiveCfg = Debug|Win32
+		{BDC1D107-DE17-4705-8E7B-CDDE8BFB2BF8}.Debug|Droid_Release.ActiveCfg = Debug|Win32
 		{BDC1D107-DE17-4705-8E7B-CDDE8BFB2BF8}.Debug|None.ActiveCfg = Debug|Win32
 		{BDC1D107-DE17-4705-8E7B-CDDE8BFB2BF8}.Debug|Win_x64.ActiveCfg = Debug|x64
 		{BDC1D107-DE17-4705-8E7B-CDDE8BFB2BF8}.Debug|Win_x64.Build.0 = Debug|x64
@@ -1022,6 +1096,7 @@ Global
 		{BDC1D107-DE17-4705-8E7B-CDDE8BFB2BF8}.Release|arm64-v8a.ActiveCfg = Release|Win32
 		{BDC1D107-DE17-4705-8E7B-CDDE8BFB2BF8}.Release|armeabi.ActiveCfg = Release|Win32
 		{BDC1D107-DE17-4705-8E7B-CDDE8BFB2BF8}.Release|armeabi-v7a.ActiveCfg = Release|Win32
+		{BDC1D107-DE17-4705-8E7B-CDDE8BFB2BF8}.Release|Droid_Release.ActiveCfg = Release|Win32
 		{BDC1D107-DE17-4705-8E7B-CDDE8BFB2BF8}.Release|None.ActiveCfg = Release|Win32
 		{BDC1D107-DE17-4705-8E7B-CDDE8BFB2BF8}.Release|Win_x64.ActiveCfg = Release|x64
 		{BDC1D107-DE17-4705-8E7B-CDDE8BFB2BF8}.Release|Win_x64.Build.0 = Release|x64
@@ -1036,6 +1111,7 @@ Global
 		{2098B6C7-05B3-431B-BB84-92B22519982B}.Debug|arm64-v8a.ActiveCfg = Debug|Win32
 		{2098B6C7-05B3-431B-BB84-92B22519982B}.Debug|armeabi.ActiveCfg = Debug|Win32
 		{2098B6C7-05B3-431B-BB84-92B22519982B}.Debug|armeabi-v7a.ActiveCfg = Debug|Win32
+		{2098B6C7-05B3-431B-BB84-92B22519982B}.Debug|Droid_Release.ActiveCfg = Debug|Win32
 		{2098B6C7-05B3-431B-BB84-92B22519982B}.Debug|None.ActiveCfg = Debug|Win32
 		{2098B6C7-05B3-431B-BB84-92B22519982B}.Debug|Win_x64.ActiveCfg = Debug|x64
 		{2098B6C7-05B3-431B-BB84-92B22519982B}.Debug|Win_x64.Build.0 = Debug|x64
@@ -1050,6 +1126,7 @@ Global
 		{2098B6C7-05B3-431B-BB84-92B22519982B}.Release|arm64-v8a.ActiveCfg = Release|Win32
 		{2098B6C7-05B3-431B-BB84-92B22519982B}.Release|armeabi.ActiveCfg = Release|Win32
 		{2098B6C7-05B3-431B-BB84-92B22519982B}.Release|armeabi-v7a.ActiveCfg = Release|Win32
+		{2098B6C7-05B3-431B-BB84-92B22519982B}.Release|Droid_Release.ActiveCfg = Release|Win32
 		{2098B6C7-05B3-431B-BB84-92B22519982B}.Release|None.ActiveCfg = Release|Win32
 		{2098B6C7-05B3-431B-BB84-92B22519982B}.Release|Win_x64.ActiveCfg = Release|x64
 		{2098B6C7-05B3-431B-BB84-92B22519982B}.Release|Win_x64.Build.0 = Release|x64
@@ -1070,6 +1147,7 @@ Global
 		{7A473BF1-AE5D-47FF-878E-E49112561CA3}.Debug|armeabi.Build.0 = Debug|Any CPU
 		{7A473BF1-AE5D-47FF-878E-E49112561CA3}.Debug|armeabi-v7a.ActiveCfg = Debug|Any CPU
 		{7A473BF1-AE5D-47FF-878E-E49112561CA3}.Debug|armeabi-v7a.Build.0 = Debug|Any CPU
+		{7A473BF1-AE5D-47FF-878E-E49112561CA3}.Debug|Droid_Release.ActiveCfg = Debug|Any CPU
 		{7A473BF1-AE5D-47FF-878E-E49112561CA3}.Debug|None.ActiveCfg = Debug|Any CPU
 		{7A473BF1-AE5D-47FF-878E-E49112561CA3}.Debug|None.Build.0 = Debug|Any CPU
 		{7A473BF1-AE5D-47FF-878E-E49112561CA3}.Debug|Win_x64.ActiveCfg = Debug|x64
@@ -1092,6 +1170,8 @@ Global
 		{7A473BF1-AE5D-47FF-878E-E49112561CA3}.Release|armeabi.Build.0 = Release|Any CPU
 		{7A473BF1-AE5D-47FF-878E-E49112561CA3}.Release|armeabi-v7a.ActiveCfg = Release|Any CPU
 		{7A473BF1-AE5D-47FF-878E-E49112561CA3}.Release|armeabi-v7a.Build.0 = Release|Any CPU
+		{7A473BF1-AE5D-47FF-878E-E49112561CA3}.Release|Droid_Release.ActiveCfg = Release|Any CPU
+		{7A473BF1-AE5D-47FF-878E-E49112561CA3}.Release|Droid_Release.Build.0 = Release|Any CPU
 		{7A473BF1-AE5D-47FF-878E-E49112561CA3}.Release|None.ActiveCfg = Release|Any CPU
 		{7A473BF1-AE5D-47FF-878E-E49112561CA3}.Release|None.Build.0 = Release|Any CPU
 		{7A473BF1-AE5D-47FF-878E-E49112561CA3}.Release|Win_x64.ActiveCfg = Release|x64
@@ -1108,6 +1188,7 @@ Global
 		{B47A5F12-2567-44E9-AE49-35763EC82149}.Debug|arm64-v8a.ActiveCfg = Debug|Win32
 		{B47A5F12-2567-44E9-AE49-35763EC82149}.Debug|armeabi.ActiveCfg = Debug|Win32
 		{B47A5F12-2567-44E9-AE49-35763EC82149}.Debug|armeabi-v7a.ActiveCfg = Debug|Win32
+		{B47A5F12-2567-44E9-AE49-35763EC82149}.Debug|Droid_Release.ActiveCfg = Debug|Win32
 		{B47A5F12-2567-44E9-AE49-35763EC82149}.Debug|None.ActiveCfg = Debug|Win32
 		{B47A5F12-2567-44E9-AE49-35763EC82149}.Debug|Win_x64.ActiveCfg = Debug|x64
 		{B47A5F12-2567-44E9-AE49-35763EC82149}.Debug|Win_x64.Build.0 = Debug|x64
@@ -1122,6 +1203,7 @@ Global
 		{B47A5F12-2567-44E9-AE49-35763EC82149}.Release|arm64-v8a.ActiveCfg = Release|Win32
 		{B47A5F12-2567-44E9-AE49-35763EC82149}.Release|armeabi.ActiveCfg = Release|Win32
 		{B47A5F12-2567-44E9-AE49-35763EC82149}.Release|armeabi-v7a.ActiveCfg = Release|Win32
+		{B47A5F12-2567-44E9-AE49-35763EC82149}.Release|Droid_Release.ActiveCfg = Release|Win32
 		{B47A5F12-2567-44E9-AE49-35763EC82149}.Release|None.ActiveCfg = Release|Win32
 		{B47A5F12-2567-44E9-AE49-35763EC82149}.Release|Win_x64.ActiveCfg = Release|x64
 		{B47A5F12-2567-44E9-AE49-35763EC82149}.Release|Win_x64.Build.0 = Release|x64
@@ -1142,6 +1224,7 @@ Global
 		{F846B396-F405-4A1C-B8F5-439CA047441C}.Debug|armeabi.Build.0 = Debug|Any CPU
 		{F846B396-F405-4A1C-B8F5-439CA047441C}.Debug|armeabi-v7a.ActiveCfg = Debug|Any CPU
 		{F846B396-F405-4A1C-B8F5-439CA047441C}.Debug|armeabi-v7a.Build.0 = Debug|Any CPU
+		{F846B396-F405-4A1C-B8F5-439CA047441C}.Debug|Droid_Release.ActiveCfg = Debug|Any CPU
 		{F846B396-F405-4A1C-B8F5-439CA047441C}.Debug|None.ActiveCfg = Debug|Any CPU
 		{F846B396-F405-4A1C-B8F5-439CA047441C}.Debug|None.Build.0 = Debug|Any CPU
 		{F846B396-F405-4A1C-B8F5-439CA047441C}.Debug|Win_x64.ActiveCfg = Debug|x64
@@ -1164,6 +1247,8 @@ Global
 		{F846B396-F405-4A1C-B8F5-439CA047441C}.Release|armeabi.Build.0 = Release|Any CPU
 		{F846B396-F405-4A1C-B8F5-439CA047441C}.Release|armeabi-v7a.ActiveCfg = Release|Any CPU
 		{F846B396-F405-4A1C-B8F5-439CA047441C}.Release|armeabi-v7a.Build.0 = Release|Any CPU
+		{F846B396-F405-4A1C-B8F5-439CA047441C}.Release|Droid_Release.ActiveCfg = Release|Any CPU
+		{F846B396-F405-4A1C-B8F5-439CA047441C}.Release|Droid_Release.Build.0 = Release|Any CPU
 		{F846B396-F405-4A1C-B8F5-439CA047441C}.Release|None.ActiveCfg = Release|Any CPU
 		{F846B396-F405-4A1C-B8F5-439CA047441C}.Release|None.Build.0 = Release|Any CPU
 		{F846B396-F405-4A1C-B8F5-439CA047441C}.Release|Win_x64.ActiveCfg = Release|x64
@@ -1187,6 +1272,8 @@ Global
 		{8E7279F8-F801-4672-B42F-1ED2C68B16A4}.Debug|armeabi.Build.0 = Release|x64
 		{8E7279F8-F801-4672-B42F-1ED2C68B16A4}.Debug|armeabi-v7a.ActiveCfg = Release|x64
 		{8E7279F8-F801-4672-B42F-1ED2C68B16A4}.Debug|armeabi-v7a.Build.0 = Release|x64
+		{8E7279F8-F801-4672-B42F-1ED2C68B16A4}.Debug|Droid_Release.ActiveCfg = Release|x64
+		{8E7279F8-F801-4672-B42F-1ED2C68B16A4}.Debug|Droid_Release.Build.0 = Release|x64
 		{8E7279F8-F801-4672-B42F-1ED2C68B16A4}.Debug|None.ActiveCfg = Release|x64
 		{8E7279F8-F801-4672-B42F-1ED2C68B16A4}.Debug|None.Build.0 = Release|x64
 		{8E7279F8-F801-4672-B42F-1ED2C68B16A4}.Debug|Win_x64.ActiveCfg = Release|x64
@@ -1203,6 +1290,7 @@ Global
 		{8E7279F8-F801-4672-B42F-1ED2C68B16A4}.Release|arm64-v8a.ActiveCfg = Release|Win32
 		{8E7279F8-F801-4672-B42F-1ED2C68B16A4}.Release|armeabi.ActiveCfg = Release|Win32
 		{8E7279F8-F801-4672-B42F-1ED2C68B16A4}.Release|armeabi-v7a.ActiveCfg = Release|Win32
+		{8E7279F8-F801-4672-B42F-1ED2C68B16A4}.Release|Droid_Release.ActiveCfg = Release|Win32
 		{8E7279F8-F801-4672-B42F-1ED2C68B16A4}.Release|None.ActiveCfg = Release|Win32
 		{8E7279F8-F801-4672-B42F-1ED2C68B16A4}.Release|Win_x64.ActiveCfg = Release|x64
 		{8E7279F8-F801-4672-B42F-1ED2C68B16A4}.Release|Win_x64.Build.0 = Release|x64
@@ -1223,6 +1311,7 @@ Global
 		{D7856971-D877-4CB1-A08C-C2A763EBFAD1}.Debug|armeabi.Build.0 = Debug|Any CPU
 		{D7856971-D877-4CB1-A08C-C2A763EBFAD1}.Debug|armeabi-v7a.ActiveCfg = Debug|Any CPU
 		{D7856971-D877-4CB1-A08C-C2A763EBFAD1}.Debug|armeabi-v7a.Build.0 = Debug|Any CPU
+		{D7856971-D877-4CB1-A08C-C2A763EBFAD1}.Debug|Droid_Release.ActiveCfg = Debug|Any CPU
 		{D7856971-D877-4CB1-A08C-C2A763EBFAD1}.Debug|None.ActiveCfg = Debug|Any CPU
 		{D7856971-D877-4CB1-A08C-C2A763EBFAD1}.Debug|None.Build.0 = Debug|Any CPU
 		{D7856971-D877-4CB1-A08C-C2A763EBFAD1}.Debug|Win_x64.ActiveCfg = Debug|x64
@@ -1245,6 +1334,8 @@ Global
 		{D7856971-D877-4CB1-A08C-C2A763EBFAD1}.Release|armeabi.Build.0 = Release|Any CPU
 		{D7856971-D877-4CB1-A08C-C2A763EBFAD1}.Release|armeabi-v7a.ActiveCfg = Release|Any CPU
 		{D7856971-D877-4CB1-A08C-C2A763EBFAD1}.Release|armeabi-v7a.Build.0 = Release|Any CPU
+		{D7856971-D877-4CB1-A08C-C2A763EBFAD1}.Release|Droid_Release.ActiveCfg = Release|Any CPU
+		{D7856971-D877-4CB1-A08C-C2A763EBFAD1}.Release|Droid_Release.Build.0 = Release|Any CPU
 		{D7856971-D877-4CB1-A08C-C2A763EBFAD1}.Release|None.ActiveCfg = Release|Any CPU
 		{D7856971-D877-4CB1-A08C-C2A763EBFAD1}.Release|None.Build.0 = Release|Any CPU
 		{D7856971-D877-4CB1-A08C-C2A763EBFAD1}.Release|Win_x64.ActiveCfg = Release|x64
@@ -1267,6 +1358,8 @@ Global
 		{658C140F-2E73-4E22-80A7-F05DF0A83318}.Debug|armeabi.Build.0 = Debug|Any CPU
 		{658C140F-2E73-4E22-80A7-F05DF0A83318}.Debug|armeabi-v7a.ActiveCfg = Debug|Any CPU
 		{658C140F-2E73-4E22-80A7-F05DF0A83318}.Debug|armeabi-v7a.Build.0 = Debug|Any CPU
+		{658C140F-2E73-4E22-80A7-F05DF0A83318}.Debug|Droid_Release.ActiveCfg = Debug|Any CPU
+		{658C140F-2E73-4E22-80A7-F05DF0A83318}.Debug|Droid_Release.Build.0 = Debug|Any CPU
 		{658C140F-2E73-4E22-80A7-F05DF0A83318}.Debug|None.ActiveCfg = Debug|Any CPU
 		{658C140F-2E73-4E22-80A7-F05DF0A83318}.Debug|None.Build.0 = Debug|Any CPU
 		{658C140F-2E73-4E22-80A7-F05DF0A83318}.Debug|Win_x64.ActiveCfg = Debug|Any CPU
@@ -1289,6 +1382,8 @@ Global
 		{658C140F-2E73-4E22-80A7-F05DF0A83318}.Release|armeabi.Build.0 = Release|Any CPU
 		{658C140F-2E73-4E22-80A7-F05DF0A83318}.Release|armeabi-v7a.ActiveCfg = Release|Any CPU
 		{658C140F-2E73-4E22-80A7-F05DF0A83318}.Release|armeabi-v7a.Build.0 = Release|Any CPU
+		{658C140F-2E73-4E22-80A7-F05DF0A83318}.Release|Droid_Release.ActiveCfg = Release|Any CPU
+		{658C140F-2E73-4E22-80A7-F05DF0A83318}.Release|Droid_Release.Build.0 = Release|Any CPU
 		{658C140F-2E73-4E22-80A7-F05DF0A83318}.Release|None.ActiveCfg = Release|Any CPU
 		{658C140F-2E73-4E22-80A7-F05DF0A83318}.Release|None.Build.0 = Release|Any CPU
 		{658C140F-2E73-4E22-80A7-F05DF0A83318}.Release|Win_x64.ActiveCfg = Release|Any CPU
@@ -1311,6 +1406,7 @@ Global
 		{B5323A43-58C7-4006-BEEC-E315CABA3673}.Debug|armeabi.Build.0 = Debug|Any CPU
 		{B5323A43-58C7-4006-BEEC-E315CABA3673}.Debug|armeabi-v7a.ActiveCfg = Debug|Any CPU
 		{B5323A43-58C7-4006-BEEC-E315CABA3673}.Debug|armeabi-v7a.Build.0 = Debug|Any CPU
+		{B5323A43-58C7-4006-BEEC-E315CABA3673}.Debug|Droid_Release.ActiveCfg = Debug|Any CPU
 		{B5323A43-58C7-4006-BEEC-E315CABA3673}.Debug|None.ActiveCfg = Debug|Any CPU
 		{B5323A43-58C7-4006-BEEC-E315CABA3673}.Debug|None.Build.0 = Debug|Any CPU
 		{B5323A43-58C7-4006-BEEC-E315CABA3673}.Debug|Win_x64.ActiveCfg = Debug|x64
@@ -1333,6 +1429,8 @@ Global
 		{B5323A43-58C7-4006-BEEC-E315CABA3673}.Release|armeabi.Build.0 = Release|Any CPU
 		{B5323A43-58C7-4006-BEEC-E315CABA3673}.Release|armeabi-v7a.ActiveCfg = Release|Any CPU
 		{B5323A43-58C7-4006-BEEC-E315CABA3673}.Release|armeabi-v7a.Build.0 = Release|Any CPU
+		{B5323A43-58C7-4006-BEEC-E315CABA3673}.Release|Droid_Release.ActiveCfg = Release|Any CPU
+		{B5323A43-58C7-4006-BEEC-E315CABA3673}.Release|Droid_Release.Build.0 = Release|Any CPU
 		{B5323A43-58C7-4006-BEEC-E315CABA3673}.Release|None.ActiveCfg = Release|Any CPU
 		{B5323A43-58C7-4006-BEEC-E315CABA3673}.Release|None.Build.0 = Release|Any CPU
 		{B5323A43-58C7-4006-BEEC-E315CABA3673}.Release|Win_x64.ActiveCfg = Release|x64
@@ -1355,6 +1453,7 @@ Global
 		{20567EDE-7C20-4734-B489-C6D303843105}.Debug|armeabi.Build.0 = Debug|Any CPU
 		{20567EDE-7C20-4734-B489-C6D303843105}.Debug|armeabi-v7a.ActiveCfg = Debug|Any CPU
 		{20567EDE-7C20-4734-B489-C6D303843105}.Debug|armeabi-v7a.Build.0 = Debug|Any CPU
+		{20567EDE-7C20-4734-B489-C6D303843105}.Debug|Droid_Release.ActiveCfg = Debug|Any CPU
 		{20567EDE-7C20-4734-B489-C6D303843105}.Debug|None.ActiveCfg = Debug|Any CPU
 		{20567EDE-7C20-4734-B489-C6D303843105}.Debug|None.Build.0 = Debug|Any CPU
 		{20567EDE-7C20-4734-B489-C6D303843105}.Debug|Win_x64.ActiveCfg = Debug|x64
@@ -1377,6 +1476,8 @@ Global
 		{20567EDE-7C20-4734-B489-C6D303843105}.Release|armeabi.Build.0 = Release|Any CPU
 		{20567EDE-7C20-4734-B489-C6D303843105}.Release|armeabi-v7a.ActiveCfg = Release|Any CPU
 		{20567EDE-7C20-4734-B489-C6D303843105}.Release|armeabi-v7a.Build.0 = Release|Any CPU
+		{20567EDE-7C20-4734-B489-C6D303843105}.Release|Droid_Release.ActiveCfg = Release|Any CPU
+		{20567EDE-7C20-4734-B489-C6D303843105}.Release|Droid_Release.Build.0 = Release|Any CPU
 		{20567EDE-7C20-4734-B489-C6D303843105}.Release|None.ActiveCfg = Release|Any CPU
 		{20567EDE-7C20-4734-B489-C6D303843105}.Release|None.Build.0 = Release|Any CPU
 		{20567EDE-7C20-4734-B489-C6D303843105}.Release|Win_x64.ActiveCfg = Release|x64
@@ -1399,6 +1500,7 @@ Global
 		{003C36A8-B61E-476B-B773-96FF132F99FD}.Debug|armeabi.Build.0 = Debug|Any CPU
 		{003C36A8-B61E-476B-B773-96FF132F99FD}.Debug|armeabi-v7a.ActiveCfg = Debug|Any CPU
 		{003C36A8-B61E-476B-B773-96FF132F99FD}.Debug|armeabi-v7a.Build.0 = Debug|Any CPU
+		{003C36A8-B61E-476B-B773-96FF132F99FD}.Debug|Droid_Release.ActiveCfg = Debug|Any CPU
 		{003C36A8-B61E-476B-B773-96FF132F99FD}.Debug|None.ActiveCfg = Debug|Any CPU
 		{003C36A8-B61E-476B-B773-96FF132F99FD}.Debug|None.Build.0 = Debug|Any CPU
 		{003C36A8-B61E-476B-B773-96FF132F99FD}.Debug|Win_x64.ActiveCfg = Debug|x64
@@ -1421,6 +1523,8 @@ Global
 		{003C36A8-B61E-476B-B773-96FF132F99FD}.Release|armeabi.Build.0 = Release|Any CPU
 		{003C36A8-B61E-476B-B773-96FF132F99FD}.Release|armeabi-v7a.ActiveCfg = Release|Any CPU
 		{003C36A8-B61E-476B-B773-96FF132F99FD}.Release|armeabi-v7a.Build.0 = Release|Any CPU
+		{003C36A8-B61E-476B-B773-96FF132F99FD}.Release|Droid_Release.ActiveCfg = Release|Any CPU
+		{003C36A8-B61E-476B-B773-96FF132F99FD}.Release|Droid_Release.Build.0 = Release|Any CPU
 		{003C36A8-B61E-476B-B773-96FF132F99FD}.Release|None.ActiveCfg = Release|Any CPU
 		{003C36A8-B61E-476B-B773-96FF132F99FD}.Release|None.Build.0 = Release|Any CPU
 		{003C36A8-B61E-476B-B773-96FF132F99FD}.Release|Win_x64.ActiveCfg = Release|Any CPU
@@ -1439,6 +1543,7 @@ Global
 		{470BD53A-6967-40AF-B88E-9AC2A56828B4}.Debug|arm64-v8a.ActiveCfg = Debug|x86
 		{470BD53A-6967-40AF-B88E-9AC2A56828B4}.Debug|armeabi.ActiveCfg = Debug|x86
 		{470BD53A-6967-40AF-B88E-9AC2A56828B4}.Debug|armeabi-v7a.ActiveCfg = Debug|x86
+		{470BD53A-6967-40AF-B88E-9AC2A56828B4}.Debug|Droid_Release.ActiveCfg = Debug|x86
 		{470BD53A-6967-40AF-B88E-9AC2A56828B4}.Debug|None.ActiveCfg = Debug|x86
 		{470BD53A-6967-40AF-B88E-9AC2A56828B4}.Debug|Win_x64.ActiveCfg = Debug|x86
 		{470BD53A-6967-40AF-B88E-9AC2A56828B4}.Debug|x64.ActiveCfg = Debug|x64
@@ -1454,6 +1559,7 @@ Global
 		{470BD53A-6967-40AF-B88E-9AC2A56828B4}.Release|arm64-v8a.ActiveCfg = Release|x86
 		{470BD53A-6967-40AF-B88E-9AC2A56828B4}.Release|armeabi.ActiveCfg = Release|x86
 		{470BD53A-6967-40AF-B88E-9AC2A56828B4}.Release|armeabi-v7a.ActiveCfg = Release|x86
+		{470BD53A-6967-40AF-B88E-9AC2A56828B4}.Release|Droid_Release.ActiveCfg = Release|x86
 		{470BD53A-6967-40AF-B88E-9AC2A56828B4}.Release|None.ActiveCfg = Release|x86
 		{470BD53A-6967-40AF-B88E-9AC2A56828B4}.Release|Win_x64.ActiveCfg = Release|x86
 		{470BD53A-6967-40AF-B88E-9AC2A56828B4}.Release|x64.ActiveCfg = Release|x64
@@ -1473,6 +1579,8 @@ Global
 		{95A85F6A-F038-4CC1-8AC9-058A30921A0E}.Debug|armeabi.Build.0 = Debug|Any CPU
 		{95A85F6A-F038-4CC1-8AC9-058A30921A0E}.Debug|armeabi-v7a.ActiveCfg = Debug|Any CPU
 		{95A85F6A-F038-4CC1-8AC9-058A30921A0E}.Debug|armeabi-v7a.Build.0 = Debug|Any CPU
+		{95A85F6A-F038-4CC1-8AC9-058A30921A0E}.Debug|Droid_Release.ActiveCfg = Debug|Any CPU
+		{95A85F6A-F038-4CC1-8AC9-058A30921A0E}.Debug|Droid_Release.Build.0 = Debug|Any CPU
 		{95A85F6A-F038-4CC1-8AC9-058A30921A0E}.Debug|None.ActiveCfg = Debug|Any CPU
 		{95A85F6A-F038-4CC1-8AC9-058A30921A0E}.Debug|None.Build.0 = Debug|Any CPU
 		{95A85F6A-F038-4CC1-8AC9-058A30921A0E}.Debug|Win_x64.ActiveCfg = Debug|Any CPU
@@ -1495,6 +1603,8 @@ Global
 		{95A85F6A-F038-4CC1-8AC9-058A30921A0E}.Release|armeabi.Build.0 = Release|Any CPU
 		{95A85F6A-F038-4CC1-8AC9-058A30921A0E}.Release|armeabi-v7a.ActiveCfg = Release|Any CPU
 		{95A85F6A-F038-4CC1-8AC9-058A30921A0E}.Release|armeabi-v7a.Build.0 = Release|Any CPU
+		{95A85F6A-F038-4CC1-8AC9-058A30921A0E}.Release|Droid_Release.ActiveCfg = Release|Any CPU
+		{95A85F6A-F038-4CC1-8AC9-058A30921A0E}.Release|Droid_Release.Build.0 = Release|Any CPU
 		{95A85F6A-F038-4CC1-8AC9-058A30921A0E}.Release|None.ActiveCfg = Release|Any CPU
 		{95A85F6A-F038-4CC1-8AC9-058A30921A0E}.Release|None.Build.0 = Release|Any CPU
 		{95A85F6A-F038-4CC1-8AC9-058A30921A0E}.Release|Win_x64.ActiveCfg = Release|Any CPU
@@ -1523,6 +1633,9 @@ Global
 		{F52A3BD0-37FD-4F4B-B7EB-D91B512983B0}.Debug|armeabi-v7a.ActiveCfg = Debug|Any CPU
 		{F52A3BD0-37FD-4F4B-B7EB-D91B512983B0}.Debug|armeabi-v7a.Build.0 = Debug|Any CPU
 		{F52A3BD0-37FD-4F4B-B7EB-D91B512983B0}.Debug|armeabi-v7a.Deploy.0 = Debug|Any CPU
+		{F52A3BD0-37FD-4F4B-B7EB-D91B512983B0}.Debug|Droid_Release.ActiveCfg = Debug|Any CPU
+		{F52A3BD0-37FD-4F4B-B7EB-D91B512983B0}.Debug|Droid_Release.Build.0 = Debug|Any CPU
+		{F52A3BD0-37FD-4F4B-B7EB-D91B512983B0}.Debug|Droid_Release.Deploy.0 = Debug|Any CPU
 		{F52A3BD0-37FD-4F4B-B7EB-D91B512983B0}.Debug|None.ActiveCfg = Debug|Any CPU
 		{F52A3BD0-37FD-4F4B-B7EB-D91B512983B0}.Debug|None.Build.0 = Debug|Any CPU
 		{F52A3BD0-37FD-4F4B-B7EB-D91B512983B0}.Debug|None.Deploy.0 = Debug|Any CPU
@@ -1556,6 +1669,9 @@ Global
 		{F52A3BD0-37FD-4F4B-B7EB-D91B512983B0}.Release|armeabi-v7a.ActiveCfg = Release|Any CPU
 		{F52A3BD0-37FD-4F4B-B7EB-D91B512983B0}.Release|armeabi-v7a.Build.0 = Release|Any CPU
 		{F52A3BD0-37FD-4F4B-B7EB-D91B512983B0}.Release|armeabi-v7a.Deploy.0 = Release|Any CPU
+		{F52A3BD0-37FD-4F4B-B7EB-D91B512983B0}.Release|Droid_Release.ActiveCfg = Release|Any CPU
+		{F52A3BD0-37FD-4F4B-B7EB-D91B512983B0}.Release|Droid_Release.Build.0 = Release|Any CPU
+		{F52A3BD0-37FD-4F4B-B7EB-D91B512983B0}.Release|Droid_Release.Deploy.0 = Release|Any CPU
 		{F52A3BD0-37FD-4F4B-B7EB-D91B512983B0}.Release|None.ActiveCfg = Release|Any CPU
 		{F52A3BD0-37FD-4F4B-B7EB-D91B512983B0}.Release|None.Build.0 = Release|Any CPU
 		{F52A3BD0-37FD-4F4B-B7EB-D91B512983B0}.Release|None.Deploy.0 = Release|Any CPU
@@ -1583,6 +1699,8 @@ Global
 		{707296F9-6AEF-4548-A66D-4CF3E5795B1A}.Debug|armeabi.Build.0 = Release|x86
 		{707296F9-6AEF-4548-A66D-4CF3E5795B1A}.Debug|armeabi-v7a.ActiveCfg = Release|x86
 		{707296F9-6AEF-4548-A66D-4CF3E5795B1A}.Debug|armeabi-v7a.Build.0 = Release|x86
+		{707296F9-6AEF-4548-A66D-4CF3E5795B1A}.Debug|Droid_Release.ActiveCfg = Release|x86
+		{707296F9-6AEF-4548-A66D-4CF3E5795B1A}.Debug|Droid_Release.Build.0 = Release|x86
 		{707296F9-6AEF-4548-A66D-4CF3E5795B1A}.Debug|None.ActiveCfg = Release|x86
 		{707296F9-6AEF-4548-A66D-4CF3E5795B1A}.Debug|None.Build.0 = Release|x86
 		{707296F9-6AEF-4548-A66D-4CF3E5795B1A}.Debug|Win_x64.ActiveCfg = Release|x86
@@ -1601,6 +1719,7 @@ Global
 		{707296F9-6AEF-4548-A66D-4CF3E5795B1A}.Release|arm64-v8a.ActiveCfg = Release|x86
 		{707296F9-6AEF-4548-A66D-4CF3E5795B1A}.Release|armeabi.ActiveCfg = Release|x86
 		{707296F9-6AEF-4548-A66D-4CF3E5795B1A}.Release|armeabi-v7a.ActiveCfg = Release|x86
+		{707296F9-6AEF-4548-A66D-4CF3E5795B1A}.Release|Droid_Release.ActiveCfg = Release|x86
 		{707296F9-6AEF-4548-A66D-4CF3E5795B1A}.Release|None.ActiveCfg = Release|x86
 		{707296F9-6AEF-4548-A66D-4CF3E5795B1A}.Release|Win_x64.ActiveCfg = Release|x86
 		{707296F9-6AEF-4548-A66D-4CF3E5795B1A}.Release|x64.ActiveCfg = Release|x64
@@ -1620,6 +1739,8 @@ Global
 		{F94F9E8A-E239-45EA-9C61-C7855C8B6F25}.Debug|armeabi.Build.0 = Debug|Any CPU
 		{F94F9E8A-E239-45EA-9C61-C7855C8B6F25}.Debug|armeabi-v7a.ActiveCfg = Debug|Any CPU
 		{F94F9E8A-E239-45EA-9C61-C7855C8B6F25}.Debug|armeabi-v7a.Build.0 = Debug|Any CPU
+		{F94F9E8A-E239-45EA-9C61-C7855C8B6F25}.Debug|Droid_Release.ActiveCfg = Debug|Any CPU
+		{F94F9E8A-E239-45EA-9C61-C7855C8B6F25}.Debug|Droid_Release.Build.0 = Debug|Any CPU
 		{F94F9E8A-E239-45EA-9C61-C7855C8B6F25}.Debug|None.ActiveCfg = Debug|Any CPU
 		{F94F9E8A-E239-45EA-9C61-C7855C8B6F25}.Debug|None.Build.0 = Debug|Any CPU
 		{F94F9E8A-E239-45EA-9C61-C7855C8B6F25}.Debug|Win_x64.ActiveCfg = Debug|Any CPU
@@ -1642,6 +1763,8 @@ Global
 		{F94F9E8A-E239-45EA-9C61-C7855C8B6F25}.Release|armeabi.Build.0 = Release|Any CPU
 		{F94F9E8A-E239-45EA-9C61-C7855C8B6F25}.Release|armeabi-v7a.ActiveCfg = Release|Any CPU
 		{F94F9E8A-E239-45EA-9C61-C7855C8B6F25}.Release|armeabi-v7a.Build.0 = Release|Any CPU
+		{F94F9E8A-E239-45EA-9C61-C7855C8B6F25}.Release|Droid_Release.ActiveCfg = Release|Any CPU
+		{F94F9E8A-E239-45EA-9C61-C7855C8B6F25}.Release|Droid_Release.Build.0 = Release|Any CPU
 		{F94F9E8A-E239-45EA-9C61-C7855C8B6F25}.Release|None.ActiveCfg = Release|Any CPU
 		{F94F9E8A-E239-45EA-9C61-C7855C8B6F25}.Release|None.Build.0 = Release|Any CPU
 		{F94F9E8A-E239-45EA-9C61-C7855C8B6F25}.Release|Win_x64.ActiveCfg = Release|Any CPU
@@ -1670,6 +1793,9 @@ Global
 		{470F48FC-8520-4017-B5AC-658B7791DAA3}.Debug|armeabi-v7a.ActiveCfg = Debug|Any CPU
 		{470F48FC-8520-4017-B5AC-658B7791DAA3}.Debug|armeabi-v7a.Build.0 = Debug|Any CPU
 		{470F48FC-8520-4017-B5AC-658B7791DAA3}.Debug|armeabi-v7a.Deploy.0 = Debug|Any CPU
+		{470F48FC-8520-4017-B5AC-658B7791DAA3}.Debug|Droid_Release.ActiveCfg = Debug|Any CPU
+		{470F48FC-8520-4017-B5AC-658B7791DAA3}.Debug|Droid_Release.Build.0 = Debug|Any CPU
+		{470F48FC-8520-4017-B5AC-658B7791DAA3}.Debug|Droid_Release.Deploy.0 = Debug|Any CPU
 		{470F48FC-8520-4017-B5AC-658B7791DAA3}.Debug|None.ActiveCfg = Debug|Any CPU
 		{470F48FC-8520-4017-B5AC-658B7791DAA3}.Debug|None.Build.0 = Debug|Any CPU
 		{470F48FC-8520-4017-B5AC-658B7791DAA3}.Debug|None.Deploy.0 = Debug|Any CPU
@@ -1703,6 +1829,9 @@ Global
 		{470F48FC-8520-4017-B5AC-658B7791DAA3}.Release|armeabi-v7a.ActiveCfg = Release|Any CPU
 		{470F48FC-8520-4017-B5AC-658B7791DAA3}.Release|armeabi-v7a.Build.0 = Release|Any CPU
 		{470F48FC-8520-4017-B5AC-658B7791DAA3}.Release|armeabi-v7a.Deploy.0 = Release|Any CPU
+		{470F48FC-8520-4017-B5AC-658B7791DAA3}.Release|Droid_Release.ActiveCfg = Release|Any CPU
+		{470F48FC-8520-4017-B5AC-658B7791DAA3}.Release|Droid_Release.Build.0 = Release|Any CPU
+		{470F48FC-8520-4017-B5AC-658B7791DAA3}.Release|Droid_Release.Deploy.0 = Release|Any CPU
 		{470F48FC-8520-4017-B5AC-658B7791DAA3}.Release|None.ActiveCfg = Release|Any CPU
 		{470F48FC-8520-4017-B5AC-658B7791DAA3}.Release|None.Build.0 = Release|Any CPU
 		{470F48FC-8520-4017-B5AC-658B7791DAA3}.Release|None.Deploy.0 = Release|Any CPU

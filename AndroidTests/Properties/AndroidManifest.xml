@@ -4,5 +4,5 @@
 	<uses-permission android:name="android.permission.CAMERA" />
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-	<application android:label="VisionAndroidTests"></application>
+	<application android:label="Vision Android Tests"></application>
 </manifest>

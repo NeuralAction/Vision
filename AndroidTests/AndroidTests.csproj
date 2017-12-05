@@ -43,6 +43,8 @@
     <AotAssemblies>false</AotAssemblies>
     <EnableLLVM>false</EnableLLVM>
     <BundleAssemblies>false</BundleAssemblies>
+    <AndroidEnableSGenConcurrent>true</AndroidEnableSGenConcurrent>
+    <AndroidSupportedAbis />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>PdbOnly</DebugType>
@@ -55,6 +57,9 @@
     <AndroidUseSharedRuntime>False</AndroidUseSharedRuntime>
     <AndroidLinkMode>SdkOnly</AndroidLinkMode>
     <EmbedAssembliesIntoApk>True</EmbedAssembliesIntoApk>
+    <AotAssemblies>false</AotAssemblies>
+    <EnableLLVM>false</EnableLLVM>
+    <BundleAssemblies>false</BundleAssemblies>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="FormsViewGroup, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -128,6 +133,14 @@
     <None Include="Properties\AndroidManifest.xml" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SharpFace\OpenCvSharp\src\OpenCvSharp.Android\OpenCvSharp.Android.csproj">
+      <Project>{f94f9e8a-e239-45ea-9c61-c7855c8b6f25}</Project>
+      <Name>OpenCvSharp.Android</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SharpFace\OpenCvSharp\src\OpenCvSharp\OpenCvSharp.csproj">
+      <Project>{658c140f-2e73-4e22-80a7-f05df0a83318}</Project>
+      <Name>OpenCvSharp</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Vision.Android\Vision.Android.csproj">
       <Project>{10cf2b9a-8340-4ad7-a998-8f05e7f038be}</Project>
       <Name>Vision.Android</Name>

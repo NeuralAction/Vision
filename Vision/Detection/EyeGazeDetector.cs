@@ -33,10 +33,10 @@ namespace Vision.Detection
         public const int ImageSizeFace = 60;
         public const int FaceSizeFace = 60;
         public const double AngleMul = 1;
-        public const double DefaultSensitiveX = 0.8;
-        public const double DefaultSensitiveY = 1.12;
-        public const double DefaultOffsetX = -0.1;
-        public const double DefaultOffsetY = 0.06;
+        public const double DefaultSensitiveX = 1;
+        public const double DefaultSensitiveY = 1;
+        public const double DefaultOffsetX = 0;
+        public const double DefaultOffsetY = 0;
 
         public readonly static ManifestResource ModelResourceExtend = new ManifestResource("Vision.Detection", "frozen_gazeEx.pb");
         public readonly static ManifestResource ModelResourceSingle = new ManifestResource("Vision.Detection", "frozen_gaze.pb");
@@ -190,11 +190,13 @@ namespace Vision.Detection
 
         private Point DetectFace(Mat face, Mat left, Mat right)
         {
+            Profiler.Start("Gaze.Face.Cvt.Resize");
             var imgSize = new Size(ImageSizeFace, ImageSizeFace);
             var imgSizeFace = new Size(FaceSizeFace, FaceSizeFace);
             left.Resize(imgSize);
             right.Resize(imgSize);
             face.Resize(imgSizeFace);
+            Profiler.End("Gaze.Face.Cvt.Resize");
 
             var bufferSize = ImageSizeFace * ImageSizeFace * 3;
             var bufferFace = FaceSizeFace * FaceSizeFace * 3;
@@ -205,16 +207,21 @@ namespace Vision.Detection
             if (imgBufferFace == null || imgBufferFace.Length != bufferFace)
                 imgBufferFace = new float[bufferFace];
 
+            Profiler.Start("Gaze.Face.Cvt");
             var imgTensorLeft = Tools.MatBgr2Tensor(left, NormalizeMode.CenterZero, -1, -1, new long[] { 1, ImageSizeFace, ImageSizeFace, 3 }, imgBufferLeft);
             var imgTensorRight = Tools.MatBgr2Tensor(right, NormalizeMode.CenterZero, -1, -1, new long[] { 1, ImageSizeFace, ImageSizeFace, 3 }, imgBufferRight);
             var imgTensorFace = Tools.MatBgr2Tensor(face, NormalizeMode.CenterZero, -1, -1, new long[] { 1, FaceSizeFace, FaceSizeFace, 3 }, imgBufferFace);
+            Profiler.End("Gaze.Face.Cvt");
 
+            Profiler.Start("Gaze.Face.Sess");
             Tensor[] fetch = sessFace.Run(new[] { "output" },
                 new Dictionary<string, Tensor>() { { "input_image", imgTensorLeft }, { "input_image_r", imgTensorRight }, { "input_image_f", imgTensorFace }, { "phase_train", new Tensor(false) }, { "keep_prob", new Tensor(0.0f) } });
+            Profiler.End("Gaze.Face.Sess");
 
             var result = fetch[0];
             float[,] output = (float[,])result.GetValue();
 
+            Profiler.Start("Gaze.Face.Dispose");
             try
             {
                 foreach (Tensor t in fetch)
@@ -232,6 +239,7 @@ namespace Vision.Detection
                 Logger.Error(this, ex);
                 throw;
             }
+            Profiler.End("Gaze.Face.Dispose");
 
             return new Point(output[0, 0], output[0, 1]);
         }
