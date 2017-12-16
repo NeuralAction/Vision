@@ -261,7 +261,7 @@ namespace Vision.Tests
                     FaceDetectionTask = Task.Factory.StartNew(() =>
                     {
                         FaceDetectProc(cloned);
-                    });
+                    }, TaskCreationOptions.LongRunning);
                     Profiler.End("DetectionFaceTaskStart");
                 }
 
@@ -401,7 +401,7 @@ namespace Vision.Tests
             {
                 Profiler.End("DetectionGazeTaskStart.Gap");
                 GazeDetectProc(mat, rect);
-            });
+            }, TaskCreationOptions.LongRunning);
             Profiler.End("DetectionGazeTaskStart");
 
             Profiler.End("DetectionFace");

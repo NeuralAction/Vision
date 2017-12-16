@@ -27,21 +27,21 @@ namespace Vision.Tests
         {
             this.index = index;
             cap = Capture.New(index);
+            cap.FrameReady += Cap_FrameReady;
+
+            Load();
         }
 
         public InceptionTests(string filepath)
         {
             this.filepath = filepath;
             cap = Capture.New(filepath);
+            cap.FrameReady += Cap_FrameReady;
+
+            Load();
         }
 
-        public void Run()
-        {
-            Start();
-            Join();
-        }
-
-        public void Start()
+        public void Load()
         {
             Logger.Log("Download model");
             FileNode f = Storage.Root.GetFile("inception5h.zip");
@@ -100,9 +100,22 @@ namespace Vision.Tests
             }
 
             sess = new Session(graph);
+        }
 
-            cap.FrameReady += Cap_FrameReady;
+        public void Run()
+        {
+            Start();
+            Join();
+        }
+
+        public void Start()
+        {
             cap.Start();
+        }
+
+        public void Stop()
+        {
+            cap.Stop();
         }
 
         public void Join()
@@ -120,23 +133,38 @@ namespace Vision.Tests
                 return;
             }
 
-            Update(e.Mat);
-
-            if(inferences != null)
+            var pt1 = LayoutHelper.ResizePoint(new Point(0, 0), new Size(10000, 10000), e.Mat.Size().ToSize(), Stretch.Uniform);
+            var pt2 = LayoutHelper.ResizePoint(new Point(10000 - 1, 10000 - 1), new Size(10000, 10000), e.Mat.Size().ToSize(), Stretch.Uniform);
+            var rect = new Rect(pt1, pt2);
+            using (Mat roi = new Mat(e.Mat, rect.ToCvRect()))
             {
-                for(int i=0; i<3; i++)
+                Update(roi);
+
+                e.Mat.DrawRectangle(rect, Scalar.BgrMagenta);
+
+                var roiDrawRect = new Rect(e.Mat.Width - 150 - 50, e.Mat.Height - 150 - 50, 150, 150);
+                roi.Resize(roiDrawRect.Size);
+                Core.Cv.DrawMatAlpha(e.Mat, roi, roiDrawRect.Point);
+                e.Mat.DrawRectangle(roiDrawRect, Scalar.BgrWhite);
+
+                if (inferences != null)
                 {
-                    InferenceResult r = inferences[i];
-                    e.Mat.DrawText(0, 50 + 40 * i, $"Top {i + 1}: {resultTag[r.Id]} ({(r.Result*100).ToString("0.00")}%)", Scalar.BgrGreen);
+                    for (int i = 0; i < 3; i++)
+                    {
+                        InferenceResult r = inferences[i];
+                        e.Mat.DrawText(30, 50 + 40 * i, $"Top {i + 1}: {resultTag[r.Id]} ({(r.Result * 100).ToString("0.00")}%)", Scalar.BgrGreen);
+                    }
                 }
-            }
-            else
-            {
-                e.Mat.DrawText(0, 50, $"Result: Wait for inference...", Scalar.BgrGreen);
-            }
-            e.Mat.DrawText(0, e.Mat.Height - 50, $"Inference FPS: {Profiler.Get("InferenceFPS")} ({Profiler.Get("InferenceALL").ToString("0")}ms)", Scalar.BgrGreen);
+                else
+                {
+                    e.Mat.DrawText(30, 50, $"Result: Wait for inference...", Scalar.BgrGreen);
+                }
+                var fps = Profiler.Get("InferenceFPS");
+                var time = Profiler.Get("InferenceRun");
+                e.Mat.DrawText(30, e.Mat.Height - 50, $"Inference FPS: {fps} ({time.ToString("0.0")}ms / RealFPS: {(1000 / time).ToString("0.0")})", Scalar.BgrGreen);
 
-            Core.Cv.ImgShow("result", e.Mat);
+                Core.Cv.ImgShow("result", e.Mat);
+            }
         }
 
         Task inferenceTask;
@@ -145,11 +173,10 @@ namespace Vision.Tests
             if(inferenceTask==null || inferenceTask.IsCompleted)
             {
                 Mat cloned = mat.Clone();
-                inferenceTask = new Task(() =>
+                inferenceTask = Task.Factory.StartNew(() =>
                 {
                     Inference(cloned);
-                });
-                inferenceTask.Start();
+                }, TaskCreationOptions.LongRunning);
             }
         }
 
@@ -176,8 +203,6 @@ namespace Vision.Tests
             Profiler.Start("InferenceRun");
             Tensor[] fetches = sess.Run(new[] { "output" }, new Dictionary<string, Tensor>() { { "input", normalized } });
             Profiler.End("InferenceRun");
-            normalized.Dispose();
-            img.Dispose();
 
             Tensor result = fetches[0];
             float[] list = ((float[][])result.GetValue(true))[0];
@@ -192,6 +217,12 @@ namespace Vision.Tests
 
             Profiler.End("InferenceALL");
             Profiler.Count("InferenceFPS");
+            foreach (var item in fetches)
+            {
+                item.Dispose();
+            }
+            normalized.Dispose();
+            img.Dispose();
             mat.Dispose();
         }
 

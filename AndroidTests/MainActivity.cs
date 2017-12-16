@@ -150,9 +150,20 @@ namespace AndroidTests
             {
                 detection.Stop();
             }
+
+            if(inception != null)
+            {
+                inception.Stop();
+            }
         }
 
         private void Start()
+        {
+            //StartDetection();
+            StartInception();
+        }
+
+        private void StartDetection()
         {
             if (detection == null)
             {
@@ -164,11 +175,16 @@ namespace AndroidTests
                 detection.GazeDetector.Calibrator.Interval = 1200;
                 detection.DetectGaze = true;
             }
-
             detection.Start();
+        }
 
-            //inception = new InceptionTests(index);
-            //inception.Start();
+        private void StartInception()
+        {
+            if (inception == null)
+            {
+                inception = new InceptionTests(index);
+            }
+            inception.Start();
         }
     }
 }

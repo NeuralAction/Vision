@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -12,11 +13,10 @@ namespace Vision
         public static bool IsDebug = true;
         public static bool ReportOn = true;
         public static Stopwatch Stopwatch;
-        public static event EventHandler<Dictionary<string, ProfilerData>> Reported;
+        public static event EventHandler<ConcurrentDictionary<string, ProfilerData>> Reported;
         public static double ReportWait = 1000;
-
-        static object DataLocker = new object();
-        static Dictionary<string, ProfilerData> Data = new Dictionary<string, ProfilerData>();
+        
+        static ConcurrentDictionary<string, ProfilerData> Data = new ConcurrentDictionary<string, ProfilerData>();
         static double lastMs = 0;
 
         static Profiler()
@@ -32,13 +32,9 @@ namespace Vision
 
             if (showlog)
                 Logger.Log("Logger", $"\"{name}\" Flag is started");
-
-            lock (DataLocker)
-            {
-                SignKey(name);
-                Data[name].Start(GetCurrent());
-                Report();
-            }
+            
+            GetOrAdd(name).Start(GetCurrent());
+            Report();
         }
 
         public static void End(string name, bool showlog = false)
@@ -49,60 +45,44 @@ namespace Vision
             if (showlog)
                 Logger.Log("Logger", $"\"{name}\" Flag is ended");
 
-            lock (DataLocker)
-            {
-                SignKey(name);
-                Data[name].End(GetCurrent());
-                Report();
-            }
+            GetOrAdd(name).End(GetCurrent());
+            Report();
         }
 
         public static void Capture(string name, double value)
         {
             if (!IsDebug)
                 return;
-            
-            lock (DataLocker)
-            {
-                SignKey(name);
-                Data[name].Capture(value);
-                Report();
-            }
+           
+            GetOrAdd(name).Capture(value);
+            Report();
         }
 
         public static void Count(string name)
         {
             if (!IsDebug)
                 return;
-
-            lock(DataLocker)
-            {
-                SignKey(name);
-                Data[name].Count();
-                Report();
-            }
+            
+            GetOrAdd(name).Count();
+            Report();
         }
 
         public static double Get(string name)
         {
-            lock (DataLocker)
-            {
-                SignKey(name);
-                return Data[name].Average;
-            }
+            if (!IsDebug)
+                return 0;
+            
+            return GetOrAdd(name).Average;
+        }
+
+        private static ProfilerData GetOrAdd(string name)
+        {
+            return Data.GetOrAdd(name, new ProfilerData(name));
         }
 
         private static double GetCurrent()
         {
             return Stopwatch.Elapsed.Ticks / TimeSpan.TicksPerMillisecond;
-        }
-
-        private static void SignKey(string key)
-        {
-            if (!Data.ContainsKey(key))
-            {
-                Data.Add(key, new ProfilerData(key));
-            }
         }
 
         static StringBuilder sb = new StringBuilder();

@@ -12,6 +12,7 @@ namespace Vision
     {
         public delegate void WriteMethodDelegate(string text);
 
+        public static event EventHandler Writed;
         public static WriteMethodDelegate WriteMethod;
         public static Stopwatch Stopwatch;
         public static string TimeStamp
@@ -73,6 +74,11 @@ namespace Vision
         public static void Throw(object sender, Exception ex)
         {
             Throw(sender, ex.ToString());
+        }
+
+        public static void Throw(object sender, string message, Exception ex)
+        {
+            Throw(sender, $"{message}\nInnerException====>\n{ex}");
         }
 
         public static string Print(Vector<double> vec)

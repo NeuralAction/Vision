@@ -14,6 +14,7 @@ namespace Vision.Tensorflow
         public TFSession NativeSession { get => sess; set => sess = value; }
 
         public Graph Graph { get; set; }
+        TFSession.Runner runner;
 
         public Session() : this(new Graph())
         {
@@ -26,6 +27,7 @@ namespace Vision.Tensorflow
             try
             {
                 sess = new TFSession(Graph.graph);
+                runner = sess.GetRunner();
             }
             catch (Exception ex)
             {
@@ -36,34 +38,43 @@ namespace Vision.Tensorflow
         
         public Tensor Run(Output output)
         {
-            var runner = sess.GetRunner();
-            runner = runner.Fetch(output.NativeOutput);
+            runner.Fetch(output.NativeOutput);
             TFTensor tensor = runner.Run();
             return new Tensor(tensor);
         }
 
         public Tensor[] Run(string[] Fetches, Dictionary<string, Tensor> Input)
         {
-            var runner = sess.GetRunner();
-
-            foreach(string key in Input.Keys)
+            try
             {
-                runner = runner.AddInput(key, Input[key].NativeTensor);
-            }
+                foreach (string key in Input.Keys)
+                {
+                    runner.AddInput(key, Input[key].NativeTensor);
+                }
 
-            foreach(string s in Fetches)
+                foreach (string s in Fetches)
+                {
+                    runner.Fetch(Fetches);
+                }
+
+                TFTensor[] ret = runner.Run();
+                Tensor[] retConv = new Tensor[ret.Length];
+                for (int i = 0; i < ret.Length; i++)
+                {
+                    retConv[i] = new Tensor(ret[i]);
+                }
+
+                return retConv;
+            }
+            catch (Exception ex)
             {
-                runner = runner.Fetch(Fetches);
+                Logger.Throw("Error occur while run TFSession", ex);
             }
-
-            TFTensor[] ret = runner.Run();
-            Tensor[] retConv = new Tensor[ret.Length];
-            for(int i =0; i<ret.Length; i++)
+            finally
             {
-                retConv[i] = new Tensor(ret[i]);
+                runner = NativeSession.GetRunner();
             }
-
-            return retConv;
+            return null;
         }
 
         public void Dispose()
