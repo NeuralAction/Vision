@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Vision.Cv;
+using Vision.Detection;
 
 namespace Vision
 {
@@ -25,13 +26,19 @@ namespace Vision
             Logger.Log("Core", $"TensorFlow Version: {TensorFlow.TFCore.Version}");
         }
 
+        protected abstract void InternalSleep(int duration);
         public static void Sleep(int duration)
         {
             Current.InternalSleep(duration);
         }
 
+        protected abstract ScreenProperties InternalGetDefaultScreen();
+        public static ScreenProperties GetDefaultScreen()
+        {
+            return Current.InternalGetDefaultScreen();
+        }
+
         public abstract void Initialize();
-        protected abstract void InternalSleep(int duration);
 
         protected void InitLogger(Logger.WriteMethodDelegate WriteMethod)
         {

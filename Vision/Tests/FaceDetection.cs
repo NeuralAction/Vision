@@ -163,12 +163,7 @@ namespace Vision.Tests
 
             UpdateGraph(1500,5000);
 
-            ScreenProperties = new ScreenProperties()
-            {
-                Origin = new Point3D(-205, 0, 0),
-                PixelSize = new Size(1920, 1080),
-                Size = new Size(410, 285)
-            };
+            ScreenProperties = Core.GetDefaultScreen();
             OpenFaceDetector = new OpenFaceDetector()
             {
                 UseSmooth = true
@@ -261,7 +256,7 @@ namespace Vision.Tests
                     FaceDetectionTask = Task.Factory.StartNew(() =>
                     {
                         FaceDetectProc(cloned);
-                    }, TaskCreationOptions.LongRunning);
+                    });
                     Profiler.End("DetectionFaceTaskStart");
                 }
 
@@ -401,7 +396,7 @@ namespace Vision.Tests
             {
                 Profiler.End("DetectionGazeTaskStart.Gap");
                 GazeDetectProc(mat, rect);
-            }, TaskCreationOptions.LongRunning);
+            });
             Profiler.End("DetectionGazeTaskStart");
 
             Profiler.End("DetectionFace");
@@ -674,16 +669,16 @@ namespace Vision.Tests
                 yoffset %= 1;
 
                 //draw texts
-                double detectionTime;
-                var detectFps = Profiler.Get("DetectionALL");
-                if (double.IsInfinity(detectFps) || detectFps == 0)
+                var detectionTime = Profiler.Get("DetectionALL");
+                if (double.IsInfinity(detectionTime) || detectionTime == 0)
                     detectionTime = 10000000000;
-                else
-                    detectionTime = detectFps;
                 string demo = $"DetectFPS: {Profiler.Get("FaceFPS")} ({detectionTime.ToString("0.00")}ms/{(1000 / detectionTime).ToString("0.00")}fps)\n" +
                     $"Frame: {frameOk}/{frameMax} ({((double)frameOk / frameMax * 100).ToString("0.00")}%)\n" +
                     $"LndSmt: {SmoothLandmarks} GzSmt: {GazeSmooth} GzMode: {GazeDetector.DetectMode}\n" +
                     $"GzMod: Sx:{GazeDetector.SensitiveX} Sy:{GazeDetector.SensitiveY} Ox:{GazeDetector.OffsetX} Oy:{GazeDetector.OffsetY}";
+                var sessTime = Profiler.Get("Gaze.Face.Sess");
+                if (!(double.IsInfinity(sessTime) || sessTime == 0))
+                    demo += $"\nGazeFaceSess: ({sessTime.ToString("0.00")}ms/{(1000/sessTime).ToString("0.00")}fps)";
                 mat.DrawText(50, 50, demo, Scalar.BgrGreen);
                 mat.DrawText(50, 400 + 250 * Math.Pow(Math.Sin(2 * Math.PI * yoffset), 3), "HELLO WORLD");
                 mat.DrawText(50, mat.Height - 50, $"DrawFPS: {Profiler.Get("DrawFPS")}", Scalar.BgrGreen);

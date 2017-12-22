@@ -84,6 +84,50 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Tensorflow\Proto\AllocationDescription.cs" />
+    <Compile Include="Tensorflow\Proto\ApiDef.cs" />
+    <Compile Include="Tensorflow\Proto\AttrValue.cs" />
+    <Compile Include="Tensorflow\Proto\Cluster.cs" />
+    <Compile Include="Tensorflow\Proto\Config.cs" />
+    <Compile Include="Tensorflow\Proto\ControlFlow.cs" />
+    <Compile Include="Tensorflow\Proto\CostGraph.cs" />
+    <Compile Include="Tensorflow\Proto\Debug.cs" />
+    <Compile Include="Tensorflow\Proto\DeviceAttributes.cs" />
+    <Compile Include="Tensorflow\Proto\DeviceProperties.cs" />
+    <Compile Include="Tensorflow\Proto\ErrorCodes.cs" />
+    <Compile Include="Tensorflow\Proto\Function.cs" />
+    <Compile Include="Tensorflow\Proto\Graph.cs" />
+    <Compile Include="Tensorflow\Proto\GraphTransferInfo.cs" />
+    <Compile Include="Tensorflow\Proto\Iterator.cs" />
+    <Compile Include="Tensorflow\Proto\KernelDef.cs" />
+    <Compile Include="Tensorflow\Proto\LogMemory.cs" />
+    <Compile Include="Tensorflow\Proto\Master.cs" />
+    <Compile Include="Tensorflow\Proto\MasterService.cs" />
+    <Compile Include="Tensorflow\Proto\MetaGraph.cs" />
+    <Compile Include="Tensorflow\Proto\NamedTensor.cs" />
+    <Compile Include="Tensorflow\Proto\NodeDef.cs" />
+    <Compile Include="Tensorflow\Proto\OpDef.cs" />
+    <Compile Include="Tensorflow\Proto\OpGenOverrides.cs" />
+    <Compile Include="Tensorflow\Proto\QueueRunner.cs" />
+    <Compile Include="Tensorflow\Proto\ReaderBase.cs" />
+    <Compile Include="Tensorflow\Proto\RemoteFusedGraphExecuteInfo.cs" />
+    <Compile Include="Tensorflow\Proto\ResourceHandle.cs" />
+    <Compile Include="Tensorflow\Proto\RewriterConfig.cs" />
+    <Compile Include="Tensorflow\Proto\SavedModel.cs" />
+    <Compile Include="Tensorflow\Proto\Saver.cs" />
+    <Compile Include="Tensorflow\Proto\StepStats.cs" />
+    <Compile Include="Tensorflow\Proto\Summary.cs" />
+    <Compile Include="Tensorflow\Proto\Tensor.cs" />
+    <Compile Include="Tensorflow\Proto\TensorBundle.cs" />
+    <Compile Include="Tensorflow\Proto\TensorDescription.cs" />
+    <Compile Include="Tensorflow\Proto\TensorflowServer.cs" />
+    <Compile Include="Tensorflow\Proto\TensorShape.cs" />
+    <Compile Include="Tensorflow\Proto\TensorSlice.cs" />
+    <Compile Include="Tensorflow\Proto\Types.cs" />
+    <Compile Include="Tensorflow\Proto\Variable.cs" />
+    <Compile Include="Tensorflow\Proto\Versions.cs" />
+    <Compile Include="Tensorflow\Proto\Worker.cs" />
+    <Compile Include="Tensorflow\Proto\WorkerService.cs" />
     <Compile Include="Tensorflow\Session.cs" />
     <Compile Include="Tensorflow\TF.cs" />
     <Compile Include="Tensorflow\Util.cs" />
@@ -129,8 +173,14 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Google.Protobuf, Version=3.5.0.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
+      <HintPath>..\packages\Google.Protobuf.3.5.0\lib\netstandard1.0\Google.Protobuf.dll</HintPath>
+    </Reference>
     <Reference Include="MathNet.Numerics, Version=3.20.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MathNet.Numerics.3.20.0\lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1\MathNet.Numerics.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.InteropServices.RuntimeInformation, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.InteropServices.RuntimeInformation.4.3.0\lib\netstandard1.1\System.Runtime.InteropServices.RuntimeInformation.dll</HintPath>
     </Reference>
     <Reference Include="System.ValueTuple, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.ValueTuple.4.4.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
@@ -152,6 +202,7 @@
     <EmbeddedResource Include="Detection\frozen_gazeEx.pb" />
     <EmbeddedResource Include="Detection\frozen_gazeFace.pb" />
     <EmbeddedResource Include="Detection\openface_model.zip" />
+    <EmbeddedResource Include="Detection\frozen_gazeFaceMobile.pb" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

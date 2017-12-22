@@ -23,7 +23,8 @@ namespace Vision.Detection
     {
         LeftOnly = 0,
         Both = 1,
-        Face = 2
+        Face = 2,
+        FaceMobile = 3,
     }
 
     public class EyeGazeDetector : IDisposable
@@ -32,6 +33,8 @@ namespace Vision.Detection
         public const int ImageSizeEx = 60;
         public const int ImageSizeFace = 60;
         public const int FaceSizeFace = 60;
+        public const int ImageSizeFaceMobile = 64;
+        public const int FaceSizeFaceMobile = 64;
         public const double AngleMul = 1;
         public const double DefaultSensitiveX = 1;
         public const double DefaultSensitiveY = 1;
@@ -41,11 +44,13 @@ namespace Vision.Detection
         public readonly static ManifestResource ModelResourceExtend = new ManifestResource("Vision.Detection", "frozen_gazeEx.pb");
         public readonly static ManifestResource ModelResourceSingle = new ManifestResource("Vision.Detection", "frozen_gaze.pb");
         public readonly static ManifestResource ModelResourceFace = new ManifestResource("Vision.Detection", "frozen_gazeFace.pb");
+        public readonly static ManifestResource ModelResourceFaceMobile = new ManifestResource("Vision.Detection", "frozen_gazeFaceMobile.pb");
 
         public static object ModelLocker = new object();
         public static Graph ModelGraphSingle;
         public static Graph ModelGraphExtend;
         public static Graph ModelGraphFace;
+        public static Graph ModelGraphFaceMobile;
 
         static EyeGazeDetector()
         {
@@ -59,6 +64,9 @@ namespace Vision.Detection
 
             ModelGraphFace = new Graph();
             ModelGraphFace.ImportPb(Storage.LoadResource(ModelResourceFace, true));
+
+            ModelGraphFaceMobile = new Graph();
+            ModelGraphFaceMobile.ImportPb(Storage.LoadResource(ModelResourceFaceMobile, true));
 
             Logger.Log("EyeGazeDetector", "Finished model load");
         }
@@ -77,11 +85,12 @@ namespace Vision.Detection
         public bool UseCalibrator { get; set; } = true;
         public EyeGazeCalibrater Calibrator { get; set; }
 
-        public EyeGazeDetectMode DetectMode { get; set; } = EyeGazeDetectMode.Face;
+        public EyeGazeDetectMode DetectMode { get; set; } = EyeGazeDetectMode.FaceMobile;
 
         Session sess;
         Session sessEx;
         Session sessFace;
+        Session sessFaceMobile;
         PointKalmanFilter kalman = new PointKalmanFilter();
         float[] imgBufferLeft;
         float[] imgBufferRight;
@@ -94,6 +103,7 @@ namespace Vision.Detection
             sess = new Session(ModelGraphSingle);
             sessEx = new Session(ModelGraphExtend);
             sessFace = new Session(ModelGraphFace);
+            sessFaceMobile = new Session(ModelGraphFaceMobile);
 
             Calibrator = new EyeGazeCalibrater();
         }
@@ -115,6 +125,7 @@ namespace Vision.Detection
                     if (face.LeftEye == null)
                         return null;
                     break;
+                case EyeGazeDetectMode.FaceMobile:
                 case EyeGazeDetectMode.Face:
                 case EyeGazeDetectMode.Both:
                     if (face.LeftEye == null || face.RightEye == null)
@@ -142,6 +153,7 @@ namespace Vision.Detection
                         using (Mat right = face.RightEye.RoiCropByPercent(frame))
                             result = DetectBothEyes(left, right);
                         break;
+                    case EyeGazeDetectMode.FaceMobile:
                     case EyeGazeDetectMode.Face:
                         using (Mat left = face.LeftEye.RoiCropByPercent(frame, .25))
                         using (Mat right = face.RightEye.RoiCropByPercent(frame, .25))
@@ -190,16 +202,32 @@ namespace Vision.Detection
 
         private Point DetectFace(Mat face, Mat left, Mat right)
         {
+            int modelImgSize, modelFaceSize;
+            Session sess;
+            if(DetectMode == EyeGazeDetectMode.Face)
+            {
+                modelImgSize = ImageSizeFace;
+                modelFaceSize = FaceSizeFace;
+                sess = sessFace;
+            }
+            else if(DetectMode == EyeGazeDetectMode.FaceMobile)
+            {
+                modelImgSize = ImageSizeFaceMobile;
+                modelFaceSize = FaceSizeFaceMobile;
+                sess = sessFaceMobile;
+            }
+            else { throw new NotImplementedException("unknown mode"); }
+
             Profiler.Start("Gaze.Face.Cvt.Resize");
-            var imgSize = new Size(ImageSizeFace, ImageSizeFace);
-            var imgSizeFace = new Size(FaceSizeFace, FaceSizeFace);
+            var imgSize = new Size(modelImgSize, modelImgSize);
+            var imgSizeFace = new Size(modelFaceSize, modelFaceSize);
             left.Resize(imgSize);
             right.Resize(imgSize);
             face.Resize(imgSizeFace);
             Profiler.End("Gaze.Face.Cvt.Resize");
 
-            var bufferSize = ImageSizeFace * ImageSizeFace * 3;
-            var bufferFace = FaceSizeFace * FaceSizeFace * 3;
+            var bufferSize = modelImgSize * modelImgSize * 3;
+            var bufferFace = modelFaceSize * modelFaceSize * 3;
             if (imgBufferLeft == null || imgBufferLeft.Length != bufferSize)
                 imgBufferLeft = new float[bufferSize];
             if (imgBufferRight == null || imgBufferRight.Length != bufferSize)
@@ -208,13 +236,13 @@ namespace Vision.Detection
                 imgBufferFace = new float[bufferFace];
 
             Profiler.Start("Gaze.Face.Cvt");
-            var imgTensorLeft = Tools.MatBgr2Tensor(left, NormalizeMode.CenterZero, -1, -1, new long[] { 1, ImageSizeFace, ImageSizeFace, 3 }, imgBufferLeft);
-            var imgTensorRight = Tools.MatBgr2Tensor(right, NormalizeMode.CenterZero, -1, -1, new long[] { 1, ImageSizeFace, ImageSizeFace, 3 }, imgBufferRight);
-            var imgTensorFace = Tools.MatBgr2Tensor(face, NormalizeMode.CenterZero, -1, -1, new long[] { 1, FaceSizeFace, FaceSizeFace, 3 }, imgBufferFace);
+            var imgTensorLeft = Tools.MatBgr2Tensor(left, NormalizeMode.CenterZero, -1, -1, new long[] { 1, modelImgSize, modelImgSize, 3 }, imgBufferLeft);
+            var imgTensorRight = Tools.MatBgr2Tensor(right, NormalizeMode.CenterZero, -1, -1, new long[] { 1, modelImgSize, modelImgSize, 3 }, imgBufferRight);
+            var imgTensorFace = Tools.MatBgr2Tensor(face, NormalizeMode.CenterZero, -1, -1, new long[] { 1, modelFaceSize, modelFaceSize, 3 }, imgBufferFace);
             Profiler.End("Gaze.Face.Cvt");
 
             Profiler.Start("Gaze.Face.Sess");
-            Tensor[] fetch = sessFace.Run(new[] { "output" },
+            Tensor[] fetch = sess.Run(new[] { "output" },
                 new Dictionary<string, Tensor>() { { "input_image", imgTensorLeft }, { "input_image_r", imgTensorRight }, { "input_image_f", imgTensorFace }, { "phase_train", new Tensor(false) }, { "keep_prob", new Tensor(0.0f) } });
             Profiler.End("Gaze.Face.Sess");
 

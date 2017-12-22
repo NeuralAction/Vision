@@ -64,7 +64,7 @@ namespace Vision.Detection
     {
         public LandmarkDetectorWrap Detector { get; set; }
 
-        public InterpolationFlags Interpolation { get; set; } = InterpolationFlags.Cubic;
+        public InterpolationFlags Interpolation { get; set; } = InterpolationFlags.Nearest;
 
         public override double UnitPerMM => 1;
         public override bool UseSmooth
