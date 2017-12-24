@@ -159,8 +159,8 @@ namespace AndroidTests
 
         private void Start()
         {
-            //StartDetection();
-            StartInception();
+            StartDetection();
+            //StartInception();
         }
 
         private void StartDetection()

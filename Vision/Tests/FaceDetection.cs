@@ -52,7 +52,7 @@ namespace Vision.Tests
         }
         public bool DrawOn { get; set; } = true;
         public bool DetectGaze { get; set; } = false;
-        public bool GazeSmooth { get; set; } = false;
+        public bool GazeSmooth { get => GazeDetector.UseSmoothing; set => GazeDetector.UseSmoothing = value; }
 
         public bool LandmarkDetect
         {
@@ -164,6 +164,7 @@ namespace Vision.Tests
             UpdateGraph(1500,5000);
 
             ScreenProperties = Core.GetDefaultScreen();
+            //ScreenProperties = new ScreenProperties(new Point3D(-134, 0, 0), new Size(268, 168), new Size(1706.66666666667, 1066.66666666667));
             OpenFaceDetector = new OpenFaceDetector()
             {
                 UseSmooth = true
@@ -657,9 +658,9 @@ namespace Vision.Tests
                 {
                     if (size == trail.Count - 1)
                     {
-                        Core.Cv.DrawCircle(mat, new Point(pt.X, pt.Y), 2, Scalar.BgrCyan, 4);
+                        Core.Cv.DrawCircle(mat, new Point(pt.X, pt.Y), 2, Scalar.BgrCyan, -1, LineTypes.AntiAlias);
                     }
-                    Core.Cv.DrawCircle(mat, new Point(pt.X, pt.Y), size, Scalar.BgrYellow, 2);
+                    Core.Cv.DrawCircle(mat, new Point(pt.X, pt.Y), size, Scalar.BgrYellow, 2, LineTypes.AntiAlias);
                     size++;
                 }
 

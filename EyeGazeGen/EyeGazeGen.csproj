@@ -142,6 +142,10 @@
       <Project>{15e57a3f-8b2f-46f0-a717-34b308307b1d}</Project>
       <Name>Vision.Windows</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Vision\Vision.csproj">
+      <Project>{67f9d3a8-f71e-4428-913f-c37ae82cdb24}</Project>
+      <Name>Vision</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

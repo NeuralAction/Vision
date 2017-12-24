@@ -11,6 +11,7 @@ using Android.Views;
 using Android.Widget;
 using Android.Util;
 using System.Threading;
+using Vision.Detection;
 
 namespace Vision.Android
 {
@@ -47,6 +48,11 @@ namespace Vision.Android
         protected override void InternalSleep(int duration)
         {
             Thread.Sleep(duration);
+        }
+
+        protected override ScreenProperties InternalGetDefaultScreen()
+        {
+            return ScreenProperties.CreatePixelScreen(new Size(1080, 1920), 320);
         }
     }
 }

@@ -7,12 +7,14 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-
+using System.Windows.Threading;
 using Vision;
 using Vision.Detection;
 
@@ -50,18 +52,37 @@ namespace EyeTestApp
         {
             InitializeComponent();
 
-            Tb_SesitiveX.Text = EyeGazeDetector.DefaultSensitiveX.ToString();
-            Tb_SesitiveY.Text = EyeGazeDetector.DefaultSensitiveY.ToString();
-            Tb_OffsetX.Text = EyeGazeDetector.DefaultOffsetX.ToString();
-            Tb_OffsetY.Text = EyeGazeDetector.DefaultOffsetY.ToString();
-
             WindowState = WindowState.Maximized;
             Topmost = true;
+
+            var names = Enum.GetNames(typeof(EyeGazeDetectMode));
+            for (int i = 0; i < names.Length; i++)
+            {
+                Cbb_GazeMode.Items.Add(new ComboBoxItem() { Content = Enum.GetName(typeof(EyeGazeDetectMode), (EyeGazeDetectMode)i) });
+            }
+
+            names = Enum.GetNames(typeof(PointSmoother.SmoothMethod));
+            for (int i = 0; i < names.Length; i++)
+            {
+                Cbb_GazeSmoothMode.Items.Add(new ComboBoxItem() { Content = Enum.GetName(typeof(PointSmoother.SmoothMethod), (PointSmoother.SmoothMethod)i) });
+            }
+
+            Loaded += delegate
+            {
+                var width = SystemInformation.PrimaryMonitorSize.Width;
+                var height = SystemInformation.PrimaryMonitorSize.Height;
+                var mW = (ActualWidth - width) / 2;
+                var mH = (ActualHeight - height) / 2;
+                Grid_Background.Margin = new Thickness(mW, mH, mW, mH);
+            };
+
+            Settings.Current.PropertyChanged += Current_PropertyChanged;
+            DataContext = Settings.Current;
         }
 
-        public void LazyStart(int camera, bool faceSmooth, bool gazeSmooth)
+        public void LazyStart()
         {
-            Task t = new Task(() =>
+            Task.Factory.StartNew(() =>
             {
                 lock (StateLocker)
                 {
@@ -70,34 +91,105 @@ namespace EyeTestApp
                         Bt_Start.IsEnabled = false;
                         Bt_Start.Content = "Waiting Camera";
                     });
-
-                    if (Started)
+                    
+                    if(service != null)
                     {
-                        if(service != null)
-                        {
-                            service.Dispose();
-                        }
+                        service.Dispose();
+                        service = null;
                     }
 
+                    var set = Settings.Current;
+
                     service = new EyeGazeService();
+                    service.ScreenProperties = Core.GetDefaultScreen();
+                    service.SmoothOpen = set.OpenSmooth;
                     service.GazeDetector.ClipToBound = true;
-                    service.GazeDetector.UseSmoothing = gazeSmooth;
-                    ((OpenFaceDetector)service.FaceDetector).UseSmooth = faceSmooth;
+                    service.GazeDetector.UseSmoothing = set.GazeSmooth;
+                    service.GazeDetector.DetectMode = set.GazeMode;
+                    service.GazeDetector.Smoother.QueueCount = set.GazeSmoothCount;
+                    service.GazeDetector.Smoother.Method = set.GazeSmoothMode;
+                    service.FaceDetector.UseSmooth = set.FaceSmooth;
+
+                    service.GazeDetector.Calibrator.Calibarting += Calibrator_Calibarting;
+                    service.GazeDetector.Calibrator.Calibrated += Calibrator_Calibrated;
                     service.GazeTracked += Service_GazeTracked;
-                    service.FaceTracked += Service_FaceTracked;
                     service.Clicked += Service_Clicked;
                     service.Released += Service_Released;
-                    service.Start(camera);
+
+                    service.Start(set.Camera);
 
                     Dispatcher.Invoke(() =>
                     {
                         Bt_Start.IsEnabled = true;
                     });
+
                     Started = true;
                 }
             });
+        }
 
-            t.Start();
+        private void Calibrator_Calibrated(object sender, CalibratedArgs e)
+        {
+            Dispatcher.Invoke(() => { Calib.Visibility = Visibility.Hidden; });
+            Task.Factory.StartNew(() =>
+            {
+                var log = new EyeGazeCalibrationLog(e.Data);
+                using (var plt = log.Plot(service.ScreenProperties, service.GazeDetector.Calibrator))
+                {
+                    Core.Cv.ImgShow("plot", plt);
+                    Core.Cv.WaitKey(0);
+                    Core.Cv.CloseAllWindows();
+                }
+            });
+        }
+
+        private void Calibrator_Calibarting(object sender, CalibratingArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                Calib.Visibility = Visibility.Visible;
+
+                var calib = (EyeGazeCalibrater)sender;
+                double duration = 0;
+                Color color = Colors.White;
+                switch (e.State)
+                {
+                    case CalibratingState.Point:
+                        color = Colors.Lime;
+                        duration = calib.Interval;
+                        break;
+                    case CalibratingState.Wait:
+                        color = Colors.Yellow;
+                        duration = calib.WaitInterval;
+                        break;
+                    case CalibratingState.SampleWait:
+                        color = Colors.Orange;
+                        duration = calib.SampleWaitInterval;
+                        break;
+                    case CalibratingState.Sample:
+                        color = Colors.Red;
+                        duration = calib.SampleInterval;
+                        break;
+                    default:
+                        throw new NotImplementedException();
+                }
+                Calib_Circle.Fill = new SolidColorBrush(color);
+                Calib_Circle.Fill.Freeze();
+
+                var storyboard = new Storyboard();
+                var aniDur = new Duration(TimeSpan.FromMilliseconds(duration * 0.8));
+                var aniX = new DoubleAnimation(Canvas.GetLeft(Calib), e.Data.X, aniDur);
+                var aniY = new DoubleAnimation(Canvas.GetTop(Calib), e.Data.Y, aniDur);
+                Storyboard.SetTarget(aniX, Calib);
+                Storyboard.SetTarget(aniY, Calib);
+                Storyboard.SetTargetProperty(aniX, new PropertyPath(Canvas.LeftProperty));
+                Storyboard.SetTargetProperty(aniY, new PropertyPath(Canvas.TopProperty));
+                storyboard.Children.Add(aniX);
+                storyboard.Children.Add(aniY);
+                storyboard.Begin();
+
+                Calib_Text.Text = (e.Percent * 100).ToString("0.00") + "%";
+            });
         }
 
         private void Service_Released(object sender, Vision.Point e)
@@ -106,6 +198,7 @@ namespace EyeTestApp
             {
                 Grid_Cursor.Width = 55;
                 Grid_Cursor.Height = 55;
+                Cursor_Back.Visibility = Visibility.Hidden;
             });
         }
 
@@ -115,17 +208,20 @@ namespace EyeTestApp
             {
                 Grid_Cursor.Width = 120;
                 Grid_Cursor.Height = 120;
+                Cursor_Back.Visibility = Visibility.Visible;
             });
         }
 
         public void LazyStop()
         {
-            Task t = new Task(() => 
+            Task.Factory.StartNew(() => 
             {
                 lock (StateLocker)
                 {
                     if (Started)
                     {
+                        Started = false;
+
                         Dispatcher.Invoke(() =>
                         {
                             Bt_Start.IsEnabled = false;
@@ -142,18 +238,9 @@ namespace EyeTestApp
                         {
                             Bt_Start.IsEnabled = true;
                         });
-
-                        Started = false;
                     }
                 }
             });
-
-            t.Start();
-        }
-
-        private void Service_FaceTracked(object sender, FaceRect[] e)
-        {
-
         }
         
         private void Service_GazeTracked(object sender, Vision.Point e)
@@ -164,14 +251,7 @@ namespace EyeTestApp
                 {
                     Cursor.Opacity = 1;
 
-                    var width = ActualWidth;
-                    var height = ActualHeight;
-
-                    var left = e.X / service.ScreenProperties.PixelSize.Width * width;
-                    var top = e.Y / service.ScreenProperties.PixelSize.Height * height;
-
-                    Canvas.SetLeft(Cursor, left);
-                    Canvas.SetTop(Cursor, top);
+                    SetCursorPos(e.X, e.Y);
                 }
                 else
                 {
@@ -182,127 +262,107 @@ namespace EyeTestApp
 
         #region UI
 
-        private void Cb_Gaze_Smooth_Checked(object sender, RoutedEventArgs e)
+        double cursorX = 0, cursorY = 0;
+        DispatcherTimer cursorUpdater;
+        private void SetCursorPos(double x, double y)
         {
-            if(service != null)
+            cursorX = x;
+            cursorY = y;
+            if (Settings.Current.CursorSmooth)
             {
-                service.GazeDetector.UseSmoothing = true;
+                if (cursorUpdater == null)
+                {
+                    cursorUpdater = new DispatcherTimer();
+                    cursorUpdater.Interval = TimeSpan.FromMilliseconds(25);
+                    cursorUpdater.Tick += delegate
+                    {
+                        var left = Canvas.GetLeft(Cursor);
+                        var top = Canvas.GetTop(Cursor);
+                        Canvas.SetLeft(Cursor, left + (cursorX - left) / 4);
+                        Canvas.SetTop(Cursor, top + (cursorY - top) / 4);
+                    };
+                    cursorUpdater.Start();
+                }
+            }
+            else
+            {
+                cursorUpdater?.Stop();
+                Canvas.SetLeft(Cursor, x);
+                Canvas.SetTop(Cursor, y);
             }
         }
 
-        private void Cb_Gaze_Smooth_Unchecked(object sender, RoutedEventArgs e)
+        private void Current_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (service != null)
+            switch (e.PropertyName)
             {
-                service.GazeDetector.UseSmoothing = false;
-            }
-        }
-
-        private void Cb_Head_Smooth_Checked(object sender, RoutedEventArgs e)
-        {
-            if (service != null)
-            {
-                ((OpenFaceDetector)service.FaceDetector).UseSmooth = true;
-            }
-        }
-
-        private void Cb_Head_Smooth_Unchecked(object sender, RoutedEventArgs e)
-        {
-            if (service != null)
-            {
-                ((OpenFaceDetector)service.FaceDetector).UseSmooth = false;
+                case nameof(Settings.Camera):
+                    break;
+                case nameof(Settings.FaceSmooth):
+                    if (service != null)
+                        service.FaceDetector.UseSmooth = Settings.Current.FaceSmooth;
+                    break;
+                case nameof(Settings.GazeMode):
+                    if (service != null)
+                        service.GazeDetector.DetectMode = Settings.Current.GazeMode;
+                    break;
+                case nameof(Settings.GazeSmooth):
+                    if (service != null)
+                        service.GazeDetector.UseSmoothing = Settings.Current.GazeSmooth;
+                    break;
+                case nameof(Settings.GazeSmoothCount):
+                    if (service != null)
+                        service.GazeDetector.Smoother.QueueCount = Settings.Current.GazeSmoothCount;
+                    break;
+                case nameof(Settings.GazeSmoothMode):
+                    if (service != null)
+                        service.GazeDetector.Smoother.Method = Settings.Current.GazeSmoothMode;
+                    break;
+                case nameof(Settings.OpenSmooth):
+                    if (service != null)
+                        service.SmoothOpen = Settings.Current.OpenSmooth;
+                    break;
+                case nameof(Settings.CursorSmooth):
+                    break;
+                default:
+                    Logger.Throw("Uknown Property Name: " + e.PropertyName);
+                    break;
             }
         }
 
         private void Bt_Start_Click(object sender, RoutedEventArgs e)
         {
-            int index = -1;
-
-            try
-            {
-                index = Convert.ToInt32(Tb_Camera.Text);
-            }
-            catch
-            {
-                MessageBox.Show("Invalid Camera Index");
-                return;
-            }
-
             if (Started)
-            {
                 LazyStop();
-            }
             else
-            {
-                LazyStart(index, (bool)Cb_Head_Smooth.IsChecked, (bool)Cb_Gaze_Smooth.IsChecked);
-            }
+                LazyStart();
         }
 
-        private void Tb_SesitiveX_TextChanged(object sender, TextChangedEventArgs e)
+        private void Bt_Calib_Calib_Click(object sender, RoutedEventArgs e)
         {
-            if(service != null)
+            if(service != null && !service.GazeDetector.Calibrator.IsStarted)
             {
-                try
-                {
-                    service.GazeDetector.SensitiveX = Convert.ToDouble(Tb_SesitiveX.Text);
-                }
-                catch
-                {
-
-                }
+                service.GazeDetector.Calibrator.Start(service.ScreenProperties);
             }
         }
 
-        private void Tb_SesitiveY_TextChanged(object sender, TextChangedEventArgs e)
+        private void Bt_Calib_Test_Click(object sender, RoutedEventArgs e)
         {
-            if (service != null)
+            if (service != null && !service.GazeDetector.Calibrator.IsStarted)
             {
-                try
-                {
-                    service.GazeDetector.SensitiveY = Convert.ToDouble(Tb_SesitiveY.Text);
-                }
-                catch
-                {
-
-                }
+                service.GazeDetector.Calibrator.Start(service.ScreenProperties, false);
             }
         }
 
-        private void Tb_OffsetX_TextChanged(object sender, TextChangedEventArgs e)
+        private void Bt_Calib_Stop_Click(object sender, RoutedEventArgs e)
         {
             if (service != null)
             {
-                try
-                {
-                    service.GazeDetector.OffsetX = Convert.ToDouble(Tb_OffsetX.Text);
-                }
-                catch
-                {
-
-                }
+                service.GazeDetector.Calibrator.Stop();
+                Calib.Visibility = Visibility.Hidden;
             }
         }
 
-        private void Tb_OffsetY_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (service != null)
-            {
-                try
-                {
-                    service.GazeDetector.OffsetY = Convert.ToDouble(Tb_OffsetY.Text);
-                }
-                catch
-                {
-
-                }
-            }
-        }
-
-        private void Cb_Model_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if(service != null)
-                service.GazeDetector.DetectMode = (EyeGazeDetectMode)Cb_Model.SelectedIndex;
-        }
         #endregion UI
     }
 }

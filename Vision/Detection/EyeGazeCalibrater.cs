@@ -124,7 +124,7 @@ namespace Vision.Detection
             var labelResultDict = new Dictionary<Point3D, CalibratingPushData>();
             var calibed = new bool[GridWidth * GridHeight];
 
-            CalibrateBegin.Invoke(this, null);
+            CalibrateBegin?.Invoke(this, null);
 
             for (int i = 0; i < calibed.Length; i++)
             {
@@ -202,7 +202,7 @@ namespace Vision.Detection
             IsCalibrating = false;
 
             Logger.Log(this, "Calibrated");
-            Calibrated.Invoke(this, new CalibratedArgs(labelResultDict, token));
+            Calibrated?.Invoke(this, new CalibratedArgs(labelResultDict, token));
             IsStarted = false;
         }
 

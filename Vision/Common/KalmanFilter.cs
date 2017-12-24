@@ -9,11 +9,11 @@ namespace Vision
     //ref. https://stackoverflow.com/questions/39315817/filtering-streaming-data-to-reduce-noise-kalman-filter-c-sharp
     public class KalmanFilter
     {
-        double A = double.Parse("1");
-        double H = double.Parse("1");
-        double P = double.Parse("0.1");
-        double Q = double.Parse("0.125");
-        double R = double.Parse("1");
+        double A = 1;
+        double H = 1;
+        double P = 0.1;
+        double Q = 0.125;
+        double R = 1;
         double K;
         double z;
         double x;

@@ -21,6 +21,8 @@ using Vision.Cv;
 using Vision.Detection;
 using Vision.Windows;
 
+using Profiler = Vision.Profiler;
+
 namespace EyeGazeGen
 {
     /// <summary>

@@ -474,8 +474,8 @@ namespace Vision.Detection
         private void SmoothEye(EyeRect rect, ArrayKalmanFilter kalman)
         {
             var result = kalman.Calculate(new double[] { rect.OpenData.Open, rect.OpenData.Close });
-            rect.OpenData.Open = Math.Max(0, Math.Min(1, result[0]));
-            rect.OpenData.Close = Math.Max(0, Math.Min(1, result[1]));
+            rect.OpenData.Open = Math.Max(0, Math.Min(1, result[0] * 0.33 + rect.OpenData.Open * 0.66));
+            rect.OpenData.Close = Math.Max(0, Math.Min(1, result[1] * 0.33 + rect.OpenData.Close * 0.66));
         }
 
         private void ArrayMul(double[] array, double right)

@@ -80,6 +80,7 @@ namespace Vision.Cv
             Core.Cv.CloseWindow(name);
             return ret;
         }
+
         public void ImgShow(string name, Mat img)
         {
             try
@@ -89,7 +90,7 @@ namespace Vision.Cv
                 if (img == null || img.IsEmpty)
                     throw new ArgumentNullException();
             }
-            catch (ObjectDisposedException ex)
+            catch (ObjectDisposedException)
             {
                 Logger.Error(this, "img is disposed");
                 return;

@@ -27,6 +27,58 @@ namespace Vision.Detection
         FaceMobile = 3,
     }
 
+    public class PointSmoother
+    {
+        public enum SmoothMethod
+        {
+            Kalman,
+            Mean,
+            MeanKalman
+        }
+
+        public int QueueCount { get; set; } = 6;
+        public SmoothMethod Method { get; set; } = SmoothMethod.MeanKalman;
+
+        PointKalmanFilter kalman = new PointKalmanFilter();
+        Queue<Point> q = new Queue<Point>();
+
+        public Point Smooth(Point pt)
+        {
+            Point ret = pt.Clone();
+
+            q.Enqueue(ret.Clone());
+            if (q.Count > QueueCount)
+                q.Dequeue();
+
+            if (Method == SmoothMethod.Mean || Method == SmoothMethod.MeanKalman)
+            {
+                var arr = q.ToArray();
+                var xarr = arr.OrderBy((a) => { return a.X; }).ToArray();
+                var yarr = arr.OrderBy((a) => { return a.Y; }).ToArray();
+                var x = 0.0;
+                var y = 0.0;
+                var cc = 0.0;
+                var count = Math.Max(1, (double)q.Count / 2);
+                var start = Math.Round((double)q.Count / 2 - count / 2);
+                for (int i = (int)start; i < count; i++)
+                {
+                    x += xarr[i].X;
+                    y += yarr[i].Y;
+                    cc++;
+                }
+                x /= cc;
+                y /= cc;
+                ret.X = x;
+                ret.Y = y;
+            }
+
+            if(Method == SmoothMethod.MeanKalman || Method == SmoothMethod.Kalman)
+                ret = kalman.Calculate(ret);
+
+            return ret;
+        }
+    }
+
     public class EyeGazeDetector : IDisposable
     {
         public const int ImageSize = 60;
@@ -73,7 +125,8 @@ namespace Vision.Detection
 
         public bool ClipToBound { get; set; } = false;
         public bool UseSmoothing { get; set; } = false;
-        
+        public PointSmoother Smoother { get; set; } = new PointSmoother();
+
         public bool UseModification { get; set; } = true;
         public double SensitiveX { get; set; } = DefaultSensitiveX;
         public double OffsetX { get; set; } = DefaultOffsetX;
@@ -91,7 +144,6 @@ namespace Vision.Detection
         Session sessEx;
         Session sessFace;
         Session sessFaceMobile;
-        PointKalmanFilter kalman = new PointKalmanFilter();
         float[] imgBufferLeft;
         float[] imgBufferRight;
         float[] imgBufferFace;
@@ -174,7 +226,7 @@ namespace Vision.Detection
 
                 vecPt = new Point(x, y);
                 if (UseSmoothing)
-                    vecPt = kalman.Calculate(vecPt);
+                    vecPt = Smoother.Smooth(vecPt);
 
                 Vector<double> vec = CreateVector.Dense(new double[] { vecPt.X, vecPt.Y, -1 });
                 pt = face.SolveRayScreenVector(new Point3D(vec.ToArray()), properties);
@@ -190,6 +242,7 @@ namespace Vision.Detection
             {
                 ScreenPoint = pt,
                 Vector = new Point3D(vecPt.X, vecPt.Y, -1),
+                ClipToBound = ClipToBound,
             };
 
             Calibrator.Push(new CalibratingPushData(face));
@@ -275,8 +328,8 @@ namespace Vision.Detection
         private Point DetectBothEyes(Mat left, Mat right)
         {
             var imgSize = new Size(ImageSizeEx, ImageSizeEx);
-            left.Resize(imgSize, 0, 0, InterpolationFlags.Cubic);
-            right.Resize(imgSize, 0, 0, InterpolationFlags.Cubic);
+            left.Resize(imgSize, 0, 0);
+            right.Resize(imgSize, 0, 0);
 
             var bufferSize = ImageSizeEx * ImageSizeEx * 3;
             if (imgBufferLeft == null || imgBufferLeft.Length != bufferSize)
@@ -314,7 +367,7 @@ namespace Vision.Detection
 
         private Point DetectLeftEyes(Mat mat)
         {
-            mat.Resize(new Size(ImageSize, ImageSize), 0, 0, InterpolationFlags.Cubic);
+            mat.Resize(new Size(ImageSize, ImageSize), 0, 0);
 
             var bufferSize = ImageSize * ImageSize * 3;
             if (imgBufferLeft == null || imgBufferLeft.Length != bufferSize)

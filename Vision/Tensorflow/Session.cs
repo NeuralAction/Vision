@@ -183,7 +183,7 @@ namespace Vision.Tensorflow
         public Graph Graph { get; set; }
         TFSession.Runner runner;
 
-        public bool EnableSummary { get; set; } = true;
+        public bool EnableSummary { get; set; } = false;
         public StatSummarizer Summary { get; set; } = new StatSummarizer();
 
         public Session() : this(new Graph())

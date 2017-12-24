@@ -16,12 +16,12 @@ namespace Vision.Detection
         Both = 2
     }
 
-    public class EyeWinkArgs : EventArgs
+    public class EyeBlinkArgs : EventArgs
     {
         public Point Point { get; set; }
         public ClickEyes ClickEyes { get; set; }
 
-        public EyeWinkArgs(Point pt, ClickEyes eye)
+        public EyeBlinkArgs(Point pt, ClickEyes eye)
         {
             Point = pt;
             ClickEyes = eye;
@@ -34,9 +34,9 @@ namespace Vision.Detection
         public event EventHandler<FaceRect[]> FaceTracked;
         public event EventHandler<FrameArgs> FrameCaptured;
 
-        public event EventHandler<EyeWinkArgs> Winked;
-        public event EventHandler<EyeWinkArgs> Winking;
-        public event EventHandler<EyeWinkArgs> UnWinked;
+        public event EventHandler<EyeBlinkArgs> Blinked;
+        public event EventHandler<EyeBlinkArgs> Blinking;
+        public event EventHandler<EyeBlinkArgs> UnBlinked;
 
         public event EventHandler<Point> Clicked;
         public event EventHandler<Point> Clicking;
@@ -45,7 +45,11 @@ namespace Vision.Detection
         public EyeGazeDetector GazeDetector { get; set; }
         public EyeOpenDetector OpenDetector { get; set; }
         public FaceDetectionProvider FaceDetector { get; set; }
-        public ScreenProperties ScreenProperties { get; set; }
+        public ScreenProperties ScreenProperties
+        {
+            get => GazeDetector.ScreenProperties;
+            set => GazeDetector.ScreenProperties = value;
+        }
         public bool SmoothOpen { get; set; } = true;
         public bool IsLeftClicking { get; protected set; } = false;
         public bool IsRightClicking { get; protected set; } = false;
@@ -56,9 +60,7 @@ namespace Vision.Detection
 
         public EyeGazeService(OpenFaceModelLoader loader, ScreenProperties screen)
         {
-            ScreenProperties = screen;
-
-            GazeDetector = new EyeGazeDetector(ScreenProperties);
+            GazeDetector = new EyeGazeDetector(screen);
 
             FaceDetector = new OpenFaceDetector()
             {
@@ -123,7 +125,7 @@ namespace Vision.Detection
 
                 if(t.Exception != null)
                 {
-                    Logger.Error(this, t.Exception);
+                    Logger.Throw(this, t.Exception);
                 }
             }
         }
@@ -162,8 +164,7 @@ namespace Vision.Detection
                         if(SmoothOpen)
                             target.Smoother.SmoothLeftEye(target.LeftEye);
                         var data = target.LeftEye.OpenData;
-                        if(data.Percent > 0.6)
-                            leftClicked = !data.IsOpen;
+                        leftClicked = !data.IsOpen;
                     }
 
                     if(target.RightEye != null)
@@ -172,8 +173,7 @@ namespace Vision.Detection
                         if(SmoothOpen)
                             target.Smoother.SmoothRightEye(target.RightEye);
                         var data = target.RightEye.OpenData;
-                        if (data.Percent > 0.6)
-                            rightClicked = !data.IsOpen;
+                        rightClicked = !data.IsOpen;
                     }
 
                     if(target.LeftEye != null && target.RightEye != null)
@@ -188,25 +188,25 @@ namespace Vision.Detection
                 if(preLeftClick != leftClicked && preRightClicking != rightClicked)
                 {
                     if (leftClicked && rightClicked)
-                        Winked?.Invoke(this, new EyeWinkArgs(result, ClickEyes.Both));
+                        Blinked?.Invoke(this, new EyeBlinkArgs(result, ClickEyes.Both));
                     else if (!leftClicked && !rightClicked)
-                        UnWinked?.Invoke(this, new EyeWinkArgs(result, ClickEyes.Both));
+                        UnBlinked?.Invoke(this, new EyeBlinkArgs(result, ClickEyes.Both));
                 }
                 
                 if(preLeftClick != leftClicked)
                 {
                     if (leftClicked)
-                        Winked?.Invoke(this, new EyeWinkArgs(result, ClickEyes.LeftEye));
+                        Blinked?.Invoke(this, new EyeBlinkArgs(result, ClickEyes.LeftEye));
                     else
-                        UnWinked?.Invoke(this, new EyeWinkArgs(result, ClickEyes.LeftEye));
+                        UnBlinked?.Invoke(this, new EyeBlinkArgs(result, ClickEyes.LeftEye));
                 }
 
                 if (preRightClicking != rightClicked)
                 {
                     if (rightClicked)
-                        Winked?.Invoke(this, new EyeWinkArgs(result, ClickEyes.RightEye));
+                        Blinked?.Invoke(this, new EyeBlinkArgs(result, ClickEyes.RightEye));
                     else
-                        Winked?.Invoke(this, new EyeWinkArgs(result, ClickEyes.RightEye));
+                        Blinked?.Invoke(this, new EyeBlinkArgs(result, ClickEyes.RightEye));
                 }
 
                 bool preClicking = preLeftClick || preRightClicking;
@@ -233,7 +233,7 @@ namespace Vision.Detection
                     if (IsLeftClicking && IsRightClicking)
                         clickEye = ClickEyes.Both;
 
-                    Winking?.Invoke(this, new EyeWinkArgs(result, clickEye));
+                    Blinking?.Invoke(this, new EyeBlinkArgs(result, clickEye));
                 }
 
                 frame.Dispose();
