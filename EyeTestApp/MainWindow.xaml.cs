@@ -48,20 +48,9 @@ namespace EyeTestApp
         {
             InitializeComponent();
 
-            var names = Enum.GetNames(typeof(EyeGazeDetectMode));
-            for (int i = 0; i < names.Length; i++)
-            {
-                Cbb_GazeMode.Items.Add(new ComboBoxItem() { Content = Enum.GetName(typeof(EyeGazeDetectMode), (EyeGazeDetectMode)i) });
-            }
             InitCombo<EyeGazeDetectMode>(Cbb_GazeMode);
             InitCombo<PointSmoother.SmoothMethod>(Cbb_GazeSmoothMode);
             InitCombo<ClickEyeTarget>(Cbb_OpenEyeTarget);
-
-            names = Enum.GetNames(typeof(PointSmoother.SmoothMethod));
-            for (int i = 0; i < names.Length; i++)
-            {
-                Cbb_GazeSmoothMode.Items.Add(new ComboBoxItem() { Content = Enum.GetName(typeof(PointSmoother.SmoothMethod), (PointSmoother.SmoothMethod)i) });
-            }
 
             Loaded += MainWindow_Loaded;
             
