@@ -37,16 +37,16 @@ namespace EyeTestApp
         }
     }
 
-    public class IntConverter : IValueConverter
+    public class ClickEyeTargetConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return value.ToString();
+            return (int)(ClickEyeTarget)value;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return System.Convert.ToInt32((string)value);
+            return (ClickEyeTarget)(int)value;
         }
     }
 
@@ -56,6 +56,13 @@ namespace EyeTestApp
         static Settings()
         {
             Current = new Settings();
+        }
+
+        double dpi = 96;
+        public double DPI
+        {
+            get => dpi;
+            set { dpi = value; OnPropertyChanged(); }
         }
 
         int camera = 0;
@@ -105,6 +112,13 @@ namespace EyeTestApp
         {
             get => openSmooth;
             set { openSmooth = value; OnPropertyChanged(); }
+        }
+
+        ClickEyeTarget openEyeTarget = ClickEyeTarget.All;
+        public ClickEyeTarget OpenEyeTarget
+        {
+            get => openEyeTarget;
+            set { openEyeTarget = value; OnPropertyChanged(); }
         }
 
         bool cursorSmooth = true;

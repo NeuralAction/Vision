@@ -16,6 +16,14 @@ namespace Vision.Detection
         Both = 2
     }
 
+    public enum ClickEyeTarget
+    {
+        LeftEye,
+        RightEye,
+        Both,
+        All,
+    }
+
     public class EyeBlinkArgs : EventArgs
     {
         public Point Point { get; set; }
@@ -41,6 +49,8 @@ namespace Vision.Detection
         public event EventHandler<Point> Clicked;
         public event EventHandler<Point> Clicking;
         public event EventHandler<Point> Released;
+
+        public ClickEyeTarget ClickTraget { get; set; } = ClickEyeTarget.All;
 
         public EyeGazeDetector GazeDetector { get; set; }
         public EyeOpenDetector OpenDetector { get; set; }
@@ -209,8 +219,29 @@ namespace Vision.Detection
                         Blinked?.Invoke(this, new EyeBlinkArgs(result, ClickEyes.RightEye));
                 }
 
-                bool preClicking = preLeftClick || preRightClicking;
-                bool newClicking = leftClicked || rightClicked;
+                bool preClicking;
+                bool newClicking;
+                switch (ClickTraget)
+                {
+                    case ClickEyeTarget.LeftEye:
+                        preClicking = preLeftClick && preRightClicking == false;
+                        newClicking = leftClicked && rightClicked == false;
+                        break;
+                    case ClickEyeTarget.RightEye:
+                        preClicking = preRightClicking && preLeftClick == false;
+                        newClicking = rightClicked && leftClicked == false;
+                        break;
+                    case ClickEyeTarget.Both:
+                        preClicking = preLeftClick && preRightClicking;
+                        newClicking = leftClicked && rightClicked;
+                        break;
+                    case ClickEyeTarget.All:
+                        preClicking = preLeftClick || preRightClicking;
+                        newClicking = leftClicked || rightClicked;
+                        break;
+                    default:
+                        throw new NotImplementedException();
+                }
 
                 if(preClicking != newClicking)
                 {

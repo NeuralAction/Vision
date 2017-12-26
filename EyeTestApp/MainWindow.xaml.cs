@@ -35,13 +35,9 @@ namespace EyeTestApp
                 Dispatcher.Invoke(() =>
                 {
                     if (value)
-                    {
                         Bt_Start.Content = "Stop";
-                    }
                     else
-                    {
                         Bt_Start.Content = "Start";
-                    }
                 });
                 _started = value;
             }
@@ -52,14 +48,14 @@ namespace EyeTestApp
         {
             InitializeComponent();
 
-            WindowState = WindowState.Maximized;
-            Topmost = true;
-
             var names = Enum.GetNames(typeof(EyeGazeDetectMode));
             for (int i = 0; i < names.Length; i++)
             {
                 Cbb_GazeMode.Items.Add(new ComboBoxItem() { Content = Enum.GetName(typeof(EyeGazeDetectMode), (EyeGazeDetectMode)i) });
             }
+            InitCombo<EyeGazeDetectMode>(Cbb_GazeMode);
+            InitCombo<PointSmoother.SmoothMethod>(Cbb_GazeSmoothMode);
+            InitCombo<ClickEyeTarget>(Cbb_OpenEyeTarget);
 
             names = Enum.GetNames(typeof(PointSmoother.SmoothMethod));
             for (int i = 0; i < names.Length; i++)
@@ -67,17 +63,63 @@ namespace EyeTestApp
                 Cbb_GazeSmoothMode.Items.Add(new ComboBoxItem() { Content = Enum.GetName(typeof(PointSmoother.SmoothMethod), (PointSmoother.SmoothMethod)i) });
             }
 
-            Loaded += delegate
+            Loaded += MainWindow_Loaded;
+            
+            Settings.Current.PropertyChanged += Current_PropertyChanged;
+            DataContext = Settings.Current;
+        }
+
+        void InitCombo<T>(System.Windows.Controls.ComboBox cb) where T : struct, IConvertible
+        {
+            if (!typeof(T).IsEnum)
             {
-                var width = SystemInformation.PrimaryMonitorSize.Width;
-                var height = SystemInformation.PrimaryMonitorSize.Height;
+                throw new ArgumentException("T must be an enumerated type");
+            }
+
+            var names = Enum.GetNames(typeof(T));
+            for (int i = 0; i < names.Length; i++)
+            {
+                cb.Items.Add(new ComboBoxItem() { Content = Enum.GetName(typeof(T), i) });
+            }
+        }
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            PresentationSource source = PresentationSource.FromVisual(this);
+            var scrScale = source == null ? 1.0 : source.CompositionTarget.TransformToDevice.M11;
+            Settings.Current.PropertyChanged -= Current_PropertyChanged;
+            Settings.Current.DPI = 96 * scrScale;
+            Settings.Current.PropertyChanged += Current_PropertyChanged;
+
+            UpdateScreen();
+        }
+
+        Vision.Detection.ScreenProperties scrProperties;
+        Vision.Size scrLogicalSize;
+        Vision.Size scrPhysicalSize;
+        void UpdateScreen()
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                PresentationSource source = PresentationSource.FromVisual(this);
+                var scrScale = source == null ? 1.0 : source.CompositionTarget.TransformToDevice.M11;
+                var scr = Screen.GetBounds(new System.Drawing.Point((int)(Left + ActualWidth / 2), (int)(Top + ActualHeight / 2)));
+                var width = scr.Width / scrScale;
+                var height = scr.Height / scrScale;
+                scrLogicalSize = new Vision.Size(width, height);
+                scrPhysicalSize = new Vision.Size(scr.Width, scr.Height);
+                scrProperties = ScreenProperties.CreatePixelScreen(scrPhysicalSize, Settings.Current.DPI);
+                scrProperties.PixelSize = scrLogicalSize;
+
+                Tb_Scr_Pixel_W.Text = scrPhysicalSize.Width.ToString();
+                Tb_Scr_Pixel_H.Text = scrPhysicalSize.Height.ToString();
+                Tb_Scr_Mm_W.Text = scrProperties.Size.Width.ToString("0.0");
+                Tb_Scr_Mm_H.Text = scrProperties.Size.Height.ToString("0.0");
+
                 var mW = (ActualWidth - width) / 2;
                 var mH = (ActualHeight - height) / 2;
                 Grid_Background.Margin = new Thickness(mW, mH, mW, mH);
-            };
-
-            Settings.Current.PropertyChanged += Current_PropertyChanged;
-            DataContext = Settings.Current;
+            });
         }
 
         public void LazyStart()
@@ -91,8 +133,8 @@ namespace EyeTestApp
                         Bt_Start.IsEnabled = false;
                         Bt_Start.Content = "Waiting Camera";
                     });
-                    
-                    if(service != null)
+
+                    if (service != null)
                     {
                         service.Dispose();
                         service = null;
@@ -101,20 +143,26 @@ namespace EyeTestApp
                     var set = Settings.Current;
 
                     service = new EyeGazeService();
-                    service.ScreenProperties = Core.GetDefaultScreen();
-                    service.SmoothOpen = set.OpenSmooth;
+
+                    UpdateScreen();
+                    service.ScreenProperties = scrProperties;
+
+                    service.GazeTracked += Service_GazeTracked;
+                    service.Clicked += Service_Clicked;
+                    service.Released += Service_Released;
+
                     service.GazeDetector.ClipToBound = true;
                     service.GazeDetector.UseSmoothing = set.GazeSmooth;
                     service.GazeDetector.DetectMode = set.GazeMode;
                     service.GazeDetector.Smoother.QueueCount = set.GazeSmoothCount;
                     service.GazeDetector.Smoother.Method = set.GazeSmoothMode;
-                    service.FaceDetector.UseSmooth = set.FaceSmooth;
-
                     service.GazeDetector.Calibrator.Calibarting += Calibrator_Calibarting;
                     service.GazeDetector.Calibrator.Calibrated += Calibrator_Calibrated;
-                    service.GazeTracked += Service_GazeTracked;
-                    service.Clicked += Service_Clicked;
-                    service.Released += Service_Released;
+
+                    service.SmoothOpen = set.OpenSmooth;
+                    service.ClickTraget = set.OpenEyeTarget;
+
+                    service.FaceDetector.UseSmooth = set.FaceSmooth;
 
                     service.Start(set.Camera);
 
@@ -186,6 +234,7 @@ namespace EyeTestApp
                 Storyboard.SetTargetProperty(aniY, new PropertyPath(Canvas.TopProperty));
                 storyboard.Children.Add(aniX);
                 storyboard.Children.Add(aniY);
+                Timeline.SetDesiredFrameRate(storyboard, 30);
                 storyboard.Begin();
 
                 Calib_Text.Text = (e.Percent * 100).ToString("0.00") + "%";
@@ -194,7 +243,7 @@ namespace EyeTestApp
 
         private void Service_Released(object sender, Vision.Point e)
         {
-            Dispatcher.Invoke(() => 
+            Dispatcher.Invoke(() =>
             {
                 Grid_Cursor.Width = 55;
                 Grid_Cursor.Height = 55;
@@ -206,15 +255,15 @@ namespace EyeTestApp
         {
             Dispatcher.Invoke(() =>
             {
-                Grid_Cursor.Width = 120;
-                Grid_Cursor.Height = 120;
+                Grid_Cursor.Width = 100;
+                Grid_Cursor.Height = 100;
                 Cursor_Back.Visibility = Visibility.Visible;
             });
         }
 
         public void LazyStop()
         {
-            Task.Factory.StartNew(() => 
+            Task.Factory.StartNew(() =>
             {
                 lock (StateLocker)
                 {
@@ -242,7 +291,7 @@ namespace EyeTestApp
                 }
             });
         }
-        
+
         private void Service_GazeTracked(object sender, Vision.Point e)
         {
             Dispatcher.Invoke(() =>
@@ -250,7 +299,6 @@ namespace EyeTestApp
                 if (e != null)
                 {
                     Cursor.Opacity = 1;
-
                     SetCursorPos(e.X, e.Y);
                 }
                 else
@@ -273,7 +321,7 @@ namespace EyeTestApp
                 if (cursorUpdater == null)
                 {
                     cursorUpdater = new DispatcherTimer();
-                    cursorUpdater.Interval = TimeSpan.FromMilliseconds(25);
+                    cursorUpdater.Interval = TimeSpan.FromMilliseconds(30);
                     cursorUpdater.Tick += delegate
                     {
                         var left = Canvas.GetLeft(Cursor);
@@ -281,8 +329,8 @@ namespace EyeTestApp
                         Canvas.SetLeft(Cursor, left + (cursorX - left) / 4);
                         Canvas.SetTop(Cursor, top + (cursorY - top) / 4);
                     };
-                    cursorUpdater.Start();
                 }
+                cursorUpdater.Start();
             }
             else
             {
@@ -322,6 +370,15 @@ namespace EyeTestApp
                     if (service != null)
                         service.SmoothOpen = Settings.Current.OpenSmooth;
                     break;
+                case nameof(Settings.OpenEyeTarget):
+                    if (service != null)
+                        service.ClickTraget = Settings.Current.OpenEyeTarget;
+                    break;
+                case nameof(Settings.DPI):
+                    UpdateScreen();
+                    if (service != null)
+                        service.ScreenProperties = scrProperties;
+                    break;
                 case nameof(Settings.CursorSmooth):
                     break;
                 default:
@@ -340,18 +397,14 @@ namespace EyeTestApp
 
         private void Bt_Calib_Calib_Click(object sender, RoutedEventArgs e)
         {
-            if(service != null && !service.GazeDetector.Calibrator.IsStarted)
-            {
+            if (service != null && !service.GazeDetector.Calibrator.IsStarted)
                 service.GazeDetector.Calibrator.Start(service.ScreenProperties);
-            }
         }
 
         private void Bt_Calib_Test_Click(object sender, RoutedEventArgs e)
         {
             if (service != null && !service.GazeDetector.Calibrator.IsStarted)
-            {
                 service.GazeDetector.Calibrator.Start(service.ScreenProperties, false);
-            }
         }
 
         private void Bt_Calib_Stop_Click(object sender, RoutedEventArgs e)

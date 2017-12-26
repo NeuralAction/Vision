@@ -5,10 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EyeTestApp"
         mc:Ignorable="d"
-        Title="MainWindow" Height="400" Width="525" WindowStyle="None" Background="Transparent" AllowsTransparency="True">
+        Title="MainWindow" Height="550" Width="525" WindowStyle="None" Background="Transparent" AllowsTransparency="True" Topmost="True" WindowState="Maximized">
     <Window.Resources>
         <local:EyeGazeDetectModeConverter x:Key="CvtGazeMode"/>
         <local:EyeGazeSmoothModeConverter x:Key="CvtGazeSmoothMode"/>
+        <local:ClickEyeTargetConverter x:Key="CvtClickEyeTarget"/>
         <Storyboard x:Key="PanalOn">
             <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)" Storyboard.TargetName="Grid_Panal">
                 <EasingDoubleKeyFrame KeyTime="0" Value="{Binding ElementName=Grid_Panal, Path=Opacity}"/>
@@ -41,6 +42,24 @@
                     <TextBox Text="{Binding Camera}" Width="50" HorizontalAlignment="Right" Height="24" VerticalContentAlignment="Center"/>
                 </Grid>
                 <Grid Margin="10,2">
+                    <TextBlock Text="DPI" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                    <TextBox Text="{Binding DPI}" Width="50" HorizontalAlignment="Right" Height="24" VerticalContentAlignment="Center"/>
+                </Grid>
+                <StackPanel Orientation="Horizontal" Opacity="0.66" HorizontalAlignment="Right" Margin="10,2">
+                    <TextBlock Text="Screen Pixel Size: "/>
+                    <TextBlock Text="1920" x:Name="Tb_Scr_Pixel_W"/>
+                    <TextBlock Text="px, "/>
+                    <TextBlock Text="1080" x:Name="Tb_Scr_Pixel_H"/>
+                    <TextBlock Text="px"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Opacity="0.66" HorizontalAlignment="Right" Margin="10,2">
+                    <TextBlock Text="Expected Screen Size: "/>
+                    <TextBlock Text="360" x:Name="Tb_Scr_Mm_W"/>
+                    <TextBlock Text="mm, "/>
+                    <TextBlock Text="240" x:Name="Tb_Scr_Mm_H"/>
+                    <TextBlock Text="mm"/>
+                </StackPanel>
+                <Grid Margin="10,2">
                     <TextBlock Text="Face Smooth" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                     <CheckBox IsChecked="{Binding FaceSmooth}" HorizontalAlignment="Right" Height="24" VerticalContentAlignment="Center"/>
                 </Grid>
@@ -63,6 +82,10 @@
                 <Grid Margin="10,2">
                     <TextBlock Text="Open Smooth" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                     <CheckBox IsChecked="{Binding OpenSmooth}" HorizontalAlignment="Right" Height="24" VerticalContentAlignment="Center"/>
+                </Grid>
+                <Grid Margin="10,2">
+                    <TextBlock Text="Open Eye Target" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                    <ComboBox Width="90" HorizontalAlignment="Right" x:Name="Cbb_OpenEyeTarget" SelectedIndex="{Binding OpenEyeTarget, Converter={StaticResource CvtClickEyeTarget}}"/>
                 </Grid>
                 <Grid Margin="10,2">
                     <TextBlock Text="Cursor Smooth" HorizontalAlignment="Left" VerticalAlignment="Center"/>
