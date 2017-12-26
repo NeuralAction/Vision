@@ -52,14 +52,14 @@ namespace Vision.Detection
 
     public class EyeGazeCalibrater
     {
-        public double Interval { get; set; } = 1000;
-        public double WaitInterval { get; set; } = 300;
+        public double Interval { get; set; } = 1500;
+        public double WaitInterval { get; set; } = 500;
         public double SampleWaitInterval { get; set; } = 150;
         public double SampleInterval { get; set; } = 100;
 
-        public int GridWidth { get; set; } = 6;
-        public int GridHeight { get; set; } = 4;
-        public int SampleCount { get; set; } = 6;
+        public int GridWidth { get; set; } = 4;
+        public int GridHeight { get; set; } = 3;
+        public int SampleCount { get; set; } = 5;
 
         public bool IsStarted { get; set; } = false;
         public bool IsCalibrating { get; set; } = false;
@@ -97,11 +97,6 @@ namespace Vision.Detection
 
         public void Start(ScreenProperties screen, bool train = true)
         {
-            if(Calibarting == null)
-            {
-                Logger.Throw("Calibrating callback must be used");
-            }
-
             if(IsStarted || (calibTask != null && (!calibTask.IsCanceled && !calibTask.IsCompleted && !calibTask.IsFaulted)))
             {
                 Logger.Throw("Already started");

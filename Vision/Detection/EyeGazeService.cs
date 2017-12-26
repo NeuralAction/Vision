@@ -293,13 +293,13 @@ namespace Vision.Detection
 
             if (FaceTask != null)
             {
-                FaceTask.Wait();
+                FaceTask.Wait(1000);
                 FaceTask = null;
             }
 
             if (GazeTask != null)
             {
-                GazeTask.Wait();
+                GazeTask.Wait(1000);
                 GazeTask = null;
             }
 
