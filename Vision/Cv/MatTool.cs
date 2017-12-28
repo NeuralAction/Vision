@@ -27,9 +27,8 @@ namespace Vision.Cv
         /// </summary>
         public static void Light(Mat input, Mat output, double factor)
         {
-            var f = factor * 255;
-            Cv2.Add(input, new OpenCvSharp.Scalar(f, f, f, 0), output);
-            Cv2.Threshold(output, output, 255, 255, ThresholdTypes.Binary);
+            var f = Math.Round(factor * 255);
+            Cv2.Add(input, new OpenCvSharp.Scalar(f, f, f), output);
         }
     }
 

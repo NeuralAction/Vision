@@ -244,11 +244,6 @@ namespace Vision.Tests
 
             if (mat != null && !mat.IsEmpty)
             {
-                Profiler.Start("Camera.ImgProc");
-                //ImgProc.Contrast(mat, mat, contrast);
-                //ImgProc.Light(mat, mat, light);
-                Profiler.End("Camera.ImgProc");
-
                 if (FaceDetectionTask == null || FaceDetectionTask.IsFaulted || FaceDetectionTask.IsCanceled || FaceDetectionTask.IsCompleted)
                 {
                     if(FaceDetectionTask != null && FaceDetectionTask.Exception != null)
