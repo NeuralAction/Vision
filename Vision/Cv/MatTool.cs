@@ -7,6 +7,32 @@ using System.Threading.Tasks;
 
 namespace Vision.Cv
 {
+    public static class ImgProc
+    {
+        //http://kylog.tistory.com/18
+        /// <summary>
+        /// Change contrast of Mat. Contrast: -1 ~ 1
+        /// </summary>
+        /// <param name="contrast">Contrastness. -1 ~ 1</param>
+        public static void Contrast(Mat input, Mat output, double contrast)
+        {
+            var c = contrast > 0 ? 1 / 1 - contrast : 1 + contrast;
+            Cv2.Subtract(input, new OpenCvSharp.Scalar(128, 128, 128, 0), output);
+            Cv2.Multiply(output, new OpenCvSharp.Scalar(c, c, c, 1), output);
+            Cv2.Add(output, new OpenCvSharp.Scalar(128, 128, 128, 0), output);
+        }
+
+        /// <summary>
+        /// Add light to Mat. output = input + factor * 255
+        /// </summary>
+        public static void Light(Mat input, Mat output, double factor)
+        {
+            var f = factor * 255;
+            Cv2.Add(input, new OpenCvSharp.Scalar(f, f, f, 0), output);
+            Cv2.Threshold(output, output, 255, 255, ThresholdTypes.Binary);
+        }
+    }
+
     public static class MatTool
     {
         public static Mat New()
@@ -93,7 +119,7 @@ namespace Vision.Cv
 
         #endregion Math
 
-        #region extensions
+        #region Extensions
 
         public static void ConvertColor(this Mat self, Mat output, ColorConversionCodes convert)
         {

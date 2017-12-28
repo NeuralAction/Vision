@@ -130,6 +130,8 @@ namespace Vision.Tests
 
         bool fullscreen = false;
         object renderLock = new object();
+        double light = 0;
+        double contrast = 0;
         double yoffset = 0;
         int frameMax = 0;
         int frameOk = 0;
@@ -242,6 +244,11 @@ namespace Vision.Tests
 
             if (mat != null && !mat.IsEmpty)
             {
+                Profiler.Start("Camera.ImgProc");
+                //ImgProc.Contrast(mat, mat, contrast);
+                //ImgProc.Light(mat, mat, light);
+                Profiler.End("Camera.ImgProc");
+
                 if (FaceDetectionTask == null || FaceDetectionTask.IsFaulted || FaceDetectionTask.IsCanceled || FaceDetectionTask.IsCompleted)
                 {
                     if(FaceDetectionTask != null && FaceDetectionTask.Exception != null)
@@ -290,6 +297,7 @@ namespace Vision.Tests
                 case 'e':
                     Core.Cv.CloseAllWindows();
                     e.Break = true;
+                    Task.Factory.StartNew(()=>capture.Dispose());
                     break;
                 case 'd':
                     LandmarkDetect = !LandmarkDetect;
@@ -309,6 +317,10 @@ namespace Vision.Tests
                     break;
                 case 'k':
                     GazeDetector.UseModification = !GazeDetector.UseModification;
+                    break;
+                case 'l':
+                    OpenDetector.DetectMode++;
+                    OpenDetector.DetectMode = (EyeOpenDetectMode)((int)OpenDetector.DetectMode % Enum.GetNames(typeof(EyeOpenDetectMode)).Length);
                     break;
                 case '1':
                     FaceProvider = FaceDetector;
@@ -358,6 +370,18 @@ namespace Vision.Tests
                     break;
                 case 'b':
                     GazeDetector.Calibrator.Start(ScreenProperties, false);
+                    break;
+                case '9':
+                    light -= 0.03;
+                    break;
+                case '0':
+                    light += 0.03;
+                    break;
+                case '-':
+                    contrast -= 0.03;
+                    break;
+                case '=':
+                    contrast += 0.03;
                     break;
                 case '`':
                     fullscreen = !fullscreen;
@@ -431,13 +455,13 @@ namespace Vision.Tests
                     if (face.LeftEye != null)
                     {
                         OpenDetector.Detect(face.LeftEye, mat);
-                        face.Smoother.SmoothLeftEye(face.LeftEye);
+                        //face.Smoother.SmoothLeftEye(face.LeftEye);
                     }
 
                     if (face.RightEye != null)
                     {
                         OpenDetector.Detect(face.RightEye, mat);
-                        face.Smoother.SmoothRightEye(face.RightEye);
+                        //face.Smoother.SmoothRightEye(face.RightEye);
                     }
                 }
                 Profiler.End("OpenALL");
@@ -675,8 +699,8 @@ namespace Vision.Tests
                     detectionTime = 10000000000;
                 string demo = $"DetectFPS: {Profiler.Get("FaceFPS")} ({detectionTime.ToString("0.00")}ms/{(1000 / detectionTime).ToString("0.00")}fps)\n" +
                     $"Frame: {frameOk}/{frameMax} ({((double)frameOk / frameMax * 100).ToString("0.00")}%)\n" +
-                    $"LndSmt: {SmoothLandmarks} GzSmt: {GazeSmooth} GzMode: {GazeDetector.DetectMode}\n" +
-                    $"GzMod: Sx:{GazeDetector.SensitiveX} Sy:{GazeDetector.SensitiveY} Ox:{GazeDetector.OffsetX} Oy:{GazeDetector.OffsetY}";
+                    $"LndSmt: {SmoothLandmarks} GzSmt: {GazeSmooth} GzMode: {GazeDetector.DetectMode} OpMode: {OpenDetector.DetectMode}\n" +
+                    $"GzMod[{(GazeDetector.UseModification ? "On" : "Off")}]: Sx:{GazeDetector.SensitiveX} Sy:{GazeDetector.SensitiveY} Ox:{GazeDetector.OffsetX} Oy:{GazeDetector.OffsetY}";
                 var sessTime = Profiler.Get("Gaze.Face.Sess");
                 if (!(double.IsInfinity(sessTime) || sessTime == 0))
                     demo += $"\nGazeFaceSess: ({sessTime.ToString("0.00")}ms/{(1000/sessTime).ToString("0.00")}fps)";
