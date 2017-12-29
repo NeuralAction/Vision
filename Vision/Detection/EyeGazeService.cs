@@ -64,6 +64,8 @@ namespace Vision.Detection
         public bool IsLeftClicking { get; protected set; } = false;
         public bool IsRightClicking { get; protected set; } = false;
 
+        public int CaptureIndex => Capture.Index;
+
         Capture Capture;
         Task FaceTask;
         Task GazeTask;
@@ -130,7 +132,14 @@ namespace Vision.Detection
             {
                 if(!t.IsCanceled || !t.IsCompleted || !t.IsFaulted)
                 {
-                    t.Wait();
+                    try
+                    {
+                        t.Wait();
+                    }
+                    catch(AggregateException ex)
+                    {
+                        Logger.Error(this, ex);
+                    }
                 }
 
                 if(t.Exception != null)
@@ -151,7 +160,6 @@ namespace Vision.Detection
                     result = null;
 
                 StartGaze(result, mat);
-                FaceTracked?.Invoke(this, result);
             });
         }
 
@@ -193,6 +201,7 @@ namespace Vision.Detection
                 IsLeftClicking = leftClicked;
                 IsRightClicking = rightClicked;
 
+                FaceTracked?.Invoke(this, face);
                 GazeTracked?.Invoke(this, result);
 
                 if(preLeftClick != leftClicked && preRightClicking != rightClicked)

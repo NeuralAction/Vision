@@ -11,7 +11,7 @@ namespace Vision.Detection
         public Dictionary<Point3D, CalibratingPushData> RawData { get; private set; } = new Dictionary<Point3D, CalibratingPushData>();
         public Dictionary<Point3D, CalibratingPushData> TrainData { get; private set; } = new Dictionary<Point3D, CalibratingPushData>();
         public Dictionary<Point3D, CalibratingPushData> TestData { get; private set; } = new Dictionary<Point3D, CalibratingPushData>();
-        public double TestRatio { get; set; } = 0.1;
+        public double TestRatio { get; set; } = 0.15;
 
         public void SetData(Dictionary<Point3D, CalibratingPushData> data)
         {
@@ -34,6 +34,13 @@ namespace Vision.Detection
                 {
                     TrainData.Add(item.Key, item.Value);
                 }
+            }
+
+            if(TestData.Count == 0)
+            {
+                var item = TrainData.Last();
+                TestData.Add(item.Key, item.Value);
+                TrainData.Remove(item.Key);
             }
         }
 
