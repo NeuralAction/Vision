@@ -92,19 +92,22 @@ namespace Vision
             {
                 lastMs = GetCurrent();
 
-                sb.AppendLine("Profiler Report ==");
-                foreach (ProfilerData d in Data.Values)
+                lock (sb)
                 {
-                    d.Push();
-                    d.Clear();
-                    sb.AppendLine(d.ToString());
+                    sb.AppendLine("Profiler Report ==");
+                    foreach (ProfilerData d in Data.Values)
+                    {
+                        d.Push();
+                        d.Clear();
+                        sb.AppendLine(d.ToString());
+                    }
+
+                    Logger.Log(sb.ToString());
+
+                    sb.Clear();
+
+                    Reported?.Invoke(null, Data);
                 }
-
-                Logger.Log(sb.ToString());
-
-                sb.Clear();
-                
-                Reported?.Invoke(null, Data);
             }
         }
     }
