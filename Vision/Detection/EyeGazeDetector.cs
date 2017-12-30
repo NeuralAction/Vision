@@ -225,7 +225,7 @@ namespace Vision.Detection
                 }
 
                 vecPt = new Point(x, y);
-                if (UseSmoothing)
+                if (UseSmoothing && !Calibrator.IsCalibrating)
                     vecPt = Smoother.Smooth(vecPt);
 
                 Vector<double> vec = CreateVector.Dense(new double[] { vecPt.X, vecPt.Y, -1 });
