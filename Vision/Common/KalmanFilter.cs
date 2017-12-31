@@ -6,6 +6,58 @@ using System.Threading.Tasks;
 
 namespace Vision
 {
+    public class PointSmoother
+    {
+        public enum SmoothMethod
+        {
+            Kalman,
+            Mean,
+            MeanKalman
+        }
+
+        public int QueueCount { get; set; } = 6;
+        public SmoothMethod Method { get; set; } = SmoothMethod.MeanKalman;
+
+        PointKalmanFilter kalman = new PointKalmanFilter();
+        Queue<Point> q = new Queue<Point>();
+
+        public Point Smooth(Point pt)
+        {
+            Point ret = pt.Clone();
+
+            q.Enqueue(ret.Clone());
+            if (q.Count > QueueCount)
+                q.Dequeue();
+
+            if (Method == SmoothMethod.Mean || Method == SmoothMethod.MeanKalman)
+            {
+                var arr = q.ToArray();
+                var xarr = arr.OrderBy((a) => { return a.X; }).ToArray();
+                var yarr = arr.OrderBy((a) => { return a.Y; }).ToArray();
+                var x = 0.0;
+                var y = 0.0;
+                var cc = 0.0;
+                var count = Math.Max(1, (double)q.Count / 2);
+                var start = Math.Round((double)q.Count / 2 - count / 2);
+                for (int i = (int)start; i < count; i++)
+                {
+                    x += xarr[i].X;
+                    y += yarr[i].Y;
+                    cc++;
+                }
+                x /= cc;
+                y /= cc;
+                ret.X = x;
+                ret.Y = y;
+            }
+
+            if (Method == SmoothMethod.MeanKalman || Method == SmoothMethod.Kalman)
+                ret = kalman.Calculate(ret);
+
+            return ret;
+        }
+    }
+
     //ref. https://stackoverflow.com/questions/39315817/filtering-streaming-data-to-reduce-noise-kalman-filter-c-sharp
     public class KalmanFilter
     {
