@@ -57,8 +57,8 @@ namespace Vision.Detection
         public double SampleWaitInterval { get; set; } = 150;
         public double SampleInterval { get; set; } = 100;
 
-        public int GridWidth { get; set; } = 3;
-        public int GridHeight { get; set; } = 2;
+        public int GridWidth { get; set; } = 4;
+        public int GridHeight { get; set; } = 3;
         public int SampleCount { get; set; } = 5;
 
         public bool IsStarted { get; set; } = false;
