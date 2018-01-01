@@ -215,6 +215,8 @@ namespace Vision.Detection
 
                 tokenSource = null;
                 calibTask = null;
+
+                Calibrated?.Invoke(this, null);
             }
         }
     }

@@ -476,23 +476,26 @@ namespace Vision.Tests
         {
             Logger.Log(this, "Calibrated");
 
-            EyeGazeCalibrationLog logger = new EyeGazeCalibrationLog(e.Data);
-            logger.Save();
-
-            using (Mat frame = logger.Plot(ScreenProperties, GazeDetector.Calibrator))
+            if (e != null)
             {
-                var savepath = logger.File.AbosolutePath;
-                savepath = savepath.Replace(".clb", ".jpg");
-                Core.Cv.ImgWrite(savepath, frame);
+                EyeGazeCalibrationLog logger = new EyeGazeCalibrationLog(e.Data);
+                logger.Save();
 
-                while (true)
+                using (Mat frame = logger.Plot(ScreenProperties, GazeDetector.Calibrator))
                 {
-                    Core.Cv.ImgShow("calib_result", frame);
-                    var c = Core.Cv.WaitKey(1);
-                    if (c != 255 || e.Token.IsCancellationRequested)
+                    var savepath = logger.File.AbosolutePath;
+                    savepath = savepath.Replace(".clb", ".jpg");
+                    Core.Cv.ImgWrite(savepath, frame);
+
+                    while (true)
                     {
-                        Core.Cv.CloseWindow("calib_result");
-                        return;
+                        Core.Cv.ImgShow("calib_result", frame);
+                        var c = Core.Cv.WaitKey(1);
+                        if (c != 255 || e.Token.IsCancellationRequested)
+                        {
+                            Core.Cv.CloseWindow("calib_result");
+                            return;
+                        }
                     }
                 }
             }
