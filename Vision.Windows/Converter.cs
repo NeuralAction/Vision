@@ -29,5 +29,15 @@ namespace Vision.Windows
         {
             return OpenCvSharp.Windows.BitmapSourceConverter.ToBitmapSource(mat);
         }
+
+        public static System.Windows.Point ToPoint(this Point pt)
+        {
+            return new System.Windows.Point(pt.X, pt.Y);
+        }
+
+        public static Point ToPoint(this System.Windows.Point pt)
+        {
+            return new Point(pt.X, pt.Y);
+        }
     }
 }
