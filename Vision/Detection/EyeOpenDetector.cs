@@ -66,7 +66,7 @@ namespace Vision.Detection
     public class EyeOpenDetector : IDisposable
     {
         public const int ImgSize = 25;
-        public const int ImgSizeV2 = 25;
+        public const int ImgSizeV2 = 48;
 
         public static ManifestResource GraphResource = new ManifestResource("Vision.Detection", "frozen_open.pb");
         public static ManifestResource GraphV2Resource = new ManifestResource("Vision.Detection", "frozen_openV2.pb");
