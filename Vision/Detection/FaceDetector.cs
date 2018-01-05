@@ -161,10 +161,13 @@ namespace Vision.Detection
             face.LandmarkCameraMatrix = MatTool.CameraMatrixArray(Detector.FocalX * scale, Detector.FocalY * scale, Detector.CenterX * scale, Detector.CenterY * scale);
             face.UnitPerMM = UnitPerMM;
 
-            var left = GetEye(face, 36, 41);
-            var right = GetEye(face, 42, 47);
-            face.Add(left);
-            face.Add(right);
+            if (face.Landmarks.Length > 47)
+            {
+                var left = GetEye(face, 36, 41);
+                var right = GetEye(face, 42, 47);
+                face.Add(left);
+                face.Add(right);
+            }
             
             return face;
         }
