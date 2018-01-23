@@ -47,9 +47,9 @@ namespace EyeExtract
                 Console.Write("caption? >>> ");
                 string caption = Console.ReadLine();
 
-                Console.Write("leftOnly? [Y/n] >>> ");
+                Console.Write("leftOnly? [y/N] >>> ");
                 string readleft = Console.ReadLine();
-                bool useleft = true;
+                bool useleft = false;
                 if (!string.IsNullOrWhiteSpace(readleft))
                 {
                     var readleftLower = readleft.ToLower();
@@ -60,10 +60,6 @@ namespace EyeExtract
                     else if (readleftLower == "y")
                     {
                         useleft = true;
-                    }
-                    else
-                    {
-                        return;
                     }
                 }
 
@@ -78,23 +74,11 @@ namespace EyeExtract
                 if (!parentRight.IsExist && !useleft)
                     parentRight.Create();
 
-                FaceDetector detector = new FaceDetector()
+                FaceDetectionProvider detector = new OpenFaceDetector()
                 {
-                    LandmarkDetect = true,
-                    SmoothVectors = true,
-                    EyesDetectCascade = true,
-                    EyesDetectLandmark = true,
-                    SmoothLandmarks = false,
-                    EyesMinFactor = 0.1,
-                    EyesMaxFactor = 0.8,
-                    EyesScaleFactor = 1.2,
-                    FaceMaxFactor = 1,
-                    FaceMinFactor = 0.1,
-                    FaceScaleFactor = 1.2,
-                    LandmarkSolve = true,
-                    MaxFaceSize = 200,
-                    MaxSize = 400,
-                    Interpolation = InterpolationFlags.Cubic
+                    Interpolation = InterpolationFlags.Cubic,
+                    MaxSize = 420,
+                    UseSmooth = false
                 };
 
                 int id = 0;

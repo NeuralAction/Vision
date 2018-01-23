@@ -129,11 +129,11 @@ namespace Vision.Detection
                         throw new NotImplementedException();
                 }
                 roi.Resize(new Size(imgSize, imgSize));
-                if (imgBuffer == null)
-                    imgBuffer = new float[roi.Width * roi.Height * 3];
+                var bufferSize = roi.Width * roi.Height * 3;
+                if (imgBuffer == null || imgBuffer.Length != bufferSize)
+                    imgBuffer = new float[bufferSize];
                 
                 var imgTensor = Tools.MatBgr2Tensor(roi, normalizeMode, -1, -1, new long[] { 1, roi.Width, roi.Height, 3 }, imgBuffer);
-                var std = MathNet.Numerics.Statistics.Statistics.StandardDeviation(imgBuffer);
                 Dictionary<string, Tensor> feedDict;
                 switch (DetectMode)
                 {
