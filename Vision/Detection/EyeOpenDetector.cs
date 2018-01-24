@@ -66,7 +66,7 @@ namespace Vision.Detection
     public class EyeOpenDetector : IDisposable
     {
         public const int ImgSize = 25;
-        public const int ImgSizeV2 = 48;
+        public const int ImgSizeV2 = 36;
 
         public static ManifestResource GraphResource = new ManifestResource("Vision.Detection", "frozen_open.pb");
         public static ManifestResource GraphV2Resource = new ManifestResource("Vision.Detection", "frozen_openV2.pb");
@@ -123,7 +123,7 @@ namespace Vision.Detection
                     case EyeOpenDetectMode.V2:
                         imgSize = ImgSizeV2;
                         sess = sessV2;
-                        normalizeMode = NormalizeMode.CenterZero;
+                        normalizeMode = NormalizeMode.ZeroOne;
                         break;
                     default:
                         throw new NotImplementedException();
@@ -150,7 +150,7 @@ namespace Vision.Detection
                         {
                             { "input_image", imgTensor },
                             { "phase_train", new Tensor(false) },
-                            { "keep_prob", new Tensor(1.0f) }
+                            //{ "keep_prob", new Tensor(1.0f) }
                         };
                         break;
                     default:
