@@ -16,18 +16,12 @@ namespace Vision.Detection
         {
             get
             {
-                Point pt = Center;
+                var pt = Center;
                 return new Point(pt.X + Parent.X, pt.Y + Parent.Y);
             }
         }
 
-        public Point AbsolutePoint
-        {
-            get
-            {
-                return new Point(X + Parent.X, Y + Parent.Y);
-            }
-        }
+        public Point AbsolutePoint => new Point(X + Parent.X, Y + Parent.Y);
 
         public EyeRect Absolute
         {
@@ -58,25 +52,24 @@ namespace Vision.Detection
             Point center = new Point(Parent.X + X + Width * 0.5, Parent.Y + Y + Height * 0.5);
             double radius = (Width + Height) * 0.25;
 
-            Core.Cv.DrawCircle(frame, center, radius, Scalar.BgrRed, thickness, LineTypes.Link4, 0);
-            Core.Cv.DrawCircle(frame, center, 2, Scalar.BgrYellow, 4, LineTypes.Link4, 0);
+            Core.Cv.DrawCircle(frame, center, radius, Scalar.BgrRed, thickness, LineTypes.AntiAlias, 0);
+            Core.Cv.DrawCircle(frame, center, 2, Scalar.BgrYellow, 4, LineTypes.AntiAlias, 0);
+            
+            if (OpenData == null) return;
 
-            if(OpenData != null)
+            string text;
+            Scalar color;
+            if (OpenData.IsOpen)
             {
-                string text;
-                Scalar color;
-                if (OpenData.IsOpen)
-                {
-                    text = $"Open ({(OpenData.Percent*100).ToString("0.0")}%)";
-                    color = Scalar.BgrRed;
-                }
-                else
-                {
-                    text = $"Close ({(OpenData.Percent * 100).ToString("0.0")}%)";
-                    color = Scalar.BgrBlue;
-                }
-                frame.DrawText(Point.X + Parent.X, Point.Y + Parent.Y - 20, text, color);
+                text = $"Open ({(OpenData.Percent*100):0.0}%)";
+                color = Scalar.BgrRed;
             }
+            else
+            {
+                text = $"Close ({(OpenData.Percent * 100):0.0)}%)";
+                color = Scalar.BgrBlue;
+            }
+            frame.DrawText(Point.X + Parent.X, Point.Y + Parent.Y - 20, text, color);
         }
 
         public Mat ROI(Mat frame)

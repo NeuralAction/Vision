@@ -62,7 +62,7 @@ namespace Vision
 
         public static void Throw(string message)
         {
-            WriteLine(string.Format("{0}[ERR] {1}", TimeStamp, message));
+            WriteLine($"{TimeStamp}[ERR] {message}");
             throw new Exception(message);
         }
 

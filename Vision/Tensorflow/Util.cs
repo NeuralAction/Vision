@@ -113,7 +113,7 @@ namespace Vision.Tensorflow
 
             Output decoded = graph.DecodeImage(input, codec);
 
-            output = graph.ExpandDims ( graph.Cast(decoded.output, TFDataType.Float), graph.Const(0, "make_batch") );
+            output = graph.ExpandDims ( graph.Cast(decoded.NativeOutput, TFDataType.Float), graph.Const(0, "make_batch") );
 
             if (use_resize) 
                 output = graph.ResizeBilinear ( output, graph.Const(new int[] { width, height }, "size") );

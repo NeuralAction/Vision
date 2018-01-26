@@ -1,11 +1,14 @@
-﻿using System;
+﻿using Google.Protobuf;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TensorFlow;
+using Vision.Tensorflow.Proto;
 
 namespace Vision.Tensorflow
 {
@@ -93,9 +96,9 @@ namespace Vision.Tensorflow
             //    memory_.UpdateStat(mem_total);
             //}
 
-            foreach(var ds in meta.StepStats.DevStats)
+            foreach (var ds in meta.StepStats.DevStats)
             {
-                foreach(var ns in ds.NodeStats)
+                foreach (var ns in ds.NodeStats)
                 {
                     var name = ns.NodeName;
                     var time = ns.AllEndRelMicros / 1000.0;
@@ -105,7 +108,7 @@ namespace Vision.Tensorflow
                         var type = OpType(ds, ns);
                         Proto.TensorShapeProto.Types.Dim[] shape = null;
 
-                        if(ns.Output.Count > 0)
+                        if (ns.Output.Count > 0)
                         {
                             shape = ns.Output.First().TensorDescription.Shape.Dim.ToArray();
                         }
@@ -157,7 +160,7 @@ namespace Vision.Tensorflow
 
         string OpType(Proto.DeviceStepStats ds, Proto.NodeExecStats ns)
         {
-            if(ds.Device.Contains("/stream") || ds.Device.Contains("/memcpy"))
+            if (ds.Device.Contains("/stream") || ds.Device.Contains("/memcpy"))
             {
                 return "<>";
             }
@@ -177,14 +180,15 @@ namespace Vision.Tensorflow
 
     public class Session : IDisposable
     {
-        internal TFSession sess;
+        static byte[] TraceAll = new byte[] { 0x08, 0x03 };
+
         public TFSession NativeSession { get => sess; set => sess = value; }
-
         public Graph Graph { get; set; }
-        TFSession.Runner runner;
-
         public bool EnableSummary { get; set; } = false;
         public StatSummarizer Summary { get; set; } = new StatSummarizer();
+
+        TFSession sess;
+        TFSession.Runner runner;
 
         public Session() : this(new Graph())
         {
@@ -196,7 +200,25 @@ namespace Vision.Tensorflow
             Graph = graph ?? throw new ArgumentNullException("graph");
             try
             {
-                sess = new TFSession(Graph.graph);
+                var config = new ConfigProto
+                {
+                    LogDevicePlacement = false,
+                    GpuOptions = new GPUOptions
+                    {
+                        AllowGrowth = true
+                    }
+                };
+                var opt = new TFSessionOptions();
+                var status = new TFStatus();
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    config.WriteTo(stream);
+                    byte[] configBuffer = stream.ToArray();
+                    IntPtr unmanagedPointer = Marshal.AllocHGlobal(configBuffer.Length);
+                    Marshal.Copy(configBuffer, 0, unmanagedPointer, configBuffer.Length);
+                    opt.SetConfig(unmanagedPointer, configBuffer.Length, status);
+                }
+                sess = new TFSession(graph.NativeGraph, opt, status);
                 runner = sess.GetRunner();
             }
             catch (Exception ex)
@@ -205,15 +227,7 @@ namespace Vision.Tensorflow
                 throw ex;
             }
         }
-        
-        public Tensor Run(Output output)
-        {
-            runner.Fetch(output.NativeOutput);
-            TFTensor tensor = runner.Run();
-            return new Tensor(tensor);
-        }
 
-        byte[] TraceAll = new byte[] { 0x08, 0x03 };
         public Tensor[] Run(string[] Fetches, Dictionary<string, Tensor> Input)
         {
             try
@@ -280,7 +294,7 @@ namespace Vision.Tensorflow
 
     public class Output
     {
-        internal TFOutput output;
+        TFOutput output;
         public TFOutput NativeOutput { get => output; set => output = value; }
 
         internal Output(TFOutput output)
@@ -304,7 +318,7 @@ namespace Vision.Tensorflow
 
     public class Tensor : IDisposable
     {
-        internal TFTensor tensor;
+        TFTensor tensor;
         public TFTensor NativeTensor { get => tensor; set => tensor = value; }
 
         public Tensor(TFTensor tensor)
@@ -319,16 +333,14 @@ namespace Vision.Tensorflow
 
         public void Dispose()
         {
-            if(tensor != null)
-            {
-                tensor.Dispose();
-            }
+            tensor?.Dispose();
+            tensor = null;
         }
     }
 
     public class Graph : IDisposable
     {
-        internal TFGraph graph;
+        TFGraph graph;
         public TFGraph NativeGraph { get => graph; set => graph = value; }
 
         public Graph()
@@ -336,6 +348,7 @@ namespace Vision.Tensorflow
             try
             {
                 graph = new TFGraph();
+                
             }
             catch (Exception ex)
             {
@@ -343,12 +356,12 @@ namespace Vision.Tensorflow
             }
         }
 
-        public void ImportPb(Stream stream, string prefix="")
+        public void ImportPb(Stream stream, string prefix = "")
         {
             graph.Import(stream.ReadAll(), prefix);
         }
 
-        public void ImportPb(FileNode node, string prefix="")
+        public void ImportPb(FileNode node, string prefix = "")
         {
             graph.Import(node.ReadBytes(), prefix);
         }
@@ -360,11 +373,8 @@ namespace Vision.Tensorflow
 
         public void Dispose()
         {
-            if(graph != null)
-            {
-                graph.Dispose();
-                graph = null;
-            }
+            graph?.Dispose();
+            graph = null;
         }
     }
 }
