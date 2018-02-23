@@ -12,8 +12,12 @@ namespace Vision.Windows
 {
     public class WindowsCore : Core
     {
-        public static void Init()
+        public static bool IsGpu { get; private set; }
+
+        public static void Init(bool isGpu = false)
         {
+            IsGpu = isGpu;
+
             Init(new WindowsCore());
         }
 
@@ -25,8 +29,10 @@ namespace Vision.Windows
 
             InitCv(new WindowsCv());
 
-            TensorFlowSharp.Windows.NativeBinding.Init();
+            TensorFlowSharp.Windows.NativeBinding.Init(IsGpu);
             TensorFlow.NativeBinding.PrintFunc = new TensorFlow.NativeBinding.Print((s) => { Logger.Log(s); });
+            if(IsGpu)
+                Logger.Log("Tensorflow Working With GPU");
         }
 
         [System.Runtime.InteropServices.DllImport("gdi32.dll")]
