@@ -161,10 +161,9 @@ namespace Vision.Tests
             UiList.Add(faceVecPlot);
             UiList.Add(facePosePlot);
 
-            UpdateGraph(1500,5000);
+            UpdateGraph(1500, 5000);
 
             ScreenProperties = Core.GetDefaultScreen();
-            //ScreenProperties = new ScreenProperties(new Point3D(-134, 0, 0), new Size(268, 168), new Size(1706.66666666667, 1066.66666666667));
             OpenFaceDetector = new OpenFaceDetector()
             {
                 UseSmooth = true
@@ -693,7 +692,7 @@ namespace Vision.Tests
                 var sessTime = Profiler.Get("Gaze.Face.Sess");
                 if (!(double.IsInfinity(sessTime) || sessTime == 0))
                     demo += $"\nGazeFaceSess: ({sessTime.ToString("0.00")}ms/{(1000/sessTime).ToString("0.00")}fps)";
-                mat.DrawText(50, 50, demo, Scalar.BgrGreen);
+                mat.DrawText(50, fullscreen ? pt1.Y + 50 : 50, demo, Scalar.BgrGreen);
                 mat.DrawText(50, 400 + 250 * Math.Pow(Math.Sin(2 * Math.PI * yoffset), 3), "HELLO WORLD");
                 mat.DrawText(50, mat.Height - 50, $"DrawFPS: {Profiler.Get("DrawFPS")}", Scalar.BgrGreen);
             }

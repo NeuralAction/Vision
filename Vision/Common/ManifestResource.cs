@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -22,6 +24,12 @@ namespace Vision
         {
             Namespace = nameSpace;
             FileName = filename;
+        }
+
+        public Stream GetStream()
+        {
+            var assembly = typeof(Core).GetTypeInfo().Assembly;
+            return assembly.GetManifestResourceStream(Resource);
         }
 
         public override string ToString()

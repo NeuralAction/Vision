@@ -175,7 +175,6 @@ namespace Vision
         public static FileNode LoadResource(ManifestResource resource, bool overwrite = false)
         {
             Logger.Log("Load Resource: " + resource);
-            var assembly = typeof(Core).GetTypeInfo().Assembly;
 
             FileNode node = Root.GetFile(resource.FileName);
             if (!overwrite && node.IsExist)
@@ -197,6 +196,7 @@ namespace Vision
                     Logger.Log("resource not found. copy to : " + node.AbosolutePath);
                 }
 
+                var assembly = typeof(Core).GetTypeInfo().Assembly;
                 using (Stream stream = assembly.GetManifestResourceStream(resource.Resource))
                 {
                     if (stream == null)

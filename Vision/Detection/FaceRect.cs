@@ -126,6 +126,7 @@ namespace Vision.Detection
                     {
                         var pt = GazeInfo.Vector * (Width / 2);
                         frame.DrawLine(start_origin, start_origin + new Point(pt.X, pt.Y), Scalar.BgrYellow, 2, LineTypes.AntiAlias);
+                        frame.DrawText(X + 5, Y + Height - Core.Cv.GetFontSize(HersheyFonts.HersheyPlain, 1), $"({GazeInfo.Vector.X:0.00}, {GazeInfo.Vector.Y:0.00}, {GazeInfo.Vector.Z:0.00})", Scalar.BgrYellow);
                     }
                 }
             }
