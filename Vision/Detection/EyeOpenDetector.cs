@@ -61,25 +61,35 @@ namespace Vision.Detection
     {
         V1,
         V2,
+        V3,
     }
 
     public class EyeOpenDetector : IDisposable
     {
         public const int ImgSize = 25;
         public const int ImgSizeV2 = 36;
+        public const int ImgSizeV3 = 32;
 
         public static ManifestResource GraphResource = new ManifestResource("Vision.Detection", "frozen_open.pb");
         public static ManifestResource GraphV2Resource = new ManifestResource("Vision.Detection", "frozen_openV2.pb");
+        public static ManifestResource GraphV3Resource = new ManifestResource("Vision.Detection", "frozen_openV3.pb");
         public static Graph Graph;
         public static Graph GraphV2;
+        public static Graph GraphV3;
 
         static EyeOpenDetector()
         {
             Graph = new Graph();
-            Graph.ImportPb(Storage.LoadResource(GraphResource, true));
+            using(var s = GraphResource.GetStream())
+                Graph.ImportPb(s);
 
             GraphV2 = new Graph();
-            GraphV2.ImportPb(Storage.LoadResource(GraphV2Resource, true));
+            using(var s = GraphV2Resource.GetStream())
+                GraphV2.ImportPb(s);
+
+            GraphV3 = new Graph();
+            using(var s = GraphV3Resource.GetStream())
+                GraphV3.ImportPb(s);
 
             Logger.Log("EyeOpenDetector", "Graph Loaded");
         }
@@ -88,12 +98,14 @@ namespace Vision.Detection
 
         Session sess;
         Session sessV2;
+        Session sessV3;
         float[] imgBuffer;
 
         public EyeOpenDetector()
         {
             sess = new Session(Graph);
             sessV2 = new Session(GraphV2);
+            sessV3 = new Session(GraphV3);
         }
 
         public EyeOpenData Detect(EyeRect eye, Mat frame)
@@ -125,6 +137,11 @@ namespace Vision.Detection
                         sess = sessV2;
                         normalizeMode = NormalizeMode.ZeroOne;
                         break;
+                    case EyeOpenDetectMode.V3:
+                        imgSize = ImgSizeV3;
+                        sess = sessV3;
+                        normalizeMode = NormalizeMode.CenterZero;
+                        break;
                     default:
                         throw new NotImplementedException();
                 }
@@ -135,6 +152,7 @@ namespace Vision.Detection
                 
                 var imgTensor = Tools.MatBgr2Tensor(roi, normalizeMode, -1, -1, new long[] { 1, roi.Width, roi.Height, 3 }, imgBuffer);
                 Dictionary<string, Tensor> feedDict;
+                string outputName = "output";
                 switch (DetectMode)
                 {
                     case EyeOpenDetectMode.V1:
@@ -153,11 +171,20 @@ namespace Vision.Detection
                             //{ "keep_prob", new Tensor(1.0f) }
                         };
                         break;
+                    case EyeOpenDetectMode.V3:
+                        feedDict = new Dictionary<string, Tensor>()
+                        {
+                            { "input", imgTensor },
+                            { "phase_train_1", new Tensor(false) },
+                            { "keep_prob_1", new Tensor(0.0f) }
+                        };
+                        outputName = "lock/output";
+                        break;
                     default:
                         throw new NotImplementedException();
                 }
                 Profiler.Start("Open.Sess");
-                var fetch = sess.Run(new[] { "output" }, feedDict);
+                var fetch = sess.Run(new[] { outputName }, feedDict);
                 Profiler.End("Open.Sess");
                 var result = (float[,])fetch[0].GetValue();
 
