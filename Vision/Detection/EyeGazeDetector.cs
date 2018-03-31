@@ -48,8 +48,7 @@ namespace Vision.Detection
         public readonly static ManifestResource ModelResourceFace = new ManifestResource("Vision.Detection", "frozen_gazeFace.pb");
         public readonly static ManifestResource ModelResourceFaceMobile = new ManifestResource("Vision.Detection", "frozen_gazeFaceMobile.pb");
         public readonly static ManifestResource ModelResourceFaceV2 = new ManifestResource("Vision.Detection", "frozen_gazeFaceV2.pb");
-
-        public static object ModelLocker = new object();
+        
         public static Graph ModelGraphSingle;
         public static Graph ModelGraphExtend;
         public static Graph ModelGraphFace;
@@ -95,11 +94,12 @@ namespace Vision.Detection
 
         public EyeGazeDetectMode DetectMode { get; set; } = EyeGazeDetectMode.FaceMobile;
 
-        public int FaceSize
+        EyeGazeDetectMode mode;
+        int FaceSize
         {
             get
             {
-                switch (DetectMode)
+                switch (mode)
                 {
                     case EyeGazeDetectMode.LeftOnly:
                     case EyeGazeDetectMode.Both:
@@ -116,11 +116,11 @@ namespace Vision.Detection
             }
         }
 
-        public int EyeSize
+        int EyeSize
         {
             get
             {
-                switch (DetectMode)
+                switch (mode)
                 {
                     case EyeGazeDetectMode.LeftOnly:
                         return ImageSize;
@@ -138,11 +138,11 @@ namespace Vision.Detection
             }
         }
 
-        public Session Sess
+        Session Sess
         {
             get
             {
-                switch (DetectMode)
+                switch (mode)
                 {
                     case EyeGazeDetectMode.LeftOnly:
                         return sess;
@@ -184,6 +184,7 @@ namespace Vision.Detection
 
         public Point Detect(FaceRect face, Mat frame)
         {
+            mode = DetectMode;
             var properties = ScreenProperties;
 
             if (face == null)
@@ -193,7 +194,7 @@ namespace Vision.Detection
             if (properties == null)
                 throw new ArgumentNullException("properties");
 
-            switch (DetectMode)
+            switch (mode)
             {
                 case EyeGazeDetectMode.LeftOnly:
                     if (face.LeftEye == null)
@@ -215,46 +216,43 @@ namespace Vision.Detection
             Point vecPt = null;
             Point result = new Point(0, 0);
             Point pt = new Point(0, 0);
-            lock (ModelLocker)
+            switch (mode)
             {
-                switch (DetectMode)
-                {
-                    case EyeGazeDetectMode.LeftOnly:
-                        using (Mat left = face.LeftEye.RoiCropByPercent(frame, .33))
-                            result = DetectLeftEyes(left);
-                        break;
-                    case EyeGazeDetectMode.Both:
-                        using (Mat left = face.LeftEye.RoiCropByPercent(frame, .33))
-                        using (Mat right = face.RightEye.RoiCropByPercent(frame, .33))
-                            result = DetectBothEyes(left, right);
-                        break;
-                    case EyeGazeDetectMode.FaceV2:
-                    case EyeGazeDetectMode.FaceMobile:
-                    case EyeGazeDetectMode.Face:
-                        using (Mat left = face.LeftEye.RoiCropByPercent(frame, .25))
-                        using (Mat right = face.RightEye.RoiCropByPercent(frame, .25))
-                        using (Mat faceRoi = face.ROI(frame))
-                            result = DetectFace(faceRoi, left, right);
-                        break;
-                    default:
-                        throw new NotImplementedException();
-                }
-
-                var x = result.X * -1;
-                var y = result.Y * -1;
-                if (UseModification)
-                {
-                    x = (x + OffsetX) * SensitiveX;
-                    y = (y + OffsetY) * SensitiveY;
-                }
-
-                vecPt = new Point(x, y);
-                if (UseSmoothing && !Calibrator.IsCalibrating)
-                    vecPt = Smoother.Smooth(vecPt);
-
-                Vector<double> vec = CreateVector.Dense(new double[] { vecPt.X, vecPt.Y, -1 });
-                pt = face.SolveRayScreenVector(new Point3D(vec.ToArray()), properties);
+                case EyeGazeDetectMode.LeftOnly:
+                    using (Mat left = face.LeftEye.RoiCropByPercent(frame, .33))
+                        result = DetectLeftEyes(left);
+                    break;
+                case EyeGazeDetectMode.Both:
+                    using (Mat left = face.LeftEye.RoiCropByPercent(frame, .33))
+                    using (Mat right = face.RightEye.RoiCropByPercent(frame, .33))
+                        result = DetectBothEyes(left, right);
+                    break;
+                case EyeGazeDetectMode.FaceV2:
+                case EyeGazeDetectMode.FaceMobile:
+                case EyeGazeDetectMode.Face:
+                    using (Mat left = face.LeftEye.RoiCropByPercent(frame, .25))
+                    using (Mat right = face.RightEye.RoiCropByPercent(frame, .25))
+                    using (Mat faceRoi = face.ROI(frame))
+                        result = DetectFace(faceRoi, left, right);
+                    break;
+                default:
+                    throw new NotImplementedException();
             }
+
+            var x = result.X * -1;
+            var y = result.Y * -1;
+            if (UseModification)
+            {
+                x = (x + OffsetX) * SensitiveX;
+                y = (y + OffsetY) * SensitiveY;
+            }
+
+            vecPt = new Point(x, y);
+            if (UseSmoothing && !Calibrator.IsCalibrating)
+                vecPt = Smoother.Smooth(vecPt);
+
+            Vector<double> vec = CreateVector.Dense(new double[] { vecPt.X, vecPt.Y, -1 });
+            pt = face.SolveRayScreenVector(new Point3D(vec.ToArray()), properties);
 
             if (ClipToBound)
             {
@@ -307,7 +305,7 @@ namespace Vision.Detection
 
             Profiler.Start("Gaze.Face.Sess");
             Dictionary<string, Tensor> feedDict = null;
-            switch (DetectMode)
+            switch (mode)
             {
                 case EyeGazeDetectMode.Face:
                 case EyeGazeDetectMode.FaceMobile:

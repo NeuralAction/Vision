@@ -110,6 +110,7 @@ namespace Vision.Detection
 
         public EyeOpenData Detect(EyeRect eye, Mat frame)
         {
+            var mode = DetectMode;
             if (eye == null)
                 throw new ArgumentNullException("eye");
             if (eye.Parent == null)
@@ -125,7 +126,7 @@ namespace Vision.Detection
                 Session sess;
                 var imgSize = 0;
                 var normalizeMode = NormalizeMode.None;
-                switch (DetectMode)
+                switch (mode)
                 {
                     case EyeOpenDetectMode.V1:
                         imgSize = ImgSize;
@@ -153,7 +154,7 @@ namespace Vision.Detection
                 var imgTensor = Tools.MatBgr2Tensor(roi, normalizeMode, -1, -1, new long[] { 1, roi.Width, roi.Height, 3 }, imgBuffer);
                 Dictionary<string, Tensor> feedDict;
                 string outputName = "output";
-                switch (DetectMode)
+                switch (mode)
                 {
                     case EyeOpenDetectMode.V1:
                         feedDict = new Dictionary<string, Tensor>()
@@ -175,10 +176,9 @@ namespace Vision.Detection
                         feedDict = new Dictionary<string, Tensor>()
                         {
                             { "input", imgTensor },
-                            { "phase_train_1", new Tensor(false) },
-                            { "keep_prob_1", new Tensor(0.0f) }
+                            { "phase_train", new Tensor(false) },
+                            { "keep_prob", new Tensor(1.0f) }
                         };
-                        outputName = "lock/output";
                         break;
                     default:
                         throw new NotImplementedException();

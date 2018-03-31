@@ -61,12 +61,12 @@ namespace Vision.Detection
             Scalar color;
             if (OpenData.IsOpen)
             {
-                text = $"Open ({(OpenData.Percent*100):0.0}%)";
+                text = $"Open ({(OpenData.Percent * 100):0.0}%)";
                 color = Scalar.BgrRed;
             }
             else
             {
-                text = $"Close ({(OpenData.Percent * 100):0.0)}%)";
+                text = $"Close ({(OpenData.Percent * 100):0.0}%)";
                 color = Scalar.BgrBlue;
             }
             frame.DrawText(Point.X + Parent.X, Point.Y + Parent.Y - 20, text, color);
