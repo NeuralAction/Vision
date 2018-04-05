@@ -11,8 +11,8 @@ namespace Vision
 {
     public abstract class Core
     {
-        public static string ProjectInfromation = "Vision Project - Computer Vision via AI - Since 2017";
-        public static string VersionInfromation = "0.0.1 dev";
+        public static string ProjectInfromation = "Vision Project - Computer Vision via AI - (c) 2017-2018";
+        public static string VersionInfromation = "0.0.3 dev";
         public static Vision.Cv.Cv Cv { get { return Vision.Cv.Cv.Context; } }
         public static Core Current { get; private set; }
 

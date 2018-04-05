@@ -356,6 +356,12 @@ namespace Vision.Tensorflow
             }
         }
 
+        public void ImportPb(ManifestResource resource, string prefix = "")
+        {
+            using(var stream = resource.GetStream())
+                ImportPb(stream, prefix);
+        }
+
         public void ImportPb(Stream stream, string prefix = "")
         {
             graph.Import(stream.ReadAll(), prefix);

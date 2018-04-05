@@ -206,6 +206,7 @@
     <EmbeddedResource Include="Detection\frozen_openV2.pb" />
     <EmbeddedResource Include="Detection\frozen_gazeFaceV2.pb" />
     <EmbeddedResource Include="Detection\frozen_openV3.pb" />
+    <EmbeddedResource Include="Detection\frozen_gazeFaceV2Mobile.pb" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

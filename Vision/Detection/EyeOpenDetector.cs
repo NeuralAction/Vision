@@ -94,7 +94,7 @@ namespace Vision.Detection
             Logger.Log("EyeOpenDetector", "Graph Loaded");
         }
 
-        public EyeOpenDetectMode DetectMode { get; set; } = EyeOpenDetectMode.V2;
+        public EyeOpenDetectMode DetectMode { get; set; } = EyeOpenDetectMode.V3;
 
         Session sess;
         Session sessV2;

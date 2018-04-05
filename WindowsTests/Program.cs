@@ -49,7 +49,7 @@ namespace WindowsTests
             {
                 Console.Write(">>> ");
                 string read_raw = Console.ReadLine();
-                string read = read_raw.ToLower();
+                string read = read_raw.ToLower().Trim();
 
                 switch (read)
                 {

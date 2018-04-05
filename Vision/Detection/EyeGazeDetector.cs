@@ -26,6 +26,7 @@ namespace Vision.Detection
         Face = 2,
         FaceMobile = 3,
         FaceV2 = 4,
+        FaceV2Mobile = 5
     }
 
     public class EyeGazeDetector : IDisposable
@@ -38,6 +39,8 @@ namespace Vision.Detection
         public const int FaceSizeFaceMobile = 64;
         public const int ImageSizeFaceV2 = 60;
         public const int FaceSizeFaceV2 = 32;
+        public const int ImageSizeFaceV2Mobile = 60;
+        public const int FaceSizeFaceV2Mobile = 32;
         public const double DefaultSensitiveX = 1;
         public const double DefaultSensitiveY = 1;
         public const double DefaultOffsetX = 0;
@@ -48,31 +51,36 @@ namespace Vision.Detection
         public readonly static ManifestResource ModelResourceFace = new ManifestResource("Vision.Detection", "frozen_gazeFace.pb");
         public readonly static ManifestResource ModelResourceFaceMobile = new ManifestResource("Vision.Detection", "frozen_gazeFaceMobile.pb");
         public readonly static ManifestResource ModelResourceFaceV2 = new ManifestResource("Vision.Detection", "frozen_gazeFaceV2.pb");
-        
+        public readonly static ManifestResource ModelResourceFaceV2Mobile = new ManifestResource("Vision.Detection", "frozen_gazeFaceV2Mobile.pb");
+
         public static Graph ModelGraphSingle;
         public static Graph ModelGraphExtend;
         public static Graph ModelGraphFace;
         public static Graph ModelGraphFaceMobile;
         public static Graph ModelGraphFaceV2;
+        public static Graph ModelGraphFaceV2Mobile;
 
         static EyeGazeDetector()
         {
             Logger.Log("EyeGazeDetector", "Start model load");
 
             ModelGraphSingle = new Graph();
-            ModelGraphSingle.ImportPb(ModelResourceSingle.GetStream());
+            ModelGraphSingle.ImportPb(ModelResourceSingle);
 
             ModelGraphExtend = new Graph();
-            ModelGraphExtend.ImportPb(ModelResourceExtend.GetStream());
+            ModelGraphExtend.ImportPb(ModelResourceExtend);
 
             ModelGraphFace = new Graph();
-            ModelGraphFace.ImportPb(ModelResourceFace.GetStream());
+            ModelGraphFace.ImportPb(ModelResourceFace);
 
             ModelGraphFaceMobile = new Graph();
-            ModelGraphFaceMobile.ImportPb(ModelResourceFaceMobile.GetStream());
+            ModelGraphFaceMobile.ImportPb(ModelResourceFaceMobile);
 
             ModelGraphFaceV2 = new Graph();
-            ModelGraphFaceV2.ImportPb(ModelResourceFaceV2.GetStream());
+            ModelGraphFaceV2.ImportPb(ModelResourceFaceV2);
+
+            ModelGraphFaceV2Mobile = new Graph();
+            ModelGraphFaceV2Mobile.ImportPb(ModelResourceFaceV2Mobile);
 
             Logger.Log("EyeGazeDetector", "Finished model load");
         }
@@ -92,7 +100,7 @@ namespace Vision.Detection
         public bool UseCalibrator { get; set; } = true;
         public EyeGazeCalibrater Calibrator { get; set; }
 
-        public EyeGazeDetectMode DetectMode { get; set; } = EyeGazeDetectMode.FaceMobile;
+        public EyeGazeDetectMode DetectMode { get; set; } = EyeGazeDetectMode.FaceV2Mobile;
 
         EyeGazeDetectMode mode;
         int FaceSize
@@ -101,15 +109,16 @@ namespace Vision.Detection
             {
                 switch (mode)
                 {
-                    case EyeGazeDetectMode.LeftOnly:
-                    case EyeGazeDetectMode.Both:
-                        return -1;
                     case EyeGazeDetectMode.Face:
                         return FaceSizeFace;
                     case EyeGazeDetectMode.FaceMobile:
                         return FaceSizeFaceMobile;
                     case EyeGazeDetectMode.FaceV2:
                         return FaceSizeFaceV2;
+                    case EyeGazeDetectMode.FaceV2Mobile:
+                        return FaceSizeFaceV2Mobile;
+                    case EyeGazeDetectMode.LeftOnly:
+                    case EyeGazeDetectMode.Both:
                     default:
                         throw new Exception();
                 }
@@ -132,6 +141,8 @@ namespace Vision.Detection
                         return ImageSizeFaceMobile;
                     case EyeGazeDetectMode.FaceV2:
                         return ImageSizeFaceV2;
+                    case EyeGazeDetectMode.FaceV2Mobile:
+                        return ImageSizeFaceV2Mobile;
                     default:
                         throw new Exception();
                 }
@@ -154,6 +165,8 @@ namespace Vision.Detection
                         return sessFaceMobile;
                     case EyeGazeDetectMode.FaceV2:
                         return sessFaceV2;
+                    case EyeGazeDetectMode.FaceV2Mobile:
+                        return sessFaceV2Mobile;
                     default:
                         throw new Exception();
                 }
@@ -165,6 +178,7 @@ namespace Vision.Detection
         Session sessFace;
         Session sessFaceMobile;
         Session sessFaceV2;
+        Session sessFaceV2Mobile;
         float[] imgBufferLeft;
         float[] imgBufferRight;
         float[] imgBufferFace;
@@ -178,6 +192,7 @@ namespace Vision.Detection
             sessFace = new Session(ModelGraphFace);
             sessFaceMobile = new Session(ModelGraphFaceMobile);
             sessFaceV2 = new Session(ModelGraphFaceV2);
+            sessFaceV2Mobile = new Session(ModelGraphFaceV2Mobile);
 
             Calibrator = new EyeGazeCalibrater();
         }
@@ -200,6 +215,7 @@ namespace Vision.Detection
                     if (face.LeftEye == null)
                         return null;
                     break;
+                case EyeGazeDetectMode.FaceV2Mobile:
                 case EyeGazeDetectMode.FaceV2:
                 case EyeGazeDetectMode.FaceMobile:
                 case EyeGazeDetectMode.Face:
@@ -227,6 +243,7 @@ namespace Vision.Detection
                     using (Mat right = face.RightEye.RoiCropByPercent(frame, .33))
                         result = DetectBothEyes(left, right);
                     break;
+                case EyeGazeDetectMode.FaceV2Mobile:
                 case EyeGazeDetectMode.FaceV2:
                 case EyeGazeDetectMode.FaceMobile:
                 case EyeGazeDetectMode.Face:
@@ -309,23 +326,24 @@ namespace Vision.Detection
             {
                 case EyeGazeDetectMode.Face:
                 case EyeGazeDetectMode.FaceMobile:
-                    feedDict = new Dictionary<string, Tensor>() 
+                    feedDict = new Dictionary<string, Tensor>()
                     {
                         { "input_image", imgTensorLeft },
                         { "input_image_r", imgTensorRight },
                         { "input_image_f", imgTensorFace },
                         { "phase_train", new Tensor(false) },
-                        { "keep_prob", new Tensor(0.0f) } 
+                        { "keep_prob", new Tensor(0.0f) }
                     };
                     break;
+                case EyeGazeDetectMode.FaceV2Mobile:
                 case EyeGazeDetectMode.FaceV2:
-                    feedDict = new Dictionary<string, Tensor>() 
+                    feedDict = new Dictionary<string, Tensor>()
                     {
                         { "input_left", imgTensorLeft },
                         { "input_right", imgTensorRight },
                         { "input_face", imgTensorFace },
                         { "phase_train", new Tensor(false) },
-                        { "keep_prob", new Tensor(0.0f) } 
+                        { "keep_prob", new Tensor(0.0f) }
                     };
                     break;
             }
