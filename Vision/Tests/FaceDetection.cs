@@ -33,7 +33,7 @@ namespace Vision.Tests
         public FaceDetectionProvider FaceProvider { get; set; }
         private FaceDetector FaceDetector { get; set; }
         private OpenFaceDetector OpenFaceDetector { get; set; }
-        
+
         public EyeGazeDetector GazeDetector { get; set; }
         public EyeOpenDetector OpenDetector { get; set; }
 
@@ -44,7 +44,7 @@ namespace Vision.Tests
             set
             {
                 _screen = value;
-                if(GazeDetector != null)
+                if (GazeDetector != null)
                 {
                     GazeDetector.ScreenProperties = _screen;
                 }
@@ -243,7 +243,7 @@ namespace Vision.Tests
             {
                 if (FaceDetectionTask == null || FaceDetectionTask.IsFaulted || FaceDetectionTask.IsCanceled || FaceDetectionTask.IsCompleted)
                 {
-                    if(FaceDetectionTask != null && FaceDetectionTask.Exception != null)
+                    if (FaceDetectionTask != null && FaceDetectionTask.Exception != null)
                     {
                         Logger.Error(this, FaceDetectionTask.Exception);
                     }
@@ -289,7 +289,7 @@ namespace Vision.Tests
                 case 'e':
                     Core.Cv.CloseAllWindows();
                     e.Break = true;
-                    Task.Factory.StartNew(()=>capture.Dispose());
+                    Task.Factory.StartNew(() => capture.Dispose());
                     break;
                 case 'd':
                     LandmarkDetect = !LandmarkDetect;
@@ -304,8 +304,8 @@ namespace Vision.Tests
                     GazeSmooth = !GazeSmooth;
                     break;
                 case 'j':
-                    GazeDetector.DetectMode++;
-                    GazeDetector.DetectMode = (EyeGazeDetectMode)((int)GazeDetector.DetectMode % Enum.GetNames(typeof(EyeGazeDetectMode)).Length);
+                    GazeDetector.ModelIndex++;
+                    GazeDetector.ModelIndex %= GazeDetector.Models.Count;
                     break;
                 case 'k':
                     GazeDetector.UseModification = !GazeDetector.UseModification;
@@ -354,7 +354,7 @@ namespace Vision.Tests
                     GazeDetector.OffsetY += 0.02;
                     break;
                 case 'c':
-                    if(!GazeDetector.Calibrator.IsStarted && DetectGaze)
+                    if (!GazeDetector.Calibrator.IsStarted && DetectGaze)
                         GazeDetector.Calibrator.Start(ScreenProperties);
                     break;
                 case 'v':
@@ -401,7 +401,7 @@ namespace Vision.Tests
             FaceRect[] rect = FaceProvider.Detect(mat);
 
             Profiler.Start("DetectionGazeTaskStart");
-            if(GazeDetectionTask != null)
+            if (GazeDetectionTask != null)
             {
                 Profiler.Start("DetectionGazeTaskStart.Wait");
                 GazeDetectionTask.Wait();
@@ -652,7 +652,7 @@ namespace Vision.Tests
                                 break;
                         }
                         mat.DrawCircle(calibPt, 15, color, -1, LineTypes.AntiAlias);
-                        Core.Cv.DrawText(mat, $"{(calibratingArgs.Percent * 100).ToString("0.00")}%", 
+                        Core.Cv.DrawText(mat, $"{(calibratingArgs.Percent * 100).ToString("0.00")}%",
                             new Point(calibPt.X + 20, calibPt.Y + Core.Cv.GetFontSize(HersheyFonts.HersheyPlain) / 2), HersheyFonts.HersheyPlain, 1, color, 2);
                     }
                 }
@@ -687,11 +687,11 @@ namespace Vision.Tests
                 if (double.IsInfinity(detectionTime) || detectionTime == 0)
                     detectionTime = 1000;
                 string demo = $"DetectFPS: {Profiler.Get("FaceFPS")} ({detectionTime.ToString("0.00")}ms/{(1000 / detectionTime).ToString("0.00")}fps)\n" +
-                    $"LndSmt: {SmoothLandmarks} GzSmt: {GazeSmooth} GzMode: {GazeDetector.DetectMode} OpMode: {OpenDetector.DetectMode}\n" +
+                    $"LndSmt: {SmoothLandmarks} GzSmt: {GazeSmooth} GzMode: {GazeDetector.CurrentModel.Name} OpMode: {OpenDetector.DetectMode}\n" +
                     $"GzMod[{(GazeDetector.UseModification ? "On" : "Off")}]: Sx:{GazeDetector.SensitiveX} Sy:{GazeDetector.SensitiveY} Ox:{GazeDetector.OffsetX} Oy:{GazeDetector.OffsetY}";
                 var sessTime = Profiler.Get("Gaze.Face.Sess");
                 if (!(double.IsInfinity(sessTime) || sessTime == 0))
-                    demo += $"\nGazeFaceSess: ({sessTime.ToString("0.00")}ms/{(1000/sessTime).ToString("0.00")}fps)";
+                    demo += $"\nGazeFaceSess: ({sessTime.ToString("0.00")}ms/{(1000 / sessTime).ToString("0.00")}fps)";
                 mat.DrawText(50, fullscreen ? pt1.Y + 50 : 50, demo, Scalar.BgrGreen);
                 mat.DrawText(50, 400 + 250 * Math.Pow(Math.Sin(2 * Math.PI * yoffset), 3), "HELLO WORLD");
                 mat.DrawText(50, mat.Height - 50, $"DrawFPS: {Profiler.Get("DrawFPS")}", Scalar.BgrGreen);
@@ -700,13 +700,13 @@ namespace Vision.Tests
 
         public void Dispose()
         {
-            if(capture != null)
+            if (capture != null)
             {
                 capture.Dispose();
                 capture = null;
             }
 
-            if(FaceProvider != null)
+            if (FaceProvider != null)
             {
                 FaceProvider.Dispose();
                 FaceProvider = null;
