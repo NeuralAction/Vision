@@ -3,7 +3,7 @@ A eye gaze tracking library based on computer vision and neural network.
 
 This library is work in progress aggressivly at this point. API structure is not stable now. And this project is personal project for competition. I will open source my model training code after compet.
 
-Current gaze tracking model's mean error is 4.3 cm in 50 cm far without any calibration. With calibration, mean error is ~3.2 cm.
+Current gaze tracking model's mean error is 3.2 cm in 50 cm far without any calibration. With calibration, mean error is ~1.8 cm.
 
 ## Demo
 ![](Web/gazedemo.gif)
