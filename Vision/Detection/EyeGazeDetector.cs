@@ -94,6 +94,7 @@ namespace Vision.Detection
         public const double DefaultSensitiveY = 1;
         public const double DefaultOffsetX = 0;
         public const double DefaultOffsetY = 0;
+        public const int DefaultModelIndex = 6;
 
         public List<EyeGazeModel> Models { get; set; } = new List<EyeGazeModel>()
         {
