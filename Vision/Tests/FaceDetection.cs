@@ -304,8 +304,7 @@ namespace Vision.Tests
                     GazeSmooth = !GazeSmooth;
                     break;
                 case 'j':
-                    GazeDetector.ModelIndex++;
-                    GazeDetector.ModelIndex %= GazeDetector.Models.Count;
+                    GazeDetector.ModelIndex = (GazeDetector.ModelIndex+1) %GazeDetector.Models.Count;
                     break;
                 case 'k':
                     GazeDetector.UseModification = !GazeDetector.UseModification;

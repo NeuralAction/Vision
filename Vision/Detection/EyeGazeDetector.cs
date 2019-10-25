@@ -2,11 +2,13 @@
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Vision.Cv;
 using Vision.Tensorflow;
+using Vision.ONNX;
 
 namespace Vision.Detection
 {
@@ -19,19 +21,130 @@ namespace Vision.Detection
         None = -1
     }
 
-    public class EyeGazeModel : IDisposable
+    public abstract class EyeGazeModel : IDisposable
     {
         public string Name { get; set; }
         public string Description { get; set; }
         public double ErrorRate { get; set; }
 
-        public ManifestResource GraphResource { get; set; }
-        public Graph Graph { get; set; }
-        public Session Session { get; set; }
+        public bool IsLoaded { get; protected set; } = false;
+        public bool IsErrored { get; protected set; } = false;
+        public bool IsActivated { get; protected set; }
 
         public bool FaceRequired { get; set; }
         public bool LeftRequired { get; set; }
         public bool RightRequired { get; set; }
+
+        public Exception InnerException { get; protected set; }
+
+        public abstract Point Forward(Mat frame, FaceRect face);
+
+        protected virtual void OnLoad() { }
+        public void Load()
+        {
+            if (!IsLoaded)
+                OnLoad();
+            IsLoaded = true;
+        }
+        protected virtual void OnActivate() { }
+        public void Activate() { OnActivate(); IsActivated = true; }
+        protected virtual void OnDeactivate() { }
+        public void Deactivate() { OnDeactivate(); IsActivated = false; }
+
+        public abstract void Dispose();
+    }
+
+    public class MergeONNXEyeGazeModel : EyeGazeModel
+    {
+        public int ImgSize { get; set; } = 64;
+        public ManifestResource Resource { get; set; }
+        public ONNXSession Session { get; set; }
+        bool isFP16 = false;
+        public bool IsFP16 { get => isFP16; set { isFP16 = value; if (Session != null) Session.IsFP16 = value; } }
+
+        ONNXBinding inputName;
+        ONNXBinding outputName;
+
+        public MergeONNXEyeGazeModel(string name, string filename)
+        {
+            LeftRequired = RightRequired = FaceRequired = true;
+            ErrorRate = 3.2;
+            Description = "ONNX version; Merged channel; FaceV2 based.";
+            Name = name;
+
+            Resource = new ManifestResource("Vision.Detection", filename);
+        }
+
+        protected override void OnLoad()
+        {
+            base.OnLoad();
+
+            buffer = new float[ImgSize * ImgSize * 9];
+            channelBuffer = new float[9][];
+            for (int i = 0; i < channelBuffer.Length; i++)
+            {
+                channelBuffer[i] = new float[ImgSize * ImgSize];
+            }
+
+            using (var stream = Resource.GetStream())
+                Session = ONNXRuntime.Instance.GetSession(stream);
+            Session.IsFP16 = IsFP16;
+            inputName = Session.GetInputs()[0];
+            outputName = Session.GetOutputs()[0];
+        }
+
+        public override void Dispose()
+        {
+            Session?.Dispose();
+            Session = null;
+        }
+
+        Mat[] ResizeMatArray(Mat m)
+        {
+            m.Resize(new Size(ImgSize));
+            var split = Cv2.Split(m);
+            m.Dispose();
+            return split;
+        }
+
+
+        float[] buffer;
+        float[][] channelBuffer;
+        public override Point Forward(Mat frame, FaceRect rect)
+        {
+            Profiler.Start("Gaze.Face.Cvt");
+            var leye = ResizeMatArray(rect.LeftEye.RoiCropByPercent(frame, 0.25));
+            var reye = ResizeMatArray(rect.RightEye.RoiCropByPercent(frame, 0.25));
+            var face = ResizeMatArray(rect.ROI(frame));
+            var channels = new List<Mat>();
+            channels.AddRange(leye);
+            channels.AddRange(reye);
+            channels.AddRange(face);
+
+            var tensor = ONNX.Util.MatArray2ONNXTensor(channels.ToArray(), buffer, channelBuffer);
+            //var tensor = new ONNXTensor() { Buffer = Random.R.FloatArray(buffer.Length, buffer), Shape = new long[] { 1, 9, ImgSize, ImgSize } };
+            Profiler.End("Gaze.Face.Cvt");
+
+            Profiler.Start("Gaze.Face.Sess");
+            var result = Session.Run(new[] { outputName.Name }, new Dictionary<string, ONNXTensor>() { { inputName.Name, tensor } });
+            var vector = result[0].Buffer;
+            var point = new Point(vector[0], vector[1]);
+            Profiler.End("Gaze.Face.Sess");
+
+            foreach (var item in channels)
+            {
+                item.Dispose();
+            }
+
+            return point;
+        }
+    }
+
+    public class TensorFlowEyeGazeModel : EyeGazeModel
+    {
+        public ManifestResource GraphResource { get; set; }
+        public Graph Graph { get; set; }
+        public Session Session { get; set; }
 
         public string FaceOpName { get; set; }
         public string LeftOpName { get; set; }
@@ -49,22 +162,19 @@ namespace Vision.Detection
         public int EyeSize { get; set; }
         public int FaceSize { get; set; }
 
-        public bool IsLoaded { get; set; } = false;
-
-        public EyeGazeModel(string name, string filename) : this(name, new ManifestResource("Vision.Detection", filename))
+        public TensorFlowEyeGazeModel(string name, string filename) : this(name, new ManifestResource("Vision.Detection", filename))
         {
 
         }
 
-        public EyeGazeModel(string name, ManifestResource resource)
+        public TensorFlowEyeGazeModel(string name, ManifestResource resource)
         {
             Name = name;
             GraphResource = resource;
         }
 
-        public void Load()
+        protected override void OnLoad()
         {
-            IsLoaded = true;
             try
             {
                 Graph = new Graph();
@@ -74,17 +184,88 @@ namespace Vision.Detection
             catch (Exception e)
             {
                 IsLoaded = false;
+                IsErrored = true;
+                InnerException = e;
 
                 Logger.Throw(this, e);
             }
+
+            var bufLen = (int)Math.Pow(EyeSize, 2) * 3;
+            if (imgBufferLeft == null || imgBufferLeft.Length != bufLen)
+                imgBufferLeft = new float[bufLen];
+
+            bufLen = (int)Math.Pow(EyeSize, 2) * 3;
+            if (imgBufferRight == null || imgBufferRight.Length != bufLen)
+                imgBufferRight = new float[bufLen];
+
+            bufLen = (int)Math.Pow(FaceSize, 2) * 3;
+            if (imgBufferFace == null || imgBufferFace.Length != bufLen)
+                imgBufferFace = new float[bufLen];
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
             Graph?.Dispose();
             Graph = null;
             Session?.Dispose();
             Session = null;
+        }
+
+        float[] imgBufferLeft;
+        float[] imgBufferRight;
+        float[] imgBufferFace;
+
+        public override Point Forward(Mat frame, FaceRect face)
+        {
+            Profiler.Start("Gaze.Face.Cvt");
+            Mat leftRoi = null, rightRoi = null, faceRoi = null;
+            Tensor leftTensor = null, rightTensor = null, faceTensor = null;
+            if (LeftRequired)
+            {
+                leftRoi = face.LeftEye.RoiCropByPercent(frame, EyeCropPercent);
+                leftRoi.Resize(new Size(EyeSize));
+                leftTensor = Tools.MatBgr2Tensor(leftRoi, ImageNormMode, -1, -1, new long[] { 1, EyeSize, EyeSize, 3 }, imgBufferLeft);
+            }
+            if (RightRequired)
+            {
+                rightRoi = face.RightEye.RoiCropByPercent(frame, EyeCropPercent);
+                rightRoi.Resize(new Size(EyeSize));
+                rightTensor = Tools.MatBgr2Tensor(rightRoi, ImageNormMode, -1, -1, new long[] { 1, EyeSize, EyeSize, 3 }, imgBufferRight);
+            }
+            if (FaceRequired)
+            {
+                faceRoi = face.ROI(frame);
+                faceRoi.Resize(new Size(FaceSize));
+                faceTensor = Tools.MatBgr2Tensor(faceRoi, ImageNormMode, -1, -1, new long[] { 1, FaceSize, FaceSize, 3 }, imgBufferFace);
+            }
+            Profiler.End("Gaze.Face.Cvt");
+
+            Profiler.Start("Gaze.Face.Sess");
+            Dictionary<string, Tensor> feedDict = new Dictionary<string, Tensor>();
+            if (LeftRequired) feedDict.Add(LeftOpName, leftTensor);
+            if (RightRequired) feedDict.Add(RightOpName, rightTensor);
+            if (FaceRequired) feedDict.Add(FaceOpName, faceTensor);
+            if (!string.IsNullOrEmpty(PhaseTrainOpName)) feedDict.Add(PhaseTrainOpName, new Tensor(false));
+            if (!string.IsNullOrEmpty(KeepProbOpName)) feedDict.Add(KeepProbOpName, new Tensor(KeepProb));
+
+            var fetch = Session.Run(new[] { OutputOpName }, feedDict);
+            Profiler.End("Gaze.Face.Sess");
+
+            var resultTensor = fetch[0];
+            float[,] output = (float[,])resultTensor.GetValue();
+
+            var result = new Point(output[0, 0], output[0, 1]);
+
+            Profiler.Start("Gaze.Face.Dispose");
+            leftTensor?.Dispose();
+            rightTensor?.Dispose();
+            faceTensor?.Dispose();
+            leftRoi?.Dispose();
+            rightRoi?.Dispose();
+            faceRoi?.Dispose();
+            Profiler.End("Gaze.Face.Dispose");
+
+            return result;
         }
     }
 
@@ -94,11 +275,11 @@ namespace Vision.Detection
         public const double DefaultSensitiveY = 1;
         public const double DefaultOffsetX = 0;
         public const double DefaultOffsetY = 0;
-        public const int DefaultModelIndex = 6;
+        public const int DefaultModelIndex = 8;
 
         public List<EyeGazeModel> Models { get; set; } = new List<EyeGazeModel>()
         {
-            new EyeGazeModel("LeftOnly", "frozen_gaze.pb")
+            new TensorFlowEyeGazeModel("LeftOnly", "frozen_gaze.pb")
             {
                 Description = "Using left eye only.",
                 ErrorRate = 12.40,
@@ -117,7 +298,7 @@ namespace Vision.Detection
                 KeepProb = 1.0f,
                 ImageNormMode = NormalizeMode.ZeroMean,
             },
-            new EyeGazeModel("LeftOnlyV2", "frozen_gazeV2.pb")
+            new TensorFlowEyeGazeModel("LeftOnlyV2", "frozen_gazeV2.pb")
             {
                 Description = "Using left eye only. version 2",
                 ErrorRate = 5.67,
@@ -136,7 +317,7 @@ namespace Vision.Detection
                 KeepProb = 0.0f,
                 ImageNormMode = NormalizeMode.CenterZero,
             },
-            new EyeGazeModel("LeftOnlyV2Mobile", "frozen_gazeV2Mobile.pb")
+            new TensorFlowEyeGazeModel("LeftOnlyV2Mobile", "frozen_gazeV2Mobile.pb")
             {
                 Description = "Using left eye only. version 2 for mobile",
                 ErrorRate = 5.81,
@@ -155,7 +336,7 @@ namespace Vision.Detection
                 KeepProb = 0.0f,
                 ImageNormMode = NormalizeMode.CenterZero,
             },
-            new EyeGazeModel("Both", "frozen_gazeEx.pb")
+            new TensorFlowEyeGazeModel("Both", "frozen_gazeEx.pb")
             {
                 Description = "Using left and right eyes.",
                 ErrorRate = 11.30,
@@ -174,7 +355,7 @@ namespace Vision.Detection
                 KeepProb = 1.0f,
                 ImageNormMode = NormalizeMode.ZeroMean,
             },
-            new EyeGazeModel("Face", "frozen_gazeFace.pb")
+            new TensorFlowEyeGazeModel("Face", "frozen_gazeFace.pb")
             {
                 Description = "Using left and right eyes, and face.",
                 ErrorRate = 4.00,
@@ -193,7 +374,7 @@ namespace Vision.Detection
                 KeepProb = 0.0f,
                 ImageNormMode = NormalizeMode.CenterZero,
             },
-            new EyeGazeModel("FaceMobile", "frozen_gazeFaceMobile.pb")
+            new TensorFlowEyeGazeModel("FaceMobile", "frozen_gazeFaceMobile.pb")
             {
                 Description = "Mobile version of `Face` model.",
                 ErrorRate = 4.85,
@@ -212,7 +393,7 @@ namespace Vision.Detection
                 KeepProb = 0.0f,
                 ImageNormMode = NormalizeMode.CenterZero,
             },
-            new EyeGazeModel("FaceV2", "frozen_gazeFaceV2.pb")
+            new TensorFlowEyeGazeModel("FaceV2", "frozen_gazeFaceV2.pb")
             {
                 Description = "Improved version of `Face`. Using ResNet arch.",
                 ErrorRate = 3.23,
@@ -231,7 +412,7 @@ namespace Vision.Detection
                 KeepProb = 0.0f,
                 ImageNormMode = NormalizeMode.CenterZero,
             },
-            new EyeGazeModel("FaceV2Mobile", "frozen_gazeFaceV2Mobile.pb")
+            new TensorFlowEyeGazeModel("FaceV2Mobile", "frozen_gazeFaceV2Mobile.pb")
             {
                 Description = "Mobile version of `FaceV2`",
                 ErrorRate = 3.56,
@@ -250,8 +431,31 @@ namespace Vision.Detection
                 KeepProb = 0.0f,
                 ImageNormMode = NormalizeMode.CenterZero,
             },
+            new MergeONNXEyeGazeModel("MergeChannel", "torch_gazeMerge.onnx")
+            {
+                IsFP16 = false,
+            },
+            //new MergeONNXEyeGazeModel("MergeChannelFP16", "torch_gazeMergeFP16.onnx")
+            //{
+            //    IsFP16 = true,
+            //}
         };
-        public int ModelIndex { get; set; } = 0;
+
+        int modelIndex = -1;
+        public int ModelIndex
+        {
+            get => modelIndex; set
+            {
+                if (value < 0 || value >= Models.Count)
+                    throw new IndexOutOfRangeException();
+                if (modelIndex != value)
+                {
+                    modelIndex = value;
+                    CurrentModel.Load();
+                    CurrentModel.Activate();
+                }
+            }
+        }
         public EyeGazeModel CurrentModel => Models[ModelIndex];
 
         public bool ClipToBound { get; set; } = false;
@@ -269,12 +473,10 @@ namespace Vision.Detection
         public bool UseCalibrator { get; set; } = true;
         public EyeGazeCalibrater Calibrator { get; set; }
 
-        float[] imgBufferLeft;
-        float[] imgBufferRight;
-        float[] imgBufferFace;
-
         public EyeGazeDetector(ScreenProperties screen)
         {
+            ModelIndex = DefaultModelIndex;
+
             ScreenProperties = screen ?? throw new ArgumentNullException("screen properites");
 
             Calibrator = new EyeGazeCalibrater();
@@ -292,11 +494,6 @@ namespace Vision.Detection
             if (properties == null)
                 throw new ArgumentNullException("properties");
 
-            if (model.LeftRequired && (face.LeftEye == null || face.RightEye == null))
-                return null;
-            if (model.RightRequired && face.RightEye == null)
-                return null;
-
             Profiler.Start("GazeDetect");
 
             if (!model.IsLoaded)
@@ -308,71 +505,12 @@ namespace Vision.Detection
                 Logger.Log($"Model[{model.Name}] load time: {timer.ElapsedMilliseconds} ms");
             }
 
-            Point vecPt = null;
-            Point result = new Point(0, 0);
-            Point pt = new Point(0, 0);
+            if (model.LeftRequired && (face.LeftEye == null || face.RightEye == null))
+                return null;
+            if (model.RightRequired && face.RightEye == null)
+                return null;
 
-            Profiler.Start("Gaze.Face.Cvt");
-            Mat leftRoi = null, rightRoi = null, faceRoi = null;
-            Tensor leftTensor = null, rightTensor = null, faceTensor = null;
-            if (model.LeftRequired)
-            {
-                leftRoi = face.LeftEye.RoiCropByPercent(frame, model.EyeCropPercent);
-                leftRoi.Resize(new Size(model.EyeSize));
-                var bufLen = (int)Math.Pow(model.EyeSize, 2) * 3;
-                if (imgBufferLeft == null || imgBufferLeft.Length != bufLen)
-                    imgBufferLeft = new float[bufLen];
-                leftTensor = Tools.MatBgr2Tensor(leftRoi, model.ImageNormMode, -1, -1, new long[] { 1, model.EyeSize, model.EyeSize, 3 }, imgBufferLeft);
-            }
-            if (model.RightRequired)
-            {
-                rightRoi = face.RightEye.RoiCropByPercent(frame, model.EyeCropPercent);
-                rightRoi.Resize(new Size(model.EyeSize));
-                var bufLen = (int)Math.Pow(model.EyeSize, 2) * 3;
-                if (imgBufferRight == null || imgBufferRight.Length != bufLen)
-                    imgBufferRight = new float[bufLen];
-                rightTensor = Tools.MatBgr2Tensor(rightRoi, model.ImageNormMode, -1, -1, new long[] { 1, model.EyeSize, model.EyeSize, 3 }, imgBufferRight);
-            }
-            if (model.FaceRequired)
-            {
-                faceRoi = face.ROI(frame);
-                faceRoi.Resize(new Size(model.FaceSize));
-                var bufLen = (int)Math.Pow(model.FaceSize, 2) * 3;
-                if (imgBufferFace == null || imgBufferFace.Length != bufLen)
-                    imgBufferFace = new float[bufLen];
-                faceTensor = Tools.MatBgr2Tensor(faceRoi, model.ImageNormMode, -1, -1, new long[] { 1, model.FaceSize, model.FaceSize, 3 }, imgBufferFace);
-            }
-            Profiler.End("Gaze.Face.Cvt");
-
-            Profiler.Start("Gaze.Face.Sess");
-            Dictionary<string, Tensor> feedDict = new Dictionary<string, Tensor>();
-            if (model.LeftRequired)
-                feedDict.Add(model.LeftOpName, leftTensor);
-            if (model.RightRequired)
-                feedDict.Add(model.RightOpName, rightTensor);
-            if (model.FaceRequired)
-                feedDict.Add(model.FaceOpName, faceTensor);
-            if (!string.IsNullOrEmpty(model.PhaseTrainOpName))
-                feedDict.Add(model.PhaseTrainOpName, new Tensor(false));
-            if (!string.IsNullOrEmpty(model.KeepProbOpName))
-                feedDict.Add(model.KeepProbOpName, new Tensor(model.KeepProb));
-
-            var fetch = model.Session.Run(new[] { model.OutputOpName }, feedDict);
-            Profiler.End("Gaze.Face.Sess");
-
-            var resultTensor = fetch[0];
-            float[,] output = (float[,])resultTensor.GetValue();
-
-            result = new Point(output[0, 0], output[0, 1]);
-
-            Profiler.Start("Gaze.Face.Dispose");
-            leftTensor?.Dispose();
-            rightTensor?.Dispose();
-            faceTensor?.Dispose();
-            leftRoi?.Dispose();
-            rightRoi?.Dispose();
-            faceRoi?.Dispose();
-            Profiler.End("Gaze.Face.Dispose");
+            var result = model.Forward(frame, face);
 
             var x = result.X * -1;
             var y = result.Y * -1;
@@ -382,22 +520,22 @@ namespace Vision.Detection
                 y = (y + OffsetY) * SensitiveY;
             }
 
-            vecPt = new Point(x, y);
+            var vecPt = new Point(x, y);
             if (UseSmoothing && !Calibrator.IsCalibrating)
                 vecPt = Smoother.Smooth(vecPt);
 
             Vector<double> vec = CreateVector.Dense(new double[] { vecPt.X, vecPt.Y, -1 });
-            pt = face.SolveRayScreenVector(new Point3D(vec.ToArray()), properties);
+            var pixelPt = face.SolveRayScreenVector(new Point3D(vec.ToArray()), properties);
 
             if (ClipToBound)
             {
-                pt.X = Util.Clamp(pt.X, 0, ScreenProperties.PixelSize.Width);
-                pt.Y = Util.Clamp(pt.Y, 0, ScreenProperties.PixelSize.Height);
+                pixelPt.X = Util.Clamp(pixelPt.X, 0, ScreenProperties.PixelSize.Width);
+                pixelPt.Y = Util.Clamp(pixelPt.Y, 0, ScreenProperties.PixelSize.Height);
             }
 
             face.GazeInfo = new EyeGazeInfo()
             {
-                ScreenPoint = pt,
+                ScreenPoint = pixelPt,
                 Vector = new Point3D(vecPt.X, vecPt.Y, -1),
                 ClipToBound = ClipToBound,
             };
@@ -412,10 +550,6 @@ namespace Vision.Detection
 
         public void Dispose()
         {
-            imgBufferLeft = null;
-            imgBufferRight = null;
-            imgBufferFace = null;
-
             foreach (var item in Models)
                 item.Dispose();
         }

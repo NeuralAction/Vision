@@ -113,7 +113,7 @@
       <Name>TensorFlowSharp.Windows</Name>
     </ProjectReference>
     <ProjectReference Include="..\Vision.Windows\Vision.Windows.csproj">
-      <Project>{15e57a3f-8b2f-46f0-a717-34b308307b1d}</Project>
+      <Project>{15a1a5b5-13b0-40dc-9564-e2d9d2debcd8}</Project>
       <Name>Vision.Windows</Name>
     </ProjectReference>
     <ProjectReference Include="..\Vision\Vision.csproj">

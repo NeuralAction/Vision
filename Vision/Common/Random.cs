@@ -42,6 +42,15 @@ namespace Vision
                 + lower);
         }
 
+        public float[] FloatArray(int len, float[] buffer)
+        {
+            for (int i = 0; i < len; i++)
+            {
+                buffer[i] = (float)NextDouble(0, 1);
+            }
+            return buffer;
+        }
+
         public double NextDouble(double lower, double upper)
         {
             return (double)NextInt((int)(lower * 1500), (int)(upper * 1500)) / 1500;

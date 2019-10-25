@@ -33,6 +33,8 @@ namespace Vision.Windows
             TensorFlow.NativeBinding.PrintFunc = new TensorFlow.NativeBinding.Print((s) => { Logger.Log(s); });
             if(IsGpu)
                 Logger.Log("Tensorflow Working With GPU");
+
+            InitONNX(new WindowsONNXRuntime());
         }
 
         [System.Runtime.InteropServices.DllImport("gdi32.dll")]

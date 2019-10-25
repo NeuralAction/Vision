@@ -54,5 +54,10 @@ namespace Vision
         {
             Storage.Init(storage);
         }
+
+        protected void InitONNX(ONNX.ONNXRuntime rt)
+        {
+            ONNX.ONNXRuntime.Instance = rt;
+        }
     }
 }

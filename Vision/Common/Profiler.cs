@@ -10,6 +10,20 @@ namespace Vision
 {
     public static class Profiler
     {
+        public class ProfilerHandle : IDisposable
+        {
+            public string Name;
+            internal ProfilerHandle(string name)
+            {
+                Name = name;
+            }
+
+            public void Dispose()
+            {
+                Profiler.End(Name);
+            }
+        }
+
         public static bool IsDebug = true;
         public static bool ReportOn = true;
         public static Stopwatch Stopwatch;
@@ -23,6 +37,12 @@ namespace Vision
         {
             Stopwatch = new Stopwatch();
             Stopwatch.Start();
+        }
+
+        public static ProfilerHandle With(string name)
+        {
+            Profiler.Start(name);
+            return new ProfilerHandle(name);
         }
 
         public static void Start(string name, bool showlog = false)

@@ -323,37 +323,66 @@ namespace Vision.Cv
                     throw new ArgumentOutOfRangeException(nameof(buffer));
                 f = buffer;
             }
-            using (MatOfByte3 matByte = new MatOfByte3())
-            {
-                self.CopyTo(matByte);
 
-                var indexer = matByte.GetIndexer();
-                int i = 0;
-                for (int y = 0; y < height; y++)
+            if (self.Channel == 3)
+            {
+                using (MatOfByte3 matByte = new MatOfByte3())
                 {
-                    for (int x = 0; x < width; x++)
+                    self.CopyTo(matByte);
+
+                    var indexer = matByte.GetIndexer();
+                    int i = 0;
+                    for (int y = 0; y < height; y++)
                     {
-                        Vec3b color = indexer[y, x];
-                        if (bgr2rgb)
+                        for (int x = 0; x < width; x++)
                         {
-                            f[i] = color.Item2;
-                            i++;
-                            f[i] = color.Item1;
-                            i++;
-                            f[i] = color.Item0;
-                            i++;
+                            Vec3b color = indexer[y, x];
+                            if (bgr2rgb)
+                            {
+                                f[i] = color.Item2;
+                                i++;
+                                f[i] = color.Item1;
+                                i++;
+                                f[i] = color.Item0;
+                                i++;
+                            }
+                            else
+                            {
+                                f[i] = color.Item0;
+                                i++;
+                                f[i] = color.Item1;
+                                i++;
+                                f[i] = color.Item2;
+                                i++;
+                            }
                         }
-                        else
+                    }
+                }
+            }
+            else if(self.Channel == 1)
+            {
+                using(var matByte = new MatOfByte())
+                {
+                    self.CopyTo(matByte);
+
+                    var w = self.Width;
+                    var h = self.Height;
+                    var indexer = matByte.GetIndexer();
+                    int i = 0;
+                    for (int y = 0; y < h; y++)
+                    {
+                        for (int x = 0; x < w; x++)
                         {
-                            f[i] = color.Item0;
-                            i++;
-                            f[i] = color.Item1;
-                            i++;
-                            f[i] = color.Item2;
+                            var pixel = indexer[y, x];
+                            f[i] = pixel;
                             i++;
                         }
                     }
                 }
+            }
+            else
+            {
+                throw new Exception("not supported channel");
             }
 
             return f;

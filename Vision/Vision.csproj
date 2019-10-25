@@ -78,6 +78,7 @@
     <Compile Include="Common\Rect.cs" />
     <Compile Include="Detection\EyeGazeCalibratorEngine.cs" />
     <Compile Include="Detection\ScreenProperties.cs" />
+    <Compile Include="ONNX\ONNXRuntime.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -209,6 +210,8 @@
     <EmbeddedResource Include="Detection\frozen_gazeFaceV2Mobile.pb" />
     <EmbeddedResource Include="Detection\frozen_gazeV2.pb" />
     <EmbeddedResource Include="Detection\frozen_gazeV2Mobile.pb" />
+    <EmbeddedResource Include="Detection\torch_gazeMerge.onnx" />
+    <EmbeddedResource Include="Detection\torch_gazeMergeFP16.onnx" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
