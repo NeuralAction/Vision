@@ -36,9 +36,11 @@ With calibration, mean error is ~1.8 cm.
 - [ ] SharpFace native recompile
 
 #### WinML Features
-- [ ] WinML backend
-- [ ] ONNX model runner
-- [ ] ONNX formatted gaze model
+- [X] WinML backend
+- [X] ONNX model runner
+- [X] ONNX formatted gaze model
+- [ ] ONNX formatted eye blink model
+- [ ] GPU support
 - [ ] FP16 computation
 
 #### Data-augmentation
@@ -51,6 +53,7 @@ With calibration, mean error is ~1.8 cm.
 
 #### Windows Eye-tracking Accessibility API
 - [ ] Intergration
+- [ ] Chrome UI accessibility expose
 
 ### NeuralAction 0.1 (~2018/05)
 - Gaze tracking calibration codes
