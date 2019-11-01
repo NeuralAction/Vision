@@ -29,12 +29,14 @@ namespace Vision.Windows
 
             InitCv(new WindowsCv());
 
-            TensorFlowSharp.Windows.NativeBinding.Init(IsGpu);
             TensorFlow.NativeBinding.PrintFunc = new TensorFlow.NativeBinding.Print((s) => { Logger.Log(s); });
-            if(IsGpu)
+            TensorFlowSharp.Windows.NativeBinding.Init(IsGpu);
+            if (TensorFlow.NativeBinding.Current.IsGpu)
                 Logger.Log("Tensorflow Working With GPU");
+            else
+                Logger.Log("Tensorflow Working With CPU");
 
-            InitONNX(new WindowsONNXRuntime());
+            InitONNX(new WindowsONNXRuntime(IsGpu));
         }
 
         [System.Runtime.InteropServices.DllImport("gdi32.dll")]

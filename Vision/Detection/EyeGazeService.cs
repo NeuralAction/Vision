@@ -76,7 +76,7 @@ namespace Vision.Detection
 
             FaceDetector = new OpenFaceDetector()
             {
-                Interpolation = InterpolationFlags.Cubic,
+                Interpolation = InterpolationFlags.Linear,
                 MaxSize = 320,
                 UseSmooth = true,
             };

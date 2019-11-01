@@ -36,7 +36,7 @@
     </Window.Triggers>
     <Grid x:Name="Grid_Background">
         <Grid x:Name="Grid_Panal">
-            <StackPanel MinWidth="240" Background="White" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,50,82">
+            <StackPanel MinWidth="240" Background="White" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,50,82" UseLayoutRounding="True" SnapsToDevicePixels="True">
                 <Grid Margin="10,2">
                     <TextBlock Text="Camera" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                     <TextBox Text="{Binding Camera}" Width="50" HorizontalAlignment="Right" Height="24" VerticalContentAlignment="Center"/>
@@ -108,7 +108,7 @@
                     <DropShadowEffect Direction="270" ShadowDepth="5" BlurRadius="24"/>
                 </StackPanel.Effect>
                 <StackPanel.CacheMode>
-                    <BitmapCache/>
+                    <BitmapCache SnapsToDevicePixels="True"/>
                 </StackPanel.CacheMode>
             </StackPanel>
         </Grid>

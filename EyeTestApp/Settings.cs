@@ -15,12 +15,12 @@ namespace EyeTestApp
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return (int)(EyeGazeDetectMode)value;
+            return (int)value;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return (EyeGazeDetectMode)(int)value;
+            return (int)value;
         }
     }
 
@@ -100,8 +100,8 @@ namespace EyeTestApp
             set { gazeSmoothMode = value; OnPropertyChanged(); }
         }
 
-        EyeGazeDetectMode gazeMode = EyeGazeDetectMode.FaceMobile;
-        public EyeGazeDetectMode GazeMode
+        int gazeMode = EyeGazeDetector.DefaultModelIndex;
+        public int GazeMode
         {
             get => gazeMode;
             set { gazeMode = value; OnPropertyChanged(); }

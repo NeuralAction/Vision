@@ -48,7 +48,7 @@ namespace EyeTestApp
         {
             InitializeComponent();
 
-            InitCombo<EyeGazeDetectMode>(Cbb_GazeMode);
+            //InitCombo<EyeGazeDetectMode>(Cbb_GazeMode);
             InitCombo<PointSmoother.SmoothMethod>(Cbb_GazeSmoothMode);
             InitCombo<ClickEyeTarget>(Cbb_OpenEyeTarget);
 
@@ -142,7 +142,7 @@ namespace EyeTestApp
 
                     service.GazeDetector.ClipToBound = true;
                     service.GazeDetector.UseSmoothing = set.GazeSmooth;
-                    service.GazeDetector.DetectMode = set.GazeMode;
+                    service.GazeDetector.ModelIndex = set.GazeMode;
                     service.GazeDetector.Smoother.QueueCount = set.GazeSmoothCount;
                     service.GazeDetector.Smoother.Method = set.GazeSmoothMode;
                     service.GazeDetector.Calibrator.Calibarting += Calibrator_Calibarting;
@@ -157,6 +157,8 @@ namespace EyeTestApp
 
                     Dispatcher.Invoke(() =>
                     {
+                        foreach(var item in service.GazeDetector.Models)
+                            Cbb_GazeMode.Items.Add(new ComboBoxItem() { Content = item.Name, ToolTip= item.Description });
                         Bt_Start.IsEnabled = true;
                     });
 
@@ -341,7 +343,7 @@ namespace EyeTestApp
                     break;
                 case nameof(Settings.GazeMode):
                     if (service != null)
-                        service.GazeDetector.DetectMode = Settings.Current.GazeMode;
+                        service.GazeDetector.ModelIndex = Settings.Current.GazeMode;
                     break;
                 case nameof(Settings.GazeSmooth):
                     if (service != null)

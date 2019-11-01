@@ -15,7 +15,7 @@ namespace EyeTestApp
     {
         public App()
         {
-            Vision.Windows.WindowsCore.Init();
+            Vision.Windows.WindowsCore.Init(true);
         }
     }
 }

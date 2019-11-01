@@ -197,21 +197,21 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Detection\frozen_gaze.pb" />
+    <EmbeddedResource Include="Detection\Models\frozen_gaze.pb" />
     <EmbeddedResource Include="Cv\flandmark_model.dat" />
-    <EmbeddedResource Include="Detection\frozen_open.pb" />
-    <EmbeddedResource Include="Detection\frozen_gazeEx.pb" />
-    <EmbeddedResource Include="Detection\frozen_gazeFace.pb" />
+    <EmbeddedResource Include="Detection\Models\frozen_open.pb" />
+    <EmbeddedResource Include="Detection\Models\frozen_gazeEx.pb" />
+    <EmbeddedResource Include="Detection\Models\frozen_gazeFace.pb" />
     <EmbeddedResource Include="Detection\openface_model.zip" />
-    <EmbeddedResource Include="Detection\frozen_gazeFaceMobile.pb" />
-    <EmbeddedResource Include="Detection\frozen_openV2.pb" />
-    <EmbeddedResource Include="Detection\frozen_gazeFaceV2.pb" />
-    <EmbeddedResource Include="Detection\frozen_openV3.pb" />
-    <EmbeddedResource Include="Detection\frozen_gazeFaceV2Mobile.pb" />
-    <EmbeddedResource Include="Detection\frozen_gazeV2.pb" />
-    <EmbeddedResource Include="Detection\frozen_gazeV2Mobile.pb" />
-    <EmbeddedResource Include="Detection\torch_gazeMerge.onnx" />
-    <EmbeddedResource Include="Detection\torch_gazeMergeFP16.onnx" />
+    <EmbeddedResource Include="Detection\Models\frozen_gazeFaceMobile.pb" />
+    <EmbeddedResource Include="Detection\Models\frozen_openV2.pb" />
+    <EmbeddedResource Include="Detection\Models\frozen_gazeFaceV2.pb" />
+    <EmbeddedResource Include="Detection\Models\frozen_openV3.pb" />
+    <EmbeddedResource Include="Detection\Models\frozen_gazeFaceV2Mobile.pb" />
+    <EmbeddedResource Include="Detection\Models\frozen_gazeV2.pb" />
+    <EmbeddedResource Include="Detection\Models\frozen_gazeV2Mobile.pb" />
+    <EmbeddedResource Include="Detection\Models\torch_gazeMerge.onnx" />
+    <EmbeddedResource Include="Detection\Models\torch_gazeMergeFP16.onnx" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

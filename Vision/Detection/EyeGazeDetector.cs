@@ -69,10 +69,10 @@ namespace Vision.Detection
         {
             LeftRequired = RightRequired = FaceRequired = true;
             ErrorRate = 3.2;
-            Description = "ONNX version; Merged channel; FaceV2 based.";
+            Description = "ONNX version; Merged channel; Face based.";
             Name = name;
 
-            Resource = new ManifestResource("Vision.Detection", filename);
+            Resource = new ManifestResource("Vision.Detection.Models", filename);
         }
 
         protected override void OnLoad()
@@ -162,7 +162,7 @@ namespace Vision.Detection
         public int EyeSize { get; set; }
         public int FaceSize { get; set; }
 
-        public TensorFlowEyeGazeModel(string name, string filename) : this(name, new ManifestResource("Vision.Detection", filename))
+        public TensorFlowEyeGazeModel(string name, string filename) : this(name, new ManifestResource("Vision.Detection.Models", filename))
         {
 
         }
