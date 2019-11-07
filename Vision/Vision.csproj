@@ -212,6 +212,7 @@
     <EmbeddedResource Include="Detection\Models\frozen_gazeV2Mobile.pb" />
     <EmbeddedResource Include="Detection\Models\torch_gazeMerge.onnx" />
     <EmbeddedResource Include="Detection\Models\torch_gazeMergeFP16.onnx" />
+    <EmbeddedResource Include="Detection\Models\torch_open.onnx" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

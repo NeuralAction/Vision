@@ -21,6 +21,8 @@ namespace Vision.Windows
         LearningModelSession sess;
         public WindowsONNXSession(Stream stream, bool isGPU = false)
         {
+            IsGPU = isGPU;
+
             var filename = $"ONNXCache_{++cacheCount}.tmp";
             if (stream.CanSeek) stream.Seek(0, SeekOrigin.Begin);
             File.WriteAllBytes(filename, stream.ReadAll());
@@ -60,6 +62,11 @@ namespace Vision.Windows
             return ConvertFeatureDesc(model.OutputFeatures);
         }
 
+        TensorFloat MoveToGPU(TensorFloat buffer)
+        {
+            throw new NotImplementedException();
+        }
+
         int evalCount = 0;
         public override List<ONNXTensor> Run(IEnumerable<string> outputs, Dictionary<string, ONNXTensor> feedDict)
         {
@@ -72,6 +79,7 @@ namespace Vision.Windows
                     tensor = TensorFloat.CreateFromArray(item.Value.Shape, item.Value.Buffer);
                     if (IsGPU) {
                         //TODO: Move SoftwareTensor to DX12Tensor
+                        tensor = MoveToGPU((TensorFloat)tensor);
                     }
                 }
                 else

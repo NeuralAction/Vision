@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Vision.Cv;
+using Vision.ONNX;
 using Vision.Tensorflow;
 
 namespace Vision.Detection
@@ -57,132 +58,109 @@ namespace Vision.Detection
         }
     }
 
-    public enum EyeOpenDetectMode
+    //public enum EyeOpenDetectMode
+    //{
+    //    V1,
+    //    V2,
+    //    V3,
+    //}
+
+    public abstract class EyeOpenModel : IDisposable
     {
-        V1,
-        V2,
-        V3,
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string Accuracy { get; set; }
+
+        public bool IsLoaded { get; private set; }
+        public bool IsActivated { get; private set; }
+
+        object loadLocker = new object();
+        
+        public void Load()
+        {
+            if (!IsLoaded)
+            {
+                lock (loadLocker)
+                {
+                    if (IsLoaded)
+                        return;
+                    OnLoad();
+                    IsLoaded = true;
+                }
+            }
+        }
+        
+        public void Activate()
+        {
+            Load();
+            if (!IsActivated)
+            {
+                OnActivate();
+                IsActivated = true;
+            }
+        }
+        
+        public void Deactivate()
+        {
+            if (IsActivated)
+            {
+                OnActivate();
+                IsActivated = false;
+            }
+        }
+
+        public EyeOpenData Forward(Mat frame, EyeRect eye)
+        {
+            Activate();
+            return OnForward(frame, eye);
+        }
+
+        protected abstract EyeOpenData OnForward(Mat frame, EyeRect eye);
+        protected virtual void OnLoad() { }
+        protected virtual void OnActivate() { }
+        protected virtual void OnDeactivate() { }
+
+        public abstract void Dispose();
     }
 
-    public class EyeOpenDetector : IDisposable
+    public class TensorFlowEyeOpenModel : EyeOpenModel
     {
-        public const int ImgSize = 25;
-        public const int ImgSizeV2 = 36;
-        public const int ImgSizeV3 = 32;
+        public int ImgSize { get; set; } = 36;
+        public bool FeedKeepProb { get; set; } = true;
+        public string InputName { get; set; } = "input_image";
+        public NormalizeMode NormalizeMode { get; set; }
 
-        public static ManifestResource GraphResource = new ManifestResource("Vision.Detection", "frozen_open.pb");
-        public static ManifestResource GraphV2Resource = new ManifestResource("Vision.Detection", "frozen_openV2.pb");
-        public static ManifestResource GraphV3Resource = new ManifestResource("Vision.Detection", "frozen_openV3.pb");
-        public static Graph Graph;
-        public static Graph GraphV2;
-        public static Graph GraphV3;
-
-        static EyeOpenDetector()
-        {
-            Graph = new Graph();
-            using(var s = GraphResource.GetStream())
-                Graph.ImportPb(s);
-
-            GraphV2 = new Graph();
-            using(var s = GraphV2Resource.GetStream())
-                GraphV2.ImportPb(s);
-
-            GraphV3 = new Graph();
-            using(var s = GraphV3Resource.GetStream())
-                GraphV3.ImportPb(s);
-
-            Logger.Log("EyeOpenDetector", "Graph Loaded");
-        }
-
-        public EyeOpenDetectMode DetectMode { get; set; } = EyeOpenDetectMode.V3;
-
+        ManifestResource resource;
         Session sess;
-        Session sessV2;
-        Session sessV3;
+        Graph graph;
         float[] imgBuffer;
 
-        public EyeOpenDetector()
+        public TensorFlowEyeOpenModel(string name, string filename) 
+            : this(name, new ManifestResource("Vision.Detection.Models", filename)) { } 
+
+        public TensorFlowEyeOpenModel(string name, ManifestResource resource)
         {
-            sess = new Session(Graph);
-            sessV2 = new Session(GraphV2);
-            sessV3 = new Session(GraphV3);
+            this.resource = resource;
+            Name = name;
         }
 
-        public EyeOpenData Detect(EyeRect eye, Mat frame)
+        protected override EyeOpenData OnForward(Mat frame, EyeRect eye)
         {
-            var mode = DetectMode;
-            if (eye == null)
-                throw new ArgumentNullException("eye");
-            if (eye.Parent == null)
-                throw new ArgumentNullException("eyeParent");
-            if (frame == null)
-                throw new ArgumentNullException("frame");
-            if (frame.IsEmpty)
-                throw new ArgumentNullException("frame is empty");
-
-            Profiler.Start("OpenALL");
+            EyeOpenData data;
             using (Mat roi = eye.RoiCropByPercent(frame))
             {
-                Session sess;
-                var imgSize = 0;
-                var normalizeMode = NormalizeMode.None;
-                switch (mode)
-                {
-                    case EyeOpenDetectMode.V1:
-                        imgSize = ImgSize;
-                        sess = this.sess;
-                        normalizeMode = NormalizeMode.ZeroMean;
-                        break;
-                    case EyeOpenDetectMode.V2:
-                        imgSize = ImgSizeV2;
-                        sess = sessV2;
-                        normalizeMode = NormalizeMode.ZeroOne;
-                        break;
-                    case EyeOpenDetectMode.V3:
-                        imgSize = ImgSizeV3;
-                        sess = sessV3;
-                        normalizeMode = NormalizeMode.CenterZero;
-                        break;
-                    default:
-                        throw new NotImplementedException();
-                }
-                roi.Resize(new Size(imgSize, imgSize));
-                var bufferSize = roi.Width * roi.Height * 3;
-                if (imgBuffer == null || imgBuffer.Length != bufferSize)
-                    imgBuffer = new float[bufferSize];
+                var imgSize = ImgSize;
+                var normalizeMode = NormalizeMode;
                 
+                roi.Resize(new Size(imgSize, imgSize));
                 var imgTensor = Tools.MatBgr2Tensor(roi, normalizeMode, -1, -1, new long[] { 1, roi.Width, roi.Height, 3 }, imgBuffer);
-                Dictionary<string, Tensor> feedDict;
+
+                var feedDict = new Dictionary<string, Tensor>();
+                feedDict.Add(InputName, imgTensor);
+                feedDict.Add("phase_train", new Tensor(false));
+                if(FeedKeepProb) feedDict.Add("keep_prob", new Tensor(1.0f));
                 string outputName = "output";
-                switch (mode)
-                {
-                    case EyeOpenDetectMode.V1:
-                        feedDict = new Dictionary<string, Tensor>()
-                        {
-                            { "input_image", imgTensor },
-                            { "phase_train", new Tensor(false) },
-                            { "keep_prob", new Tensor(1.0f) }
-                        };
-                        break;
-                    case EyeOpenDetectMode.V2:
-                        feedDict = new Dictionary<string, Tensor>()
-                        {
-                            { "input_image", imgTensor },
-                            { "phase_train", new Tensor(false) },
-                            //{ "keep_prob", new Tensor(1.0f) }
-                        };
-                        break;
-                    case EyeOpenDetectMode.V3:
-                        feedDict = new Dictionary<string, Tensor>()
-                        {
-                            { "input", imgTensor },
-                            { "phase_train", new Tensor(false) },
-                            { "keep_prob", new Tensor(1.0f) }
-                        };
-                        break;
-                    default:
-                        throw new NotImplementedException();
-                }
+
                 Profiler.Start("Open.Sess");
                 var fetch = sess.Run(new[] { outputName }, feedDict);
                 Profiler.End("Open.Sess");
@@ -195,20 +173,185 @@ namespace Vision.Detection
                 imgTensor.Dispose();
                 imgTensor = null;
 
-                var data = new EyeOpenData(result[0,1], result[0,0]);
-                eye.OpenData = data;
-                Profiler.End("OpenALL");
-                return data;
+                data = new EyeOpenData(result[0, 1], result[0, 0]);
             }
+            return data;
+        }
+
+        protected override void OnLoad()
+        {
+            var bufferSize = ImgSize * ImgSize * 3;
+            imgBuffer = new float[bufferSize];
+
+            graph = new Graph();
+            using (var s = resource.GetStream())
+                graph.ImportPb(s);
+            sess = new Session(graph);
+        }
+
+        public override void Dispose()
+        {
+            imgBuffer = null;
+
+            sess?.Dispose();
+            sess = null;
+
+            graph?.Dispose();
+            graph = null;
+        }
+    }
+
+    public class ONNXEyeOpenModel : EyeOpenModel
+    {
+        public int ImgSize { get; set; } = 64;
+
+        ManifestResource resource;
+        ONNXSession session;
+
+        public ONNXEyeOpenModel(string name, string filename) 
+            : this(name, new ManifestResource("Vision.Detection.Models", filename)) { }
+
+        public ONNXEyeOpenModel(string name, ManifestResource resource)
+        {
+            Name = name;
+            this.resource = resource;
+        }
+
+        float[] outputBuffer;
+        float[][] channelBuffer;
+        string outputName;
+        string inputName;
+        protected override void OnLoad()
+        {
+            using (var s = resource.GetStream())
+                session = ONNXRuntime.Instance.GetSession(s);
+
+            outputBuffer = new float[ImgSize * ImgSize * 3];
+            channelBuffer = new float[3][];
+            for (int i = 0; i < channelBuffer.Length; i++)
+            {
+                channelBuffer[i] = new float[ImgSize * ImgSize];
+            }
+            outputName = session.GetOutputs()[0].Name;
+            inputName = session.GetInputs()[0].Name;
+        }
+
+        protected override EyeOpenData OnForward(Mat frame, EyeRect eye)
+        {
+            EyeOpenData data;
+            using (Mat roi = eye.RoiCropByPercent(frame))
+            {
+                var imgSize = ImgSize;
+                roi.Resize(new Size(imgSize, imgSize));
+                var split = Cv2.Split(roi);
+                var imgTensor = ONNX.Util.MatArray2ONNXTensor(split, outputBuffer, channelBuffer);
+
+                Profiler.Start("Open.Sess");
+                var result = session.Run(new[] { outputName }, 
+                    new Dictionary<string, ONNXTensor>() { { inputName, imgTensor } })[0];
+                var vector = result.Buffer;
+                Profiler.End("Open.Sess");
+
+                data = new EyeOpenData(vector[1], vector[0]);
+
+                foreach (var item in split)
+                    item.Dispose();
+            }
+            return data;
+        }
+
+        public override void Dispose()
+        {
+            session?.Dispose();
+            session = null;
+
+            outputBuffer = null;
+            channelBuffer = null;
+        }
+    }
+
+    public class EyeOpenDetector : IDisposable
+    {
+        public const int DefaultModelIndex = 3;
+
+        public List<EyeOpenModel> Models { get; set; } = new List<EyeOpenModel>()
+        {
+            new TensorFlowEyeOpenModel("OpenV1", "frozen_open.pb")
+            {
+                Description = "LeNet5 based tiny model",
+                Accuracy = "80%",
+                FeedKeepProb = true,
+                ImgSize = 25,
+                InputName = "input_image",
+                NormalizeMode = NormalizeMode.ZeroMean,
+            },
+            new TensorFlowEyeOpenModel("OpenV2", "frozen_openV2.pb")
+            {
+                Description = "Version 2",
+                Accuracy = "90%",
+                FeedKeepProb = false,
+                ImgSize = 36,
+                InputName = "input_image",
+                NormalizeMode = NormalizeMode.ZeroOne,
+            },
+            new TensorFlowEyeOpenModel("OpenV3", "frozen_openV3.pb")
+            {
+                Description = "Version 3",
+                Accuracy = "92%",
+                FeedKeepProb = true,
+                ImgSize = 32,
+                InputName = "input",
+                NormalizeMode = NormalizeMode.CenterZero,
+            },
+            new ONNXEyeOpenModel("OpenV4", "torch_open.onnx")
+            {
+                Description = "Version 4; ONNX enabled",
+                Accuracy = "95%",
+                ImgSize = 64,
+            },
+        };
+
+        int modelIndex = DefaultModelIndex;
+        public int ModelIndex 
+        {
+            get => modelIndex;
+            set
+            {
+                if(modelIndex != value)
+                {
+                    CurrentModel.Deactivate();
+                    modelIndex = value;
+                    CurrentModel.Activate();
+                }
+            }
+        }
+
+        public EyeOpenModel CurrentModel => Models[modelIndex];
+
+        public EyeOpenData Detect(EyeRect eye, Mat frame)
+        {
+            var model = CurrentModel;
+            if (eye == null)
+                throw new ArgumentNullException("eye");
+            if (eye.Parent == null)
+                throw new ArgumentNullException("eyeParent");
+            if (frame == null)
+                throw new ArgumentNullException("frame");
+            if (frame.IsEmpty)
+                throw new ArgumentNullException("frame is empty");
+
+            Profiler.Start("OpenALL");
+            var data = model.Forward(frame, eye);
+            eye.OpenData = data;
+            Profiler.End("OpenALL");
+
+            return data;
         }
 
         public void Dispose()
         {
-            if (sess != null)
-            {
-                sess.Dispose();
-                sess = null;
-            }
+            foreach (var item in Models)
+                item.Dispose();
         }
     }
 }

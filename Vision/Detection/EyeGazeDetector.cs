@@ -39,12 +39,21 @@ namespace Vision.Detection
 
         public abstract Point Forward(Mat frame, FaceRect face);
 
+        object loadLocker = new object();
+
         protected virtual void OnLoad() { }
         public void Load()
         {
             if (!IsLoaded)
-                OnLoad();
-            IsLoaded = true;
+            {
+                lock (loadLocker)
+                {
+                    if (IsLoaded)
+                        return;
+                    OnLoad();
+                    IsLoaded = true;
+                }
+            }
         }
         protected virtual void OnActivate() { }
         public void Activate() { OnActivate(); IsActivated = true; }
@@ -77,8 +86,6 @@ namespace Vision.Detection
 
         protected override void OnLoad()
         {
-            base.OnLoad();
-
             buffer = new float[ImgSize * ImgSize * 9];
             channelBuffer = new float[9][];
             for (int i = 0; i < channelBuffer.Length; i++)

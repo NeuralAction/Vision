@@ -304,14 +304,13 @@ namespace Vision.Tests
                     GazeSmooth = !GazeSmooth;
                     break;
                 case 'j':
-                    GazeDetector.ModelIndex = (GazeDetector.ModelIndex+1) %GazeDetector.Models.Count;
+                    GazeDetector.ModelIndex = (GazeDetector.ModelIndex + 1) %GazeDetector.Models.Count;
                     break;
                 case 'k':
                     GazeDetector.UseModification = !GazeDetector.UseModification;
                     break;
                 case 'l':
-                    OpenDetector.DetectMode++;
-                    OpenDetector.DetectMode = (EyeOpenDetectMode)((int)OpenDetector.DetectMode % Enum.GetNames(typeof(EyeOpenDetectMode)).Length);
+                    OpenDetector.ModelIndex = (OpenDetector.ModelIndex + 1) % OpenDetector.Models.Count;
                     break;
                 case '1':
                     FaceProvider = FaceDetector;
@@ -686,7 +685,7 @@ namespace Vision.Tests
                 if (double.IsInfinity(detectionTime) || detectionTime == 0)
                     detectionTime = 1000;
                 string demo = $"DetectFPS: {Profiler.Get("FaceFPS")} ({detectionTime.ToString("0.00")}ms/{(1000 / detectionTime).ToString("0.00")}fps)\n" +
-                    $"LndSmt: {SmoothLandmarks} GzSmt: {GazeSmooth} GzMode: {GazeDetector.CurrentModel.Name} OpMode: {OpenDetector.DetectMode}\n" +
+                    $"LndSmt: {SmoothLandmarks} GzSmt: {GazeSmooth} GzMode: {GazeDetector.CurrentModel.Name} OpMode: {OpenDetector.CurrentModel.Name}\n" +
                     $"GzMod[{(GazeDetector.UseModification ? "On" : "Off")}]: Sx:{GazeDetector.SensitiveX} Sy:{GazeDetector.SensitiveY} Ox:{GazeDetector.OffsetX} Oy:{GazeDetector.OffsetY}";
                 var sessTime = Profiler.Get("Gaze.Face.Sess");
                 if (!(double.IsInfinity(sessTime) || sessTime == 0))

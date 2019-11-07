@@ -157,6 +157,7 @@ namespace EyeTestApp
 
                     Dispatcher.Invoke(() =>
                     {
+                        Cbb_GazeMode.Items.Clear();
                         foreach(var item in service.GazeDetector.Models)
                             Cbb_GazeMode.Items.Add(new ComboBoxItem() { Content = item.Name, ToolTip= item.Description });
                         Bt_Start.IsEnabled = true;
