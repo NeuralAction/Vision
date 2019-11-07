@@ -39,7 +39,7 @@ With calibration, mean error is ~1.8 cm.
 - [X] WinML backend
 - [X] ONNX model runner
 - [X] ONNX formatted gaze model
-- [ ] ONNX formatted eye blink model
+- [x] ONNX formatted eye blink model
 - [ ] GPU support
 - [ ] FP16 computation
 
