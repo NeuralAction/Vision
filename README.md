@@ -19,6 +19,7 @@ With calibration, mean error is ~1.8 cm.
   - More accurate eye-gaze tracker
   - More accurate eye-blink classification
   - Being more robust to a person's appearance difference
+  - Less calibration tries
 - Develop
   - Support ARM64 (WoA)
   - Support WinML / ONNX models
@@ -30,6 +31,7 @@ With calibration, mean error is ~1.8 cm.
 - [ ] Neural-net based calibrator
 - [ ] MobileNet-v3 training
 - [ ] Support IR camera from Windows Hello
+- [ ] Auto detect and load calibration data
 
 #### ARM64(WoA) Support
 - [ ] OpenCvSharp native recompile
