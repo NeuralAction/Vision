@@ -21,15 +21,14 @@ namespace Vision.Detection
             Data = arg;
         }
 
-        public EyeGazeCalibrationLog() : this(Storage.Root.GetFile($"CalibData-[{DateTime.Now}].clb"))
+        public EyeGazeCalibrationLog() : this(
+            Storage.Root.GetFile(Storage.FixPathChars($"CalibData-[{DateTime.Now}].clb")))
         {
 
         }
 
         public EyeGazeCalibrationLog(FileNode file)
         {
-            Storage.FixPathChars(file);
-
             Data = new Dictionary<Point3D, CalibratingPushData>();
             File = file;
 
@@ -233,7 +232,8 @@ namespace Vision.Detection
                     },
                     LandmarkTransform = readedTrans,
                     LandmarkRotation = readedRot
-                }
+                },
+                null
             );
 
             Data.Add(readedKey, readedPushData);

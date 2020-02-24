@@ -1,0 +1,24 @@
+﻿<Window x:Class="VideoDetectingWithCalib.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:VideoDetectingWithCalib"
+        mc:Ignorable="d"
+        Title="NeuralAction - Video Gaze Tracker" Height="450" Width="800" Icon="icon_main.ico" Background="#343434">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" Content="Load Calib" x:Name="Bt_Proc_Load_Calib" Click="Bt_Proc_Load_Calib_Click" Height="48"/>
+            <Button Grid.Column="1" Content="Processing video files" x:Name="Bt_Proc_File" Click="Bt_Proc_File_Click" Height="48"/>
+        </Grid>
+        <Image Grid.Row="1" x:Name="Img_Show" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+    </Grid>
+</Window>

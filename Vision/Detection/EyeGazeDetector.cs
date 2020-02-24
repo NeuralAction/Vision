@@ -547,7 +547,7 @@ namespace Vision.Detection
                 ClipToBound = ClipToBound,
             };
 
-            Calibrator.Push(new CalibratingPushData(face));
+            Calibrator.Push(new CalibratingPushData(face, frame));
             if (UseCalibrator)
                 Calibrator.Apply(face, ScreenProperties);
 

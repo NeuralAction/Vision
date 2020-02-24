@@ -122,11 +122,6 @@ namespace Vision
             return true;
         }
 
-        public static void FixPathChars(StorageNode node)
-        {
-            node.Path = FixPathChars(node.Path);
-        }
-
         public static string FixPathChars(string path)
         {
             StringBuilder builder = new StringBuilder();

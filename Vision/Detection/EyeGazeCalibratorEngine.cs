@@ -71,13 +71,25 @@ namespace Vision.Detection
         {
             CheckError();
 
-            var trainX = new Point[RawData.Count];
-            var trainY = new Point[RawData.Count];
-            int i = 0;
+            var dataset = new List<(Point3D label, CalibratingPushData data)>();
+            var errors = new List<double>();
             foreach (var item in RawData)
             {
-                var label = EyeGazeInfo.ToGazeVector(item.Key);
-                var train = EyeGazeInfo.ToGazeVector(item.Value.Face.GazeInfo.Vector);
+                var key = EyeGazeInfo.ToGazeVector(item.Key);
+                var data = EyeGazeInfo.ToGazeVector(item.Value.Face.GazeInfo.Vector);
+                var e = Math.Pow(key.X - data.X, 2) + Math.Pow(key.Y - data.Y, 2);
+                errors.Add(e);
+                dataset.Add((item.Key, item.Value));
+            }
+            errors.Sort();
+
+            var trainX = new Point[dataset.Count];
+            var trainY = new Point[dataset.Count];
+            int i = 0;
+            foreach (var item in dataset)
+            {
+                var label = EyeGazeInfo.ToGazeVector(item.label);
+                var train = EyeGazeInfo.ToGazeVector(item.data.Face.GazeInfo.Vector);
                 trainX[i] = new Point(train.X, label.X);
                 trainY[i] = new Point(train.Y, label.Y);
                 i++;

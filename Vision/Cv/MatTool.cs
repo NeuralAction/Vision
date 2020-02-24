@@ -388,6 +388,25 @@ namespace Vision.Cv
             return f;
         }
 
+        public static void Rotate(this Mat self, double angle)
+        {
+            if (Math.Abs(angle % 360) < 0.001)
+                return;
+
+            var w = self.Width;
+            var h = self.Height;
+
+            var m = Cv2.GetRotationMatrix2D(new Point2f(w / 2, h / 2), angle, 1);
+                
+            var sin = Math.Abs(Math.Sin(angle / 180.0 * Math.PI));
+            var cos = Math.Abs(Math.Cos(angle / 180.0 * Math.PI));
+            var nW = (int)((h * sin) + (w * cos));
+            var nH = (int)((h * cos) + (w * sin));
+            m.Set(new[] { 0, 2 }, m.At<double>(0, 2) + (nW / 2) - (w / 2));
+            m.Set(new[] { 1, 2 }, m.At<double>(1, 2) + (nH / 2) - (h / 2));
+            Cv2.WarpAffine(self, self, m, new OpenCvSharp.Size(nW, nH));
+        }
+
         #endregion Extensions
     }
 }

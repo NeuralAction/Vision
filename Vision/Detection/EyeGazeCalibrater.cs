@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenCvSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -43,10 +44,12 @@ namespace Vision.Detection
     public class CalibratingPushData
     {
         public FaceRect Face { get; set; }
+        public Mat Image { get; set; }
 
-        public CalibratingPushData(FaceRect face)
+        public CalibratingPushData(FaceRect face, Mat image)
         {
             Face = face;
+            Image = image;
         }
     }
 

@@ -84,6 +84,8 @@ namespace Vision.Windows
             List<char> c = new List<char>();
             c.AddRange(Path.GetInvalidPathChars());
             c.Add(Path.VolumeSeparatorChar);
+            c.Add('/');
+            c.Add('\\');
             return c.ToArray();
         }
 

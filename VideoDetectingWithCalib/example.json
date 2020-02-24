@@ -1,0 +1,76 @@
+{
+    "User": "boi",
+    "File": "WIN_20200223_21_22_39_Pro.mp4",
+    "TimeStamp": "2020-02-23 22:56:32.1331",
+    "Note": "something to note",
+    "FPS": 29.95,
+    "ScrMilliWidth": 587.5,
+    "ScrMilliHeight": 391.6667,
+    "ScrPixelWidth": 2256,
+    "ScrPixelHeight": 1504,
+    "ScrOriginX": -293.75,
+    "ScrOriginY": 0.0,
+    "ScrOriginZ": 0.0,
+    "CalibPoints": [
+        {
+            "Millisecond": 1000,
+            "ScrPixelX": 123,
+            "ScrPixelY": 343
+        },
+        {
+            "Millisecond": 1100,
+            "ScrPixelX": 123,
+            "ScrPixelY": 343
+        },
+        {
+            "Millisecond": 1300,
+            "ScrPixelX": 1123,
+            "ScrPixelY": 343
+        },
+        {
+            "Millisecond": 2000,
+            "ScrPixelX": 1123,
+            "ScrPixelY": 343
+        },
+        {
+            "Millisecond": 2100,
+            "ScrPixelX": 1123,
+            "ScrPixelY": 343
+        },
+        {
+            "Millisecond": 2300,
+            "ScrPixelX": 1123,
+            "ScrPixelY": 343
+        },
+        {
+            "Millisecond": 3000,
+            "ScrPixelX": 1123,
+            "ScrPixelY": 1343
+        },
+        {
+            "Millisecond": 3100,
+            "ScrPixelX": 1123,
+            "ScrPixelY": 1343
+        },
+        {
+            "Millisecond": 3300,
+            "ScrPixelX": 1123,
+            "ScrPixelY": 1343
+        },
+        {
+            "Millisecond": 4000,
+            "ScrPixelX": 123,
+            "ScrPixelY": 1343
+        },
+        {
+            "Millisecond": 4100,
+            "ScrPixelX": 123,
+            "ScrPixelY": 1343
+        },
+        {
+            "Millisecond": 4300,
+            "ScrPixelX": 123,
+            "ScrPixelY": 1343
+        }
+    ]
+}
