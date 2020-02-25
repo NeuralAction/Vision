@@ -230,11 +230,11 @@ namespace VideoDetectingWithCalib
 
                                 target.Draw(e.Mat, 3, true, true);
 
-                                if(point.y > 1400)
-                                {
-                                    Core.Cv.ImgShow($"{frameIndex}|{elapsed}", e.Mat);
-                                    Core.Cv.WaitKey(1);
-                                }
+                                //if(point.y > 1400)
+                                //{
+                                //    Core.Cv.ImgShow($"{frameIndex}|{elapsed}", e.Mat);
+                                //    Core.Cv.WaitKey(1);
+                                //}
                                 
                                 matQueue.Enqueue(e.Mat.Clone());
                             }
@@ -250,7 +250,7 @@ namespace VideoDetectingWithCalib
                     gazeDetector.UseSmoothing = false;
                     cap.Start();
                     cap.Wait();
-                    gazeDetector.UseSmoothing = true;
+                    //gazeDetector.UseSmoothing = true;
                     gazeDetector.UseCalibrator = true;
 
                     var engine = gazeDetector.Calibrator.Engine;
