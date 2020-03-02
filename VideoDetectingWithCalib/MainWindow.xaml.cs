@@ -63,6 +63,7 @@ namespace VideoDetectingWithCalib
                     while (matQueue.Count > 0)
                         matQueue.Dequeue().Dispose();
                     Img_Show.Source = img.ToBitmapSource();
+                    img.Dispose();
                 }
             };
 
@@ -127,9 +128,12 @@ namespace VideoDetectingWithCalib
 
                                 target.Draw(frame, 1, true, true);
 
-                                builder.AppendLine($"{index},{target.GazeInfo.ScreenPoint.X},{target.GazeInfo.ScreenPoint.Y}," +
-                                    $"{target.GazeInfo.Vector.X},{target.GazeInfo.Vector.Y},{target.GazeInfo.Vector.Z}");
-                                Logger.Log(target.GazeInfo.ScreenPoint);
+                                if (gaze != null)
+                                {
+                                    builder.AppendLine($"{index},{target.GazeInfo.ScreenPoint.X},{target.GazeInfo.ScreenPoint.Y}," +
+                                        $"{target.GazeInfo.Vector.X},{target.GazeInfo.Vector.Y},{target.GazeInfo.Vector.Z}");
+                                    Logger.Log(target.GazeInfo.ScreenPoint);
+                                }
                             }
 
                             matQueue.Enqueue(frame.Clone());
