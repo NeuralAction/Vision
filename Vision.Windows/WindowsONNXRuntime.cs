@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -109,6 +110,22 @@ namespace Vision.Windows
         public WindowsONNXRuntime(bool isGPU = false)
         {
             UseGPU = isGPU;
+            string versionStr = "";
+            int versionID;
+            try
+            {
+                versionStr = Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion", "ReleaseId", "").ToString();
+                versionID = Convert.ToInt32(versionStr);
+            }
+            catch
+            {
+                versionID = -1;
+            }
+
+            if (versionID == -1)
+                throw new Exception($"Unknown version of Windows. {versionStr}. Require Windows 10 1903 later");
+            if (versionID < 1903)
+                throw new Exception("Outdated Windows. Require Windows 10 1903 later");
         }
         public override ONNXSession GetSession(Stream stream)
         {

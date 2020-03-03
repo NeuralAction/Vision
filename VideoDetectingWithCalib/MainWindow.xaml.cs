@@ -45,7 +45,15 @@ namespace VideoDetectingWithCalib
         {
             InitializeComponent();
 
-            Vision.Windows.WindowsCore.Init(true);
+            try
+            {
+                Vision.Windows.WindowsCore.Init(true);
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show($"Exception:{ex.ToString()}", "Error while Startup", MessageBoxButton.OK, MessageBoxImage.Error);
+                Environment.Exit(-1);
+            }
 
             faceDetector = new OpenFaceDetector(new OpenFaceModelLoader());
             faceDetector.UseSmooth = true;
