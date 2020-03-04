@@ -284,24 +284,46 @@ namespace VideoDetectingWithCalib
             }
         }
 
+        void SafeTask(Task t)
+        {
+            Task.Factory.StartNew(() =>
+            {
+                try
+                {
+                    t.Wait();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Throw(this, ex);
+                }
+
+                if (t.Exception != null)
+                    Logger.Throw(this, t.Exception);
+            });
+        }
+
         private void Bt_Proc_File_Click(object sender, RoutedEventArgs e)
         {
             this.IsEnabled = false;
-            Task.Factory.StartNew(() =>
-            {
-                StartProcessing();
-                Dispatcher.Invoke(() => { this.IsEnabled = true; });
-            });
+            SafeTask(
+                Task.Factory.StartNew(() =>
+                {
+                    StartProcessing();
+                    Dispatcher.Invoke(() => { this.IsEnabled = true; });
+                })
+            );
         }
 
         private void Bt_Proc_Load_Calib_Click(object sender, RoutedEventArgs e)
         {
             this.IsEnabled = false;
-            Task.Factory.StartNew(() =>
-            {
-                LoadCalibration();
-                Dispatcher.Invoke(() => { this.IsEnabled = true; });
-            });
+            SafeTask(
+                Task.Factory.StartNew(() =>
+                {
+                    LoadCalibration();
+                    Dispatcher.Invoke(() => { this.IsEnabled = true; });
+                })
+            );
         }
     }
 }
